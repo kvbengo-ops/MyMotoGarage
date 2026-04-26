@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Garage Dashboard - The Digital Garage</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                            "tertiary-fixed-dim": "#85cfff",
+                            "on-primary-fixed-variant": "#6e3900",
+                            "surface-container-low": "#241912",
+                            "surface-bright": "#43372e",
+                            "tertiary": "#85cfff",
+                            "primary-fixed-dim": "#ffb77d",
+                            "on-primary-fixed": "#2f1500",
+                            "on-primary-container": "#623200",
+                            "on-background": "#f3dfd1",
+                            "on-secondary-fixed": "#1b1c1c",
+                            "on-tertiary": "#00344c",
+                            "on-secondary-container": "#b7b5b4",
+                            "primary": "#ffb77d",
+                            "error": "#ffb4ab",
+                            "on-primary": "#4d2600",
+                            "error-container": "#93000a",
+                            "surface-container-high": "#33281f",
+                            "on-tertiary-fixed-variant": "#004c6c",
+                            "inverse-surface": "#f3dfd1",
+                            "background": "#1b110a",
+                            "on-surface": "#f3dfd1",
+                            "tertiary-fixed": "#c7e7ff",
+                            "tertiary-container": "#00b5fc",
+                            "surface-tint": "#ffb77d",
+                            "surface-dim": "#1b110a",
+                            "secondary-container": "#474746",
+                            "inverse-primary": "#904d00",
+                            "on-tertiary-container": "#004360",
+                            "surface": "#1b110a",
+                            "surface-container-highest": "#3f3229",
+                            "secondary-fixed": "#e5e2e1",
+                            "on-secondary": "#303030",
+                            "primary-fixed": "#ffdcc3",
+                            "on-tertiary-fixed": "#001e2e",
+                            "on-error": "#690005",
+                            "surface-variant": "#3f3229",
+                            "on-surface-variant": "#ddc1ae",
+                            "on-error-container": "#ffdad6",
+                            "surface-container-lowest": "#150c06",
+                            "secondary-fixed-dim": "#c8c6c5",
+                            "primary-container": "#ff8c00",
+                            "outline-variant": "#564334",
+                            "on-secondary-fixed-variant": "#474746",
+                            "surface-container": "#281d15",
+                            "secondary": "#c8c6c5",
+                            "outline": "#a48c7a",
+                            "inverse-on-surface": "#3a2e25"
+                    },
+                    "borderRadius": {
+                            "DEFAULT": "0.25rem",
+                            "lg": "0.5rem",
+                            "xl": "0.75rem",
+                            "full": "9999px"
+                    },
+                    "spacing": {
+                            "section_gap": "24px",
+                            "container_padding": "16px",
+                            "base": "8px",
+                            "stack_gap": "12px"
+                    },
+                    "fontFamily": {
+                            "body-sm": ["Inter"],
+                            "headline-md": ["Inter"],
+                            "label-caps": ["Inter"],
+                            "body-lg": ["Inter"],
+                            "headline-lg": ["Inter"],
+                            "display-data": ["Inter"]
+                    },
+                    "fontSize": {
+                            "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                            "headline-md": ["20px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                            "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                            "body-lg": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                            "headline-lg": ["24px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                            "display-data": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #121212; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="text-on-background pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="bg-[#121212] dark:bg-neutral-950 font-inter uppercase tracking-widest text-sm font-bold full-width top-0 border-b border-b-white/10 flat no shadows flex justify-between items-center w-full px-4 h-16 sticky z-40 transition-colors duration-150 ease-in-out md:hidden">
+<h1 class="text-xl font-black text-[#FF8C00] tracking-tighter">Your Garage</h1>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-[#FF8C00]">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" data-alt="close up portrait of a young man wearing a leather jacket outdoors with blurred background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDeB3i8NovGnkgLTaeepVhvHTO2CoO45PPn3XU2eA54jgrqdF-a9oKx5zBN8mycTFBKW_FdF4gP7wRoEuHvj2oH6brNpiYIPIJ2W8GPD-zmkc1oBmnUhewiwewPVBjz3dkytzyJ6ZyPO9Pn7aTrRRGtKotAixjf9ELY8hST32qSRLaAHJBx9R2Ak8WZ1wUuB9WCjoXQxT1fxLlgXAAXVGnGKephEtL_ypmDpVNd9yN4jXEymkVCPb9GqYOCfTL5CoeW54SKYp6xyzk"/>
+</div>
+</header>
+<!-- Desktop Sidebar/Nav (Hidden on Mobile) -->
+<nav class="hidden md:flex flex-col w-64 h-screen fixed left-0 top-0 bg-[#121212] border-r border-white/10 p-6 z-50">
+<div class="flex items-center gap-3 mb-12">
+<div class="w-10 h-10 rounded-full overflow-hidden border border-[#FF8C00]">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" data-alt="close up portrait of a young man wearing a leather jacket outdoors with blurred background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBxULhM5umudYCOypcozBNySpjdMz7sgm3KPV71rFbR96Qt-LtpS7zWCIOk1nlvusvMJC8D9VGiEiJQPwa01S776DoZEqmecTxBSF0wHiMrLABOPLx5wBCp8vA_uUbHiMIcNX950iBj8XsK4OpeyVW__2BPTbfdanHUKkadcU2R53JD-85CO7O17NfMlOmXkmYR69jdl03S67H4hrKSuXlInIXpP0Qf5wNsmGLwKF0OVSB_P8HUgEy3w_H0P8kdq6OrpO6sFT2Iuc"/>
+</div>
+<h1 class="text-xl font-black text-[#FF8C00] tracking-tighter uppercase">Your Garage</h1>
+</div>
+<div class="flex flex-col gap-4">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-neutral-800/50 text-[#FF8C00] transition-colors duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">garage</span>
+<span class="font-body-lg text-body-lg font-bold">Garage</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-neutral-500 hover:text-neutral-200 transition-colors duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">precision_manufacturing</span>
+<span class="font-body-lg text-body-lg font-bold">AI Mechanic</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-neutral-500 hover:text-neutral-200 transition-colors duration-150 ease-in-out mt-auto" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-lg text-body-lg font-bold">Settings</span>
+</a>
+</div>
+</nav>
+<!-- Main Canvas -->
+<main class="md:ml-64 p-container_padding max-w-7xl mx-auto space-y-section_gap pt-section_gap">
+<!-- Header Section (Desktop) -->
+<div class="hidden md:flex justify-between items-end pb-base border-b border-outline-variant/30">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Fleet Status</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">2 Vehicles • 1 Requires Attention</p>
+</div>
+<button class="bg-primary-container text-on-primary-container px-4 py-2 rounded-DEFAULT font-label-caps text-label-caps hover:bg-primary transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                ADD VEHICLE
+            </button>
+</div>
+<!-- Ride Suggestion Card -->
+<div class="bg-[#222222] rounded-[12px] p-5 border border-[#FF8C00]/20 flex items-center gap-4">
+<div class="bg-[#FF8C00]/10 p-3 rounded-full flex-shrink-0">
+<span class="material-symbols-outlined text-[#FF8C00] text-[24px]" style="font-variation-settings: 'FILL' 1;">light_mode</span>
+</div>
+<div>
+<h3 class="font-label-caps text-[12px] font-bold text-[#FF8C00] uppercase tracking-wider mb-1">Ride Outlook</h3>
+<p class="font-body-sm text-[14px] text-on-surface-variant">If you're going for a ride today, you should consider wearing ventilated gear because it's hot.</p>
+</div>
+</div>
+<!-- Vehicle Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-stack_gap">
+<!-- Vehicle Card 1: Healthy -->
+<div class="bg-[#222222] rounded-[12px] overflow-hidden border border-outline-variant/20 relative group">
+<!-- Image Area -->
+<div class="aspect-video relative overflow-hidden bg-surface-container-high">
+<img alt="2023 Yamaha MT-07" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="sleek modern naked motorcycle parked in an empty industrial warehouse with dramatic overhead lighting highlighting metallic parts" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUExCJEbRuYbsAN75IsMV9hJaq4Kd8QFzuX_TN7_s6q3jCVE3NuDTQjHUWIdfCQ-1PlbIoJyWQ9UxC6jZOZ7BSNrD-dQrIrmf9B0S9KUGj62i_Pgl54v51pnYTJsMyenTqTh2pjZ3Ge6x7dn88DhYurNC1n1rPrReu_etwBFXCNp7QyYBq3bF3vJiYGzKP2DOVgOtN5hPSRlsMyrB_0jV7Mf6uglLYKHoPpUJsha7BSUZXsGRyZTqilnXsfF8FR9QxllhjraE1njk"/>
+<div class="absolute inset-0 bg-gradient-to-t from-[#222222] to-transparent opacity-80"></div>
+<div class="absolute top-3 right-3 bg-primary-container/20 backdrop-blur-md px-3 py-1 rounded-full border border-primary-container/50 flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></div>
+<span class="font-label-caps text-[10px] text-primary font-bold uppercase tracking-wider">Ready to Ride</span>
+</div>
+<div class="absolute top-12 right-3 flex flex-col gap-2">
+<div class="bg-[#222222]/80 backdrop-blur-sm p-2 rounded-full border border-[#FF8C00]/50 shadow-[0_0_10px_rgba(255,140,0,0.3)] flex items-center justify-center" title="Oil: Check Levels">
+<span class="material-symbols-outlined text-[#FF8C00] text-[20px]" style="font-variation-settings: 'FILL' 1;">water_drop</span>
+</div>
+<div class="bg-[#222222]/80 backdrop-blur-sm p-2 rounded-full border border-[#FF8C00]/50 shadow-[0_0_10px_rgba(255,140,0,0.3)] flex items-center justify-center" title="Battery: Check Soon">
+<span class="material-symbols-outlined text-[#FF8C00] text-[20px]" style="font-variation-settings: 'FILL' 1;">battery_alert</span>
+</div>
+</div>
+</div>
+<!-- Content Area -->
+<div class="p-4 space-y-4">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface uppercase tracking-tight">2023 Yamaha MT-07</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Street / Naked</p>
+</div>
+<!-- Action -->
+<button class="w-full bg-[#FF8C00] text-black font-bold py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-[#e67e00] transition-colors active:scale-[0.98]">
+<span class="material-symbols-outlined font-bold" style="font-variation-settings: 'FILL' 1;">two_wheeler</span>
+<span class="font-label-caps">START RIDE</span>
+</button><button class="w-full bg-surface-container-highest text-on-surface font-bold py-3 rounded-lg flex items-center justify-center gap-2 mt-2 hover:bg-surface-bright transition-colors active:scale-[0.98]">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+<span class="font-label-caps">VIEW BIKE</span>
+</button><div class="pt-2 border-t border-white/5 flex justify-between items-center mt-auto">
+<span class="font-body-sm text-[12px] text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">speed</span>
+                            4,250 mi
+                        </span>
+<button class="text-primary hover:text-primary-fixed-dim transition-colors flex items-center gap-1">
+<span class="font-label-caps text-label-caps">DIAGNOSTICS</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Vehicle Card 2: Warning/Service -->
+<div class="bg-[#222222] rounded-[12px] overflow-hidden border border-error/30 relative group">
+<!-- Image Area -->
+<div class="aspect-video relative overflow-hidden bg-surface-container-high">
+<img alt="2019 Ducati Panigale V4" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="red sport motorcycle parked on a winding mountain road at dusk with dark moody lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWIzKpebFybnw8laTsuepBqMPgUwlXp_YRHRAHTM0ajwnkE_QRCtO-5zOi_A4MrBZt6o9aR_qZXz09IYZNAgfqO7luUK0stNK7Q6jpCzLKN_4FJ6wbrFXmHdDpYtX7P8QA4Zm9OKg7tbBdZbPfh-noeq9hJydMALtQPhtK20pix8IcDGsd6LW2n7CWgixfJR6vQUTP6_OzyCBM8q4u0uAE4T2YW1ZvumTtfTKiYpOPaY8syrBfT1j1uF-u3p4caVC3OS5MEGp_hfY"/>
+<div class="absolute inset-0 bg-gradient-to-t from-[#222222] to-transparent opacity-80"></div>
+<div class="absolute top-3 right-3 bg-error/20 backdrop-blur-md px-3 py-1 rounded-full border border-error/50 flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-error"></div>
+<span class="font-label-caps text-[10px] text-error font-bold uppercase tracking-wider">Service Due</span>
+</div>
+<div class="absolute top-12 right-3 flex flex-col gap-2">
+<div class="bg-[#222222]/80 backdrop-blur-sm p-2 rounded-full border border-[#F44336]/50 shadow-[0_0_10px_rgba(244,67,54,0.3)] flex items-center justify-center" title="Brakes: Critical">
+<span class="material-symbols-outlined text-[#F44336] text-[20px]" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+<div class="bg-[#222222]/80 backdrop-blur-sm p-2 rounded-full border border-[#FF8C00]/50 shadow-[0_0_10px_rgba(255,140,0,0.3)] flex items-center justify-center" title="Tire: Check Soon">
+<span class="material-symbols-outlined text-[#FF8C00] text-[20px]" style="font-variation-settings: 'FILL' 1;">adjust</span>
+</div>
+</div>
+</div>
+<!-- Content Area -->
+<div class="p-4 space-y-4">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface uppercase tracking-tight">2019 Ducati Panigale V4</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Sport / Track</p>
+</div>
+<!-- Action -->
+<button class="w-full bg-[#FF8C00] text-black font-bold py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-[#e67e00] transition-colors active:scale-[0.98]">
+<span class="material-symbols-outlined font-bold" style="font-variation-settings: 'FILL' 1;">two_wheeler</span>
+<span class="font-label-caps">START RIDE</span>
+</button><button class="w-full bg-surface-container-highest text-on-surface font-bold py-3 rounded-lg flex items-center justify-center gap-2 mt-2 hover:bg-surface-bright transition-colors active:scale-[0.98]">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+<span class="font-label-caps">VIEW BIKE</span>
+</button><div class="pt-2 border-t border-white/5 flex justify-between items-center mt-auto">
+<span class="font-body-sm text-[12px] text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">speed</span>
+                            15,120 mi
+                        </span>
+<button class="text-error hover:text-error-container transition-colors flex items-center gap-1">
+<span class="font-label-caps text-label-caps">VIEW ALERTS</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Add New Vehicle Card (Empty State) -->
+<div class="bg-[#222222] rounded-[12px] overflow-hidden border border-dashed border-outline-variant/40 hover:border-primary/50 transition-colors cursor-pointer group flex flex-col items-center justify-center p-8 aspect-[4/3] md:aspect-auto">
+<div class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center mb-4 group-hover:bg-primary-container/20 transition-colors">
+<span class="material-symbols-outlined text-3xl text-on-surface-variant group-hover:text-primary transition-colors">add_circle</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Add Vehicle</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-center max-w-[200px]">Connect a new machine to your digital garage.</p>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="bg-[#121212] dark:bg-neutral-950 font-inter text-[10px] font-bold uppercase tracking-tighter fixed bottom-0 w-full border-t border-t-white/10 flat no shadows fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-20 bg-[#121212] px-6 md:hidden">
+<a class="flex flex-col items-center justify-center text-[#FF8C00] border-t-2 border-[#FF8C00] pt-2 scale-95 active:scale-90 transition-transform h-full" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1" style="font-variation-settings: 'FILL' 1;">garage</span>
+            Garage
+        </a>
+<a class="flex flex-col items-center justify-center text-neutral-500 pt-2 hover:text-neutral-200 scale-95 active:scale-90 transition-transform h-full border-t-2 border-transparent" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">precision_manufacturing</span>
+            AI Mechanic
+        </a>
+<a class="flex flex-col items-center justify-center text-neutral-500 pt-2 hover:text-neutral-200 scale-95 active:scale-90 transition-transform h-full border-t-2 border-transparent" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">settings</span>
+            Settings
+        </a>
+</nav>
+</body></html>

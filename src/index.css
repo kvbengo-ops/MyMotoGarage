@@ -1,0 +1,164 @@
+@import "tailwindcss";
+
+@theme {
+  /* ── TFT Precision Color Palette ── */
+  --color-background:               #121212;
+  --color-surface:                  #1b110a;
+  --color-surface-dim:              #1b110a;
+  --color-surface-bright:           #43372e;
+  --color-surface-container-lowest: #150c06;
+  --color-surface-container-low:    #241912;
+  --color-surface-container:        #281d15;
+  --color-surface-container-high:   #33281f;
+  --color-surface-container-highest:#3f3229;
+  --color-on-surface:               #f3dfd1;
+  --color-on-surface-variant:       #ddc1ae;
+  --color-inverse-surface:          #f3dfd1;
+  --color-inverse-on-surface:       #3a2e25;
+  --color-outline:                  #a48c7a;
+  --color-outline-variant:          #564334;
+  --color-surface-tint:             #ffb77d;
+  --color-primary:                  #ffb77d;
+  --color-on-primary:               #4d2600;
+  --color-primary-container:        #ff8c00;
+  --color-on-primary-container:     #623200;
+  --color-inverse-primary:          #904d00;
+  --color-secondary:                #c8c6c5;
+  --color-on-secondary:             #303030;
+  --color-secondary-container:      #474746;
+  --color-on-secondary-container:   #b7b5b4;
+  --color-tertiary:                 #85cfff;
+  --color-on-tertiary:              #00344c;
+  --color-tertiary-container:       #00b5fc;
+  --color-error:                    #ffb4ab;
+  --color-on-error:                 #690005;
+  --color-error-container:          #93000a;
+  --color-on-error-container:       #ffdad6;
+
+  /* ── Typography ── */
+  --font-sans: 'Inter', sans-serif;
+
+  /* ── Spacing ── */
+  --spacing-base:    8px;
+  --spacing-stack:   12px;
+  --spacing-section: 24px;
+  --spacing-pad:     16px;
+
+  /* ── Border Radius ── */
+  --radius-card:   12px;
+  --radius-btn:    8px;
+  --radius-chip:   9999px;
+}
+
+:root {
+  /* ── Dark Mode (Default) ── */
+  --ds-bg: #111111;
+  --ds-surface: #1A1A1A;
+  --ds-surface-active: #222222;
+  --ds-border: rgba(255, 255, 255, 0.07);
+  --ds-border-heavy: rgba(255, 255, 255, 0.15);
+  --ds-input: #141414;
+  --ds-text-primary: #F0DDD0;
+  --ds-text-secondary: #7A6A60;
+  --ds-text-muted: #555555;
+  --ds-amber: #FF8C00;
+  --ds-green: #4ade80;
+  --ds-red: #f87171;
+  --ds-glass-bg: rgba(17, 17, 17, 0.96);
+  --ds-glass-border: rgba(255, 255, 255, 0.07);
+  --ds-surface-hover: rgba(255, 255, 255, 0.04);
+}
+
+.light-theme {
+  /* ── Elegant Light Mode (Not too bright) ── */
+  --ds-bg: #EBE6E0;
+  --ds-surface: #F4EFEA;
+  --ds-surface-active: #E8E2D9;
+  --ds-border: rgba(0, 0, 0, 0.08);
+  --ds-border-heavy: rgba(0, 0, 0, 0.15);
+  --ds-input: #E2DBD4;
+  --ds-text-primary: #2A2624;
+  --ds-text-secondary: #6A635E;
+  --ds-text-muted: #958B84;
+  --ds-amber: #D97706; /* deeper amber for contrast */
+  /* Keep alert dots vibrant as requested */
+  --ds-green: #22c55e;
+  --ds-red: #ef4444; 
+  --ds-glass-bg: rgba(244, 239, 234, 0.94);
+  --ds-glass-border: rgba(0, 0, 0, 0.1);
+  --ds-surface-hover: rgba(0, 0, 0, 0.04);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  background-color: var(--ds-bg);
+  font-family: 'Inter', sans-serif;
+  color: var(--ds-text-primary);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Material Symbols — full font config required for ligature rendering */
+.material-symbols-outlined,
+.material-symbols-filled {
+  font-family: 'Material Symbols Outlined', sans-serif;
+  font-style: normal;
+  font-weight: normal;
+  font-size: inherit;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'liga';
+  user-select: none;
+}
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+.material-symbols-filled {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #121212; }
+::-webkit-scrollbar-thumb { background: #33281f; border-radius: 4px; }
+
+/* Pulse animation for Ready-to-Ride dot */
+@keyframes ping {
+  75%, 100% { transform: scale(2); opacity: 0; }
+}
+.animate-ping {
+  animation: ping 1.5s cubic-bezier(0,0,0.2,1) infinite;
+}
+
+/* Dashed border for Add Vehicle card */
+.dashed-border {
+  background-image: repeating-linear-gradient(
+    0deg, #564334, #564334 8px, transparent 8px, transparent 16px
+  ),
+  repeating-linear-gradient(
+    90deg, #564334, #564334 8px, transparent 8px, transparent 16px
+  ),
+  repeating-linear-gradient(
+    180deg, #564334, #564334 8px, transparent 8px, transparent 16px
+  ),
+  repeating-linear-gradient(
+    270deg, #564334, #564334 8px, transparent 8px, transparent 16px
+  );
+  background-size: 1px 100%, 100% 1px, 1px 100%, 100% 1px;
+  background-position: 0 0, 0 0, 100% 0, 0 100%;
+  background-repeat: no-repeat;
+}
