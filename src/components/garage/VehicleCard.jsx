@@ -114,7 +114,7 @@ export default function VehicleCard({ bike }) {
         {/* Action Buttons based on status */}
         {bike.status === 'needsSetup' ? (
           <button
-            onClick={() => navigate('/setup-vehicle')}
+            onClick={() => navigate(`/setup-vehicle/${bike.id}`)}
             style={{
               width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
               height: '56px', borderRadius: '12px',
@@ -185,7 +185,7 @@ export default function VehicleCard({ bike }) {
             {bike.status === 'needsSetup' ? '--' : bike.odometer.toLocaleString() + ' mi'}
           </span>
           <button
-            onClick={() => bike.status === 'needsSetup' ? navigate('/setup-vehicle') : navigate(`/bike/${bike.id}`)}
+            onClick={() => bike.status === 'needsSetup' ? navigate(`/setup-vehicle/${bike.id}`) : navigate(`/bike/${bike.id}`)}
             style={{
               display: 'flex', alignItems: 'center', gap: '2px',
               fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',

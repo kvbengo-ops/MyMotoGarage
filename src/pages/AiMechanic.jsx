@@ -1,16 +1,12 @@
 import { useRef, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { getBikeById } from '../data/fleet'
+import { useNavigate, useOutletContext } from 'react-router-dom'
 
 export default function AiMechanic() {
-  const { bikeId } = useParams()
   const navigate = useNavigate()
-  const bike = getBikeById(bikeId)
+  const { bike } = useOutletContext()
 
   const [input, setInput] = useState('')
   const [showToast, setShowToast] = useState(false)
-
-  if (!bike) return null
 
   const activeThread = bike.chatThread || []
 

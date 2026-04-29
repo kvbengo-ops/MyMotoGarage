@@ -1,19 +1,52 @@
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import RideOutlookCard from '../components/garage/RideOutlookCard'
 import VehicleCard from '../components/garage/VehicleCard'
 import AddVehicleCard from '../components/garage/AddVehicleCard'
-import { fleet } from '../data/fleet'
-
-/*
-  8px grid:  pt-16=header, px-16=side, gap-24=cards, mt-32=section break
-  Type:      17px header, 11px label (both on Major Third scale)
-  Gestalt:   Proximity — Ride Outlook isolated at top as "context widget"
-             Similarity — all cards share identical radius + surface
-             Figure/Ground — dark outer shell vs warm #1A1A1A card surfaces
-*/
-import { useNavigate } from 'react-router-dom'
 
 export default function GarageDashboard() {
   const navigate = useNavigate()
+  
+  const [fleet, setFleet] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      try {
+        const response = await fetch('/api/vehicles?userId=00000000-0000-0000-0000-000000000000')
+        const data = await response.json()
+        if (data.success) {
+          const mappedFleet = data.data.map(v => ({
+            id: v.id,
+            name: `${v.year} ${v.make.toUpperCase()} ${v.model.toUpperCase()}`,
+            category: v.category || 'Unknown Category',
+            status: v.status || 'needsSetup',
+            image: v.image_url || 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&q=80',
+            odometer: v.odometer || 0,
+            diagnosticPins: [], // Not yet in DB
+            diagnostics: [],
+            maintenanceLogs: [],
+            rideHistory: [],
+            systemStatus: [],
+            smartAlerts: [],
+            recentUpgrades: [],
+            chatThread: []
+          }))
+          setFleet(mappedFleet)
+        } else {
+          setError(data.error || 'Failed to fetch vehicles')
+        }
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchVehicles()
+  }, [])
+
   return (
     <div className="min-h-screen transition-colors duration-300" style={{ background: 'var(--ds-bg)' }}>
 
@@ -54,15 +87,31 @@ export default function GarageDashboard() {
               My Fleet
             </span>
             <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--ds-text-muted)' }}>
-              {fleet.length} vehicles
+              {loading ? '...' : fleet.length} vehicles
             </span>
           </div>
 
+          {error && (
+            <div style={{ color: 'var(--ds-red)', fontSize: '12px', padding: '12px', background: 'color-mix(in srgb, var(--ds-red) 10%, transparent)', borderRadius: '12px', marginBottom: '16px' }}>
+              Failed to load garage: {error}
+            </div>
+          )}
+
           {/* Cards — 20px gap between (consistent with 8px grid, 2.5 units deliberate for card stacking) */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {fleet.map((bike) => (
-              <VehicleCard key={bike.id} bike={bike} />
-            ))}
+            {loading && !error ? (
+              <div style={{ color: 'var(--ds-text-muted)', fontSize: '13px', textAlign: 'center', padding: '32px 0' }}>
+                Loading vehicles...
+              </div>
+            ) : fleet.length === 0 && !error ? (
+              <div style={{ color: 'var(--ds-text-muted)', fontSize: '13px', textAlign: 'center', padding: '32px 0', border: '1.5px dashed var(--ds-border-heavy)', borderRadius: '16px' }}>
+                Your garage is empty. Add your first vehicle below!
+              </div>
+            ) : (
+              fleet.map((bike) => (
+                <VehicleCard key={bike.id} bike={bike} />
+              ))
+            )}
           </div>
         </div>
 

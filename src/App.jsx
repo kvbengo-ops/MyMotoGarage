@@ -31,7 +31,7 @@ const router = createBrowserRouter([
   },
   { path: '/bike/:bikeId/add-log',  element: <AddLog /> },
   { path: '/add-vehicle',           element: <AddVehicle /> },
-  { path: '/setup-vehicle',         element: <VehicleSetupWizard /> },
+  { path: '/setup-vehicle/:bikeId', element: <VehicleSetupWizard /> },
 ])
 
 export default function App() {

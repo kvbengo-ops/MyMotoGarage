@@ -1,8 +1,9 @@
-export default function AmberButton({ children, onClick, icon, className = '' }) {
+export default function AmberButton({ children, onClick, icon, className = '', disabled = false }) {
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center justify-center gap-2.5 rounded-[12px] text-black font-bold text-[13px] uppercase tracking-[0.12em] active:scale-[0.97] transition-all duration-150 ${className}`}
+      disabled={disabled}
+      className={`w-full flex items-center justify-center gap-2.5 rounded-[12px] text-black font-bold text-[13px] uppercase tracking-[0.12em] active:scale-[0.97] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
       style={{ 
         minHeight: '56px', paddingTop: '16px', paddingBottom: '16px',
         background: 'var(--ds-amber)',

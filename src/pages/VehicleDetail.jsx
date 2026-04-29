@@ -24,8 +24,7 @@
     9999  pill / avatar
 */
 
-import { useParams, useNavigate } from 'react-router-dom'
-import { getBikeById } from '../data/fleet'
+import { useNavigate, useOutletContext } from 'react-router-dom'
 import AmberButton from '../components/shared/AmberButton'
 import SecondaryButton from '../components/shared/SecondaryButton'
 
@@ -56,6 +55,7 @@ const specFields = [
   { icon: 'category',       label: 'Type',     key: 'category' },
   { icon: 'settings',       label: 'Engine',   key: 'engine'   },
   { icon: 'monitor_weight', label: 'Weight',   key: 'weight'   },
+  { icon: 'local_gas_station', label: 'Fuel',  key: 'fuelType' },
 ]
 
 /* ── Reusable SectionCard ── */
@@ -137,15 +137,8 @@ function ListRow({ icon, iconColor, primary, secondary, trailing, trailingHint }
 }
 
 export default function VehicleDetail() {
-  const { bikeId } = useParams()
   const navigate   = useNavigate()
-  const bike       = getBikeById(bikeId)
-
-  if (!bike) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100dvh', background: DS.bg }}>
-      <p style={{ color: DS.textSecondary }}>Bike not found.</p>
-    </div>
-  )
+  const { bike }   = useOutletContext()
 
   return (
     <div style={{ minHeight: '100dvh', background: DS.bg }}>

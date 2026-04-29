@@ -1,22 +1,96 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet, useParams } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import BikeNavBar from './BikeNavBar'
 
 export default function BikeLayout() {
+  const { bikeId } = useParams()
+  const [bike, setBike] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const fetchBike = async () => {
+      try {
+        const response = await fetch(`/api/vehicles/${bikeId}`)
+        const data = await response.json()
+        if (data.success) {
+          const v = data.data
+          setBike({
+            id: v.id,
+            name: `${v.year} ${v.make.toUpperCase()} ${v.model.toUpperCase()}`,
+            make: v.make,
+            model: v.model,
+            year: v.year,
+            category: v.category || '-',
+            engine: v.engine_displacement ? `${v.engine_displacement} cc` : '-', 
+            weight: v.weight ? `${v.weight} lbs` : '-',
+            fuelType: v.fuel_type || '-',
+            status: v.status || 'needsSetup',
+            image: v.image_url || 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&q=80',
+            odometer: v.odometer || 0,
+            fuelRange: 120,
+            diagnostics: [
+              { label: 'Battery Health', percent: 98, color: 'green', icon: 'battery_full' },
+              { label: 'Oil Life', percent: 100, color: 'green', icon: 'water_drop' },
+              { label: 'Tire Tread', percent: 100, color: 'green', icon: 'tire_repair' }
+            ],
+            maintenanceLogs: [],
+            rideHistory: [],
+            systemStatus: [
+              { id: '1', label: 'Engine Oil', percent: 80, lastKm: '2,500', lastDate: 'Oct 12', icon: 'oil_barrel' },
+              { id: '2', label: 'Brake Fluid', percent: 45, lastKm: '8,000', lastDate: 'Mar 01', icon: 'water_drop' },
+              { id: '3', label: 'Drive Chain', percent: 90, lastKm: '300', lastDate: 'Nov 05', icon: 'link' },
+            ],
+            smartAlerts: [
+              { id: 'a1', type: 'warning', title: 'Rear Tire Pressure Low', body: 'Pressure is at 32 PSI (Target: 36 PSI).', action: 'FIND AIR', icon: 'tire_repair' },
+            ],
+            recentUpgrades: [
+              { id: 'u1', title: 'Akrapovič Slip-on', subtitle: 'Exhaust System', date: 'Oct 20', borderColor: 'amber' },
+              { id: 'u2', title: 'Brembo Brake Pads', subtitle: 'Front & Rear', date: 'Sep 15', borderColor: 'gray' },
+            ],
+            chatThread: [
+              { id: 1, text: 'Hi! Im noticing a slight vibration at 65mph. Could it be the chain?', isUser: true, time: '10:02 AM' },
+              { id: 2, text: 'Vibrations at specific speeds often point to wheel balance or alignment. However, since you last cleaned your chain 300 miles ago, it is worth checking the slack first. Want me to pull up the factory spec for your chain tension?', isUser: false, time: '10:03 AM' }
+            ]
+          })
+        } else {
+          setError(data.error || 'Failed to fetch bike')
+        }
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchBike()
+  }, [bikeId])
+
   return (
     <div className="relative min-h-screen flex justify-center transition-colors duration-300" style={{ background: '#090909' }}>
-      {/* ── Desktop wrapper simulating a mobile phone shell ── */}
       <div 
         className="w-full h-full min-h-screen relative overflow-x-hidden transition-colors duration-300"
         style={{ 
-          maxWidth: '430px', /* standard Pro Max phone width */
+          maxWidth: '430px',
           background: 'var(--ds-bg)',
           boxShadow: '0 0 40px rgba(0,0,0,0.5)',
           borderLeft: '1px solid var(--ds-border)',
           borderRight: '1px solid var(--ds-border)'
         }}
       >
-        <Outlet />
-        <BikeNavBar />
+        {loading ? (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100dvh' }}>
+            <p style={{ color: 'var(--ds-text-secondary)' }}>Loading...</p>
+          </div>
+        ) : error || !bike ? (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100dvh' }}>
+            <p style={{ color: 'var(--ds-text-secondary)' }}>{error || 'Bike not found.'}</p>
+          </div>
+        ) : (
+          <>
+            <Outlet context={{ bike }} />
+            <BikeNavBar />
+          </>
+        )}
       </div>
     </div>
   )

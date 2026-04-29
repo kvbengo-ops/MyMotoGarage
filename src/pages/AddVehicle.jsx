@@ -89,20 +89,51 @@ export default function AddVehicle() {
   const [model, setModel] = useState('')
   const [year, setYear] = useState('')
   const [category, setCategory] = useState('')
-  const [engine, setEngine] = useState('')
   const [odometer, setOdometer] = useState('')
   const [image, setImage] = useState(null)
   
   const [success, setSuccess] = useState(false)
 
-  const handleSubmit = (e) => {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState(null)
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // Simulate API call to save vehicle
-    setSuccess(true)
-    setTimeout(() => {
-      setSuccess(false)
-      navigate('/')
-    }, 2000)
+    setIsSubmitting(true)
+    setError(null)
+
+    try {
+      const response = await fetch('/api/vehicles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: '00000000-0000-0000-0000-000000000000', // Test user ID
+          make,
+          model,
+          year: parseInt(year),
+          category,
+          odometer: parseInt(odometer) || 0,
+          imageUrl: 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&q=80', // Placeholder
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to add vehicle')
+      }
+
+      setSuccess(true)
+      setTimeout(() => {
+        setSuccess(false)
+        navigate(`/setup-vehicle/${data.data.id}`)
+      }, 2000)
+    } catch (err) {
+      console.error('Add vehicle error:', err)
+      setError(err.message)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -165,18 +196,23 @@ export default function AddVehicle() {
               </StyledSelect>
             </Field>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <Field label="Displacement (cc)">
-                <StyledInput type="number" placeholder="e.g. 689" value={engine} onChange={(e) => setEngine(e.target.value)} />
-              </Field>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
               <Field label="Initial Odometer">
                 <StyledInput type="number" placeholder="e.g. 4500" value={odometer} onChange={(e) => setOdometer(e.target.value)} />
               </Field>
             </div>
           </FormGroup>
 
+          {error && (
+            <div style={{ color: 'var(--ds-red)', fontSize: '12px', fontWeight: 600, padding: '8px', background: 'color-mix(in srgb, var(--ds-red) 10%, transparent)', borderRadius: '8px' }}>
+              Error: {error}
+            </div>
+          )}
+
           <div style={{ marginTop: '8px' }}>
-            <AmberButton icon="garage">ADD TO GARAGE</AmberButton>
+            <AmberButton icon="garage" disabled={isSubmitting}>
+              {isSubmitting ? 'ADDING...' : 'ADD TO GARAGE'}
+            </AmberButton>
           </div>
 
         </form>

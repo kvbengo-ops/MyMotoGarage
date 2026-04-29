@@ -1,5 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom'
-import { getBikeById } from '../data/fleet'
+import { useNavigate, useOutletContext } from 'react-router-dom'
 import AmberButton from '../components/shared/AmberButton'
 
 const DS = {
@@ -28,11 +27,8 @@ function SectionLabel({ title }) {
 const barFill = (p) => p >= 70 ? DS.amber : p >= 40 ? '#fbbf24' : 'var(--ds-red)'
 
 export default function SystemStatus() {
-  const { bikeId } = useParams()
   const navigate = useNavigate()
-  const bike = getBikeById(bikeId)
-
-  if (!bike) return null
+  const { bike } = useOutletContext()
 
   const items = bike.systemStatus || []
   const alerts = bike.smartAlerts || []
