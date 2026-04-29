@@ -11,6 +11,9 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- Create Vehicles table
+DROP TABLE IF EXISTS components CASCADE;
+DROP TABLE IF EXISTS vehicles CASCADE;
+
 CREATE TABLE IF NOT EXISTS vehicles (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
@@ -30,6 +33,21 @@ CREATE TABLE IF NOT EXISTS vehicles (
     engine_displacement INTEGER,
     weight INTEGER,
     fuel_type VARCHAR(100),
+    bike_condition VARCHAR(50),
+    riding_habit VARCHAR(100),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create Components table
+CREATE TABLE IF NOT EXISTS components (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    vehicle_id UUID REFERENCES vehicles(id) ON DELETE CASCADE,
+    category VARCHAR(50) NOT NULL,
+    component_type VARCHAR(100) NOT NULL,
+    brand VARCHAR(100) NOT NULL,
+    model VARCHAR(100) NOT NULL,
+    baseline_install_odometer INTEGER NOT NULL,
+    last_service_date DATE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

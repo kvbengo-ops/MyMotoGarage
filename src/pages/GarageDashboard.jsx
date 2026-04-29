@@ -47,29 +47,52 @@ export default function GarageDashboard() {
     fetchVehicles()
   }, [])
 
+  const handleDeleteVehicle = async (id) => {
+    try {
+      const response = await fetch(`/api/vehicles/${id}`, {
+        method: 'DELETE',
+      })
+      const data = await response.json()
+      if (data.success) {
+        setFleet(prev => prev.filter(v => v.id !== id))
+      } else {
+        setError(data.error || 'Failed to delete vehicle')
+      }
+    } catch (err) {
+      console.error('Delete error:', err)
+      setError('Failed to delete vehicle')
+    }
+  }
+
   return (
     <div className="min-h-screen transition-colors duration-300" style={{ background: 'var(--ds-bg)' }}>
 
-      {/* ── App Bar — 56px (7 × 8px) ── */}
+      {/* ── App Bar ── */}
       <header
+        className="carbon-texture"
         style={{
           position: 'sticky', top: 0, zIndex: 40,
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          height: '56px', padding: '0 20px',
+          height: '58px', padding: '0 20px',
           background: 'var(--ds-glass-bg)',
-          borderBottom: '1px solid var(--ds-glass-border)',
-          backdropFilter: 'blur(20px)',
-          transition: 'background-color 0.3s'
+          borderBottom: '1px solid var(--ds-border)',
+          backdropFilter: 'blur(24px)',
         }}
       >
-        <h1 style={{ fontSize: '17px', fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ds-amber)' }}>
-          Your Garage
-        </h1>
+        {/* Left: amber accent line + title */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ width: '3px', height: '22px', background: 'var(--ds-amber)', borderRadius: '2px', boxShadow: '0 0 10px var(--ds-amber-glow)' }} />
+          <h1 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: '20px', fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ds-text-primary)' }}>
+            Your Garage
+          </h1>
+        </div>
+        {/* Right: avatar */}
         <div style={{
-          width: '32px', height: '32px', borderRadius: '50%',
+          width: '32px', height: '32px', borderRadius: '6px',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: '13px', fontWeight: 700, color: 'var(--ds-amber)',
-          background: 'color-mix(in srgb, var(--ds-amber) 10%, transparent)', border: '1.5px solid color-mix(in srgb, var(--ds-amber) 35%, transparent)',
+          background: 'var(--ds-amber-subtle)', border: '1px solid rgba(255,107,0,0.25)',
+          fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: '0.05em',
         }}>R</div>
       </header>
 
@@ -109,7 +132,7 @@ export default function GarageDashboard() {
               </div>
             ) : (
               fleet.map((bike) => (
-                <VehicleCard key={bike.id} bike={bike} />
+                <VehicleCard key={bike.id} bike={bike} onDelete={handleDeleteVehicle} />
               ))
             )}
           </div>

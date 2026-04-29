@@ -1,94 +1,93 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── TFT Precision Color Palette ── */
-  --color-background:               #121212;
-  --color-surface:                  #1b110a;
-  --color-surface-dim:              #1b110a;
-  --color-surface-bright:           #43372e;
-  --color-surface-container-lowest: #150c06;
-  --color-surface-container-low:    #241912;
-  --color-surface-container:        #281d15;
-  --color-surface-container-high:   #33281f;
-  --color-surface-container-highest:#3f3229;
-  --color-on-surface:               #f3dfd1;
-  --color-on-surface-variant:       #ddc1ae;
-  --color-inverse-surface:          #f3dfd1;
-  --color-inverse-on-surface:       #3a2e25;
-  --color-outline:                  #a48c7a;
-  --color-outline-variant:          #564334;
-  --color-surface-tint:             #ffb77d;
-  --color-primary:                  #ffb77d;
-  --color-on-primary:               #4d2600;
-  --color-primary-container:        #ff8c00;
-  --color-on-primary-container:     #623200;
-  --color-inverse-primary:          #904d00;
-  --color-secondary:                #c8c6c5;
-  --color-on-secondary:             #303030;
-  --color-secondary-container:      #474746;
-  --color-on-secondary-container:   #b7b5b4;
-  --color-tertiary:                 #85cfff;
-  --color-on-tertiary:              #00344c;
-  --color-tertiary-container:       #00b5fc;
-  --color-error:                    #ffb4ab;
-  --color-on-error:                 #690005;
-  --color-error-container:          #93000a;
-  --color-on-error-container:       #ffdad6;
-
-  /* ── Typography ── */
-  --font-sans: 'Inter', sans-serif;
-
-  /* ── Spacing ── */
-  --spacing-base:    8px;
-  --spacing-stack:   12px;
-  --spacing-section: 24px;
-  --spacing-pad:     16px;
-
-  /* ── Border Radius ── */
-  --radius-card:   12px;
-  --radius-btn:    8px;
-  --radius-chip:   9999px;
+  --font-sans: 'DM Sans', sans-serif;
+  --font-display: 'Barlow Condensed', sans-serif;
 }
 
+/* ─────────────────────────────────────────────────────────────
+   DEFAULT (DARK) — "Proper Dark"
+   Mid-dark surfaces, full-white text, readable at any age.
+   Primary accent: Acid Lime — motorsport DNA, no AI app uses this.
+─────────────────────────────────────────────────────────────── */
 :root {
-  /* ── Dark Mode (Default) ── */
-  --ds-bg: #111111;
-  --ds-surface: #1A1A1A;
-  --ds-surface-active: #222222;
-  --ds-border: rgba(255, 255, 255, 0.07);
-  --ds-border-heavy: rgba(255, 255, 255, 0.15);
-  --ds-input: #141414;
-  --ds-text-primary: #F0DDD0;
-  --ds-text-secondary: #7A6A60;
-  --ds-text-muted: #555555;
-  --ds-amber: #FF8C00;
-  --ds-green: #4ade80;
-  --ds-red: #f87171;
-  --ds-glass-bg: rgba(17, 17, 17, 0.96);
-  --ds-glass-border: rgba(255, 255, 255, 0.07);
-  --ds-surface-hover: rgba(255, 255, 255, 0.04);
+  --ds-bg:              #16161E;
+  --ds-surface:         #1F1F2C;
+  --ds-surface-active:  #28283A;
+  --ds-surface-hover:   rgba(255, 255, 255, 0.05);
+  --ds-input:           #1A1A28;
+
+  --ds-border:          rgba(255, 255, 255, 0.10);
+  --ds-border-heavy:    rgba(255, 255, 255, 0.20);
+
+  --ds-text-primary:    #FFFFFF;
+  --ds-text-secondary:  #9090A8;
+  --ds-text-muted:      #55556A;
+
+  /* Acid Lime — Kawasaki liveries, MotoGP race gear, zero AI apps */
+  --ds-primary:         #C8FF00;
+  --ds-primary-glow:    rgba(200, 255, 0, 0.28);
+  --ds-primary-subtle:  rgba(200, 255, 0, 0.07);
+  /* Keep --ds-amber as alias so existing components don't break */
+  --ds-amber:           #C8FF00;
+  --ds-amber-glow:      rgba(200, 255, 0, 0.28);
+  --ds-amber-subtle:    rgba(200, 255, 0, 0.07);
+
+  --ds-green:           #22C55E;
+  --ds-green-glow:      rgba(34, 197, 94, 0.25);
+
+  --ds-red:             #EF4444;
+  --ds-red-glow:        rgba(239, 68, 68, 0.25);
+
+  --ds-cyan:            #38BDF8;
+  --ds-cyan-glow:       rgba(56, 189, 248, 0.25);
+
+  --ds-glass-bg:        rgba(22, 22, 30, 0.97);
+  --ds-glass-border:    rgba(255, 255, 255, 0.08);
 }
 
+/* ─────────────────────────────────────────────────────────────
+   LIGHT THEME — toggled via ThemeContext adding .light-theme to <html>
+   Warm cement tones. Lime darkens to an olive-green for readability.
+─────────────────────────────────────────────────────────────── */
 .light-theme {
-  /* ── Elegant Light Mode (Not too bright) ── */
-  --ds-bg: #EBE6E0;
-  --ds-surface: #F4EFEA;
-  --ds-surface-active: #E8E2D9;
-  --ds-border: rgba(0, 0, 0, 0.08);
-  --ds-border-heavy: rgba(0, 0, 0, 0.15);
-  --ds-input: #E2DBD4;
-  --ds-text-primary: #2A2624;
-  --ds-text-secondary: #6A635E;
-  --ds-text-muted: #958B84;
-  --ds-amber: #D97706; /* deeper amber for contrast */
-  /* Keep alert dots vibrant as requested */
-  --ds-green: #22c55e;
-  --ds-red: #ef4444; 
-  --ds-glass-bg: rgba(244, 239, 234, 0.94);
-  --ds-glass-border: rgba(0, 0, 0, 0.1);
-  --ds-surface-hover: rgba(0, 0, 0, 0.04);
+  --ds-bg:              #ECEAE5;
+  --ds-surface:         #F7F5F2;
+  --ds-surface-active:  #E5E2DA;
+  --ds-surface-hover:   rgba(0, 0, 0, 0.04);
+  --ds-input:           #EDEAE4;
+
+  --ds-border:          rgba(0, 0, 0, 0.10);
+  --ds-border-heavy:    rgba(0, 0, 0, 0.20);
+
+  --ds-text-primary:    #111111;
+  --ds-text-secondary:  #5A5650;
+  --ds-text-muted:      #9A9490;
+
+  /* Lime on white is invisible. Use dark olive-lime for light mode. */
+  --ds-primary:         #5A7A00;
+  --ds-primary-glow:    rgba(90, 122, 0, 0.20);
+  --ds-primary-subtle:  rgba(90, 122, 0, 0.07);
+  --ds-amber:           #5A7A00;
+  --ds-amber-glow:      rgba(90, 122, 0, 0.20);
+  --ds-amber-subtle:    rgba(90, 122, 0, 0.07);
+
+  --ds-green:           #16A34A;
+  --ds-green-glow:      rgba(22, 163, 74, 0.20);
+
+  --ds-red:             #DC2626;
+  --ds-red-glow:        rgba(220, 38, 38, 0.20);
+
+  --ds-cyan:            #0284C7;
+  --ds-cyan-glow:       rgba(2, 132, 199, 0.20);
+
+  --ds-glass-bg:        rgba(236, 234, 229, 0.97);
+  --ds-glass-border:    rgba(0, 0, 0, 0.08);
 }
 
+/* ─────────────────────────────────────────────────────────────
+   BASE RESET
+─────────────────────────────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -98,13 +97,49 @@
 html, body, #root {
   height: 100%;
   background-color: var(--ds-bg);
-  font-family: 'Inter', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   color: var(--ds-text-primary);
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Material Symbols — full font config required for ligature rendering */
+/* ── Carbon Texture ── */
+.carbon-texture {
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      rgba(255,255,255,0.015) 0px,
+      rgba(255,255,255,0.015) 1px,
+      transparent 1px,
+      transparent 6px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255,255,255,0.015) 0px,
+      rgba(255,255,255,0.015) 1px,
+      transparent 1px,
+      transparent 6px
+    );
+}
+.light-theme .carbon-texture {
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      rgba(0,0,0,0.012) 0px,
+      rgba(0,0,0,0.012) 1px,
+      transparent 1px,
+      transparent 6px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(0,0,0,0.012) 0px,
+      rgba(0,0,0,0.012) 1px,
+      transparent 1px,
+      transparent 6px
+    );
+}
+
+/* Material Symbols */
 .material-symbols-outlined,
 .material-symbols-filled {
   font-family: 'Material Symbols Outlined', sans-serif;
@@ -132,33 +167,30 @@ html, body, #root {
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: #121212; }
-::-webkit-scrollbar-thumb { background: #33281f; border-radius: 4px; }
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--ds-bg); }
+::-webkit-scrollbar-thumb { background: var(--ds-surface-active); border-radius: 4px; }
 
-/* Pulse animation for Ready-to-Ride dot */
+/* ── Animations ── */
 @keyframes ping {
-  75%, 100% { transform: scale(2); opacity: 0; }
+  75%, 100% { transform: scale(2.2); opacity: 0; }
 }
 .animate-ping {
-  animation: ping 1.5s cubic-bezier(0,0,0.2,1) infinite;
+  animation: ping 1.4s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
-/* Dashed border for Add Vehicle card */
-.dashed-border {
-  background-image: repeating-linear-gradient(
-    0deg, #564334, #564334 8px, transparent 8px, transparent 16px
-  ),
-  repeating-linear-gradient(
-    90deg, #564334, #564334 8px, transparent 8px, transparent 16px
-  ),
-  repeating-linear-gradient(
-    180deg, #564334, #564334 8px, transparent 8px, transparent 16px
-  ),
-  repeating-linear-gradient(
-    270deg, #564334, #564334 8px, transparent 8px, transparent 16px
-  );
-  background-size: 1px 100%, 100% 1px, 1px 100%, 100% 1px;
-  background-position: 0 0, 0 0, 100% 0, 0 100%;
-  background-repeat: no-repeat;
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 14px var(--ds-primary-glow); }
+  50%       { box-shadow: 0 0 30px var(--ds-primary-glow), 0 4px 20px var(--ds-primary-subtle); }
+}
+.glow-pulse {
+  animation: glow-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.slide-up {
+  animation: slide-up 0.35s ease forwards;
 }

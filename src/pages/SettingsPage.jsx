@@ -9,7 +9,7 @@ export default function SettingsPage() {
         className="sticky top-0 z-40 flex justify-between items-center px-4 h-14 transition-colors duration-300"
         style={{ borderBottom: '1px solid var(--ds-border)' }}
       >
-        <h1 className="text-[15px] font-black uppercase tracking-widest text-[var(--ds-amber)]">Settings</h1>
+        <h1 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: '20px', fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ds-primary)' }}>Settings</h1>
       </header>
       <div className="flex flex-col py-12 px-6">
         
@@ -35,19 +35,21 @@ export default function SettingsPage() {
             <button 
               onClick={toggleTheme}
               style={{
-                width: '48px', height: '28px', borderRadius: '14px',
-                background: theme === 'dark' ? 'var(--ds-amber)' : 'var(--ds-surface-active)',
+                width: '52px', height: '28px', borderRadius: '14px',
+                background: theme === 'dark' ? 'var(--ds-primary)' : 'var(--ds-surface-active)',
                 border: '1px solid var(--ds-border)',
                 position: 'relative',
                 cursor: 'pointer',
-                transition: 'background 0.3s'
+                transition: 'background 0.3s',
+                boxShadow: theme === 'dark' ? '0 0 12px var(--ds-primary-glow)' : 'none',
               }}
             >
               <div style={{
-                position: 'absolute', top: '2px', left: theme === 'dark' ? '22px' : '2px',
-                width: '22px', height: '22px', borderRadius: '50%',
-                background: theme === 'dark' ? '#000' : 'var(--ds-text-secondary)',
-                transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                position: 'absolute', top: '3px', left: theme === 'dark' ? '26px' : '3px',
+                width: '20px', height: '20px', borderRadius: '50%',
+                background: theme === 'dark' ? '#111' : 'var(--ds-text-secondary)',
+                transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
               }} />
             </button>
           </div>

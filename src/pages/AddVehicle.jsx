@@ -1,7 +1,54 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AmberButton from '../components/shared/AmberButton'
 import { Field, StyledInput, StyledSelect, FormGroup } from '../components/shared/FormUtils'
+import Cropper from 'react-easy-crop'
+
+const createImage = (url) =>
+  new Promise((resolve, reject) => {
+    const image = new Image()
+    image.addEventListener('load', () => resolve(image))
+    image.addEventListener('error', (error) => reject(error))
+    image.setAttribute('crossOrigin', 'anonymous') 
+    image.src = url
+  })
+
+async function getCroppedImg(imageSrc, pixelCrop) {
+  const image = await createImage(imageSrc)
+  const canvas = document.createElement('canvas')
+  const ctx = canvas.getContext('2d')
+
+  if (!ctx) {
+    return null
+  }
+
+  canvas.width = pixelCrop.width
+  canvas.height = pixelCrop.height
+
+  ctx.drawImage(
+    image,
+    pixelCrop.x,
+    pixelCrop.y,
+    pixelCrop.width,
+    pixelCrop.height,
+    0,
+    0,
+    pixelCrop.width,
+    pixelCrop.height
+  )
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error('Canvas is empty'))
+        return
+      }
+      blob.name = 'cropped.jpg'
+      resolve(blob)
+    }, 'image/jpeg')
+  })
+}
+
 
 const makes = [
   'Yamaha', 'Ducati', 'Honda', 'Kawasaki', 'Suzuki', 'BMW', 'Triumph', 'KTM', 'Harley-Davidson', 'Indian', 'Aprilia', 'Other'
@@ -12,17 +59,19 @@ const categories = [
 ]
 
 /* ── Image Upload Component ── */
-function ImageUploadField({ image, onImageChange }) {
+function ImageUploadField({ image, onFileSelect }) {
   const fileInputRef = useRef(null)
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0]
-      // Create a local object URL to preview the image
       const imageUrl = URL.createObjectURL(file)
-      onImageChange(imageUrl)
+      onFileSelect(imageUrl)
     }
   }
+
+  // Ensure we show local blob preview or server uploaded image
+  const previewUrl = image
 
   return (
     <div style={{ width: '100%', marginBottom: '16px' }}>
@@ -56,7 +105,7 @@ function ImageUploadField({ image, onImageChange }) {
       >
         {image ? (
           <>
-            <img src={image} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={previewUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', opacity: 0, transition: 'opacity 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                  onMouseEnter={e => e.currentTarget.style.opacity = 1}
                  onMouseLeave={e => e.currentTarget.style.opacity = 0}>
@@ -82,6 +131,7 @@ function ImageUploadField({ image, onImageChange }) {
   )
 }
 
+
 export default function AddVehicle() {
   const navigate = useNavigate()
 
@@ -93,9 +143,54 @@ export default function AddVehicle() {
   const [image, setImage] = useState(null)
   
   const [success, setSuccess] = useState(false)
-
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState(null)
+
+  // Cropper States
+  const [tempImageSrc, setTempImageSrc] = useState(null)
+  const [crop, setCrop] = useState({ x: 0, y: 0 })
+  const [zoom, setZoom] = useState(1)
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
+  const [showCropper, setShowCropper] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+
+  const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
+    setCroppedAreaPixels(croppedAreaPixels)
+  }, [])
+
+  const handleFileSelect = (imageUrl) => {
+    setTempImageSrc(imageUrl)
+    setShowCropper(true)
+  }
+
+  const handleCropSave = async () => {
+    try {
+      setIsUploading(true)
+      const croppedBlob = await getCroppedImg(tempImageSrc, croppedAreaPixels)
+      
+      // Upload to backend
+      const formData = new FormData()
+      formData.append('image', croppedBlob, 'bike.jpg')
+      
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      })
+      
+      const data = await response.json()
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Image upload failed')
+      }
+      
+      setImage(data.imageUrl)
+      setShowCropper(false)
+    } catch (err) {
+      console.error('Error saving crop:', err)
+      setError(err.message)
+    } finally {
+      setIsUploading(false)
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -113,7 +208,7 @@ export default function AddVehicle() {
           year: parseInt(year),
           category,
           odometer: parseInt(odometer) || 0,
-          imageUrl: 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&q=80', // Placeholder
+          imageUrl: image, 
         })
       })
 
@@ -135,6 +230,7 @@ export default function AddVehicle() {
       setIsSubmitting(false)
     }
   }
+
 
   return (
     <div style={{ minHeight: '100dvh', background: 'var(--ds-bg)' }}>
@@ -164,7 +260,7 @@ export default function AddVehicle() {
       <main style={{ padding: '24px 16px 40px' }}>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
-          <ImageUploadField image={image} onImageChange={setImage} />
+          <ImageUploadField image={image} onFileSelect={handleFileSelect} />
 
           <FormGroup title="Identification">
             <Field label="Make">
@@ -230,6 +326,85 @@ export default function AddVehicle() {
         }}>
           <span className="material-symbols-filled" style={{ fontSize: '16px' }}>check_circle</span>
           Vehicle added successfully!
+        </div>
+      )}
+
+      {/* ── Cropper Modal ── */}
+      {showCropper && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 100,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)',
+          padding: '20px'
+        }}>
+          <div style={{
+            width: '100%', maxWidth: '500px', background: 'var(--ds-surface)',
+            borderRadius: '16px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)', border: '1px solid var(--ds-border)'
+          }}>
+            <h2 style={{ fontSize: '17px', fontWeight: 900, color: 'var(--ds-text-primary)', letterSpacing: '0.05em' }}>
+              ADJUST PHOTO
+            </h2>
+            
+            {/* Cropper Container */}
+            <div style={{ position: 'relative', width: '100%', height: '250px', background: '#000', borderRadius: '12px', overflow: 'hidden' }}>
+              <Cropper
+                image={tempImageSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={16 / 9}
+                onCropChange={setCrop}
+                onCropComplete={onCropComplete}
+                onZoomChange={setZoom}
+              />
+            </div>
+
+            {/* Slider for Zoom */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--ds-text-secondary)', fontWeight: 600 }}>
+                <span>ZOOM</span>
+                <span>{Math.round(zoom * 100)}%</span>
+              </div>
+              <input
+                type="range"
+                min={1}
+                max={3}
+                step={0.1}
+                value={zoom}
+                onChange={(e) => setZoom(parseFloat(e.target.value))}
+                style={{
+                  width: '100%', accentColor: 'var(--ds-amber)',
+                  background: 'var(--ds-surface-hover)', height: '6px', borderRadius: '3px',
+                  appearance: 'none', cursor: 'pointer'
+                }}
+              />
+            </div>
+
+            {/* Buttons */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '8px' }}>
+              <button
+                type="button"
+                onClick={() => setShowCropper(false)}
+                style={{
+                  padding: '12px', background: 'transparent', border: '1px solid var(--ds-border)',
+                  borderRadius: '12px', color: 'var(--ds-text-primary)', fontSize: '13px', fontWeight: 700,
+                  cursor: 'pointer', transition: 'all 0.2s'
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = 'var(--ds-surface-hover)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >
+                CANCEL
+              </button>
+              <AmberButton
+                type="button"
+                onClick={handleCropSave}
+                disabled={isUploading}
+                icon="check"
+              >
+                {isUploading ? 'UPLOADING...' : 'CONFIRM CROP'}
+              </AmberButton>
+            </div>
+          </div>
         </div>
       )}
     </div>

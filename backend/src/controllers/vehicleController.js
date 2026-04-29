@@ -60,50 +60,78 @@ export const setupVehicle = async (req, res) => {
   try {
     const { id } = req.params;
     const { 
-      lastOilChangeDate, oilInterval, chainInterval, tireAge, tireLifespan,
-      engineDisplacement, weight, fuelType
+      engineDisplacement, weight, fuelType,
+      bikeCondition, ridingHabit,
+      components // array of components
     } = req.body;
 
-    const query = `
+    // First update the vehicle's core specs and mark it active
+    const vehicleQuery = `
       UPDATE vehicles 
       SET 
-        last_oil_change_date = $1,
-        oil_interval = $2,
-        chain_cleaning_interval = $3,
-        tire_age_months = $4,
-        tire_lifespan_months = $5,
-        engine_displacement = $6,
-        weight = $7,
-        fuel_type = $8,
+        engine_displacement = $1,
+        weight = $2,
+        fuel_type = $3,
+        bike_condition = $4,
+        riding_habit = $5,
         status = 'active'
-      WHERE id = $9
+      WHERE id = $6
       RETURNING *;
     `;
     
-    // Parse lastOilChangeDate as proper date or null
-    const oilDate = lastOilChangeDate ? new Date(lastOilChangeDate) : null;
-    
-    const values = [
-      oilDate, 
-      oilInterval || null, 
-      chainInterval || null, 
-      tireAge || null, 
-      tireLifespan || null, 
+    const vehicleValues = [
       engineDisplacement || null,
       weight || null,
       fuelType || null,
+      bikeCondition || null,
+      ridingHabit || null,
       id
     ];
     
-    const result = await pool.query(query, values);
+    const vehicleResult = await pool.query(vehicleQuery, vehicleValues);
 
-    if (result.rowCount === 0) {
+    if (vehicleResult.rowCount === 0) {
       return res.status(404).json({ success: false, error: 'Vehicle not found' });
+    }
+
+    const initialOdometer = vehicleResult.rows[0].odometer || 0;
+
+    // Now insert components if they exist
+    if (components && Array.isArray(components) && components.length > 0) {
+      // Clear any existing components for this vehicle to prevent duplicates if they run setup again
+      await pool.query('DELETE FROM components WHERE vehicle_id = $1', [id]);
+
+      // Prepare batch insert
+      for (const comp of components) {
+        let baselineOdometer = initialOdometer;
+
+        if (comp.wearState === 'Currently Used' && comp.estimatedMilesUsed) {
+          baselineOdometer = initialOdometer - comp.estimatedMilesUsed;
+          if (baselineOdometer < 0) baselineOdometer = 0;
+        }
+
+        const compQuery = `
+          INSERT INTO components (vehicle_id, category, component_type, brand, model, baseline_install_odometer, last_service_date)
+          VALUES ($1, $2, $3, $4, $5, $6, $7)
+        `;
+        
+        const serviceDate = comp.lastServiceDate ? new Date(comp.lastServiceDate) : null;
+
+        await pool.query(compQuery, [
+          id,
+          comp.category,
+          comp.componentType,
+          comp.brand,
+          comp.model,
+          baselineOdometer,
+          serviceDate
+        ]);
+      }
     }
 
     res.status(200).json({
       success: true,
-      data: result.rows[0]
+      data: vehicleResult.rows[0]
     });
 
   } catch (error) {
@@ -128,6 +156,26 @@ export const getVehicleById = async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching vehicle by id:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+};
+
+export const deleteVehicle = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query('DELETE FROM vehicles WHERE id = $1 RETURNING id', [id]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ success: false, error: 'Vehicle not found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: { id: result.rows[0].id }
+    });
+  } catch (error) {
+    console.error('Error deleting vehicle:', error);
     res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };
