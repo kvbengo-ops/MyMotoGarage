@@ -24,7 +24,7 @@
     9999  pill / avatar
 */
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import AmberButton from '../components/shared/AmberButton'
@@ -94,7 +94,7 @@ function SectionLabel({ title, action }) {
   )
 }
 
-/* ── Progress bar ── */
+/* ── Progress bar (with custom accent) ── */
 function ProgressBar({ percent, color }) {
   const fill = color === 'green' ? 'var(--ds-green)' : color === 'red' ? 'var(--ds-red)' : DS.amber
   return (
@@ -102,6 +102,489 @@ function ProgressBar({ percent, color }) {
       <div style={{ height: '100%', width: `${percent}%`, background: fill, borderRadius: '4px' }} />
     </div>
   )
+}
+
+/* ── SVG Arc Gauge — theme-aware ── */
+function ArcGauge({ percent, status }) {
+  const cx = 50, cy = 56, r = 36
+  const toRad = deg => (deg * Math.PI) / 180
+  const startAngle = 150, sweepTotal = 240
+  const startX = cx + r * Math.cos(toRad(startAngle))
+  const startY = cy + r * Math.sin(toRad(startAngle))
+  const endX = cx + r * Math.cos(toRad(startAngle + sweepTotal))
+  const endY = cy + r * Math.sin(toRad(startAngle + sweepTotal))
+  const fillSweep = sweepTotal * percent / 100
+  const fillAngle = startAngle + fillSweep
+  const fillX = cx + r * Math.cos(toRad(fillAngle))
+  const fillY = cy + r * Math.sin(toRad(fillAngle))
+  const fillLargeArc = fillSweep >= 180 ? 1 : 0
+  // 4-tier color scale based on actual percent — more expressive than 3-tier status
+  const arcColor =
+    percent >= 90 ? 'var(--ds-green)'   // excellent
+    : percent >= 70 ? 'var(--ds-primary)' // good (acid lime)
+    : percent >= 40 ? 'var(--ds-amber)'  // caution
+    : 'var(--ds-red)'                    // critical
+  return (
+    <svg viewBox="0 0 100 76" style={{ width: '100%', display: 'block' }}>
+      <path d={`M ${startX.toFixed(2)} ${startY.toFixed(2)} A ${r} ${r} 0 1 1 ${endX.toFixed(2)} ${endY.toFixed(2)}`}
+        fill="none" stroke="var(--ds-surface-active)" strokeWidth="5" strokeLinecap="round" />
+      {percent > 0 && (
+        <path d={`M ${startX.toFixed(2)} ${startY.toFixed(2)} A ${r} ${r} 0 ${fillLargeArc} 1 ${fillX.toFixed(2)} ${fillY.toFixed(2)}`}
+          fill="none" stroke={arcColor} strokeWidth="5" strokeLinecap="round" />
+      )}
+      <text x="50" y="54" textAnchor="middle" fontSize="14" fontWeight="800"
+        fill={arcColor}
+        fontFamily="inherit">{percent}</text>
+      <text x="50" y="63" textAnchor="middle" fontSize="6.5" fontWeight="500"
+        fill={arcColor} opacity="0.5" fontFamily="inherit">%</text>
+    </svg>
+  )
+}
+
+/* ── Diagnostic Category Card — theme-aware, with locked state ── */
+function DiagCategoryCard({ diag, isSelected, onSelect }) {
+  const hasAlerts = diag.alerts && diag.alerts.length > 0
+  const alertColor = diag.status === 'critical' ? 'var(--ds-red)' : 'var(--ds-amber)'
+
+  // ── LOCKED state: no components configured for this category ──
+  if (diag.isLocked) {
+    return (
+      <div style={{
+        borderRadius: '10px', padding: '10px 6px 8px',
+        background: 'var(--ds-surface)',
+        border: `1px dashed var(--ds-border)`,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        {/* Blurred ghost gauge behind */}
+        <div style={{ position: 'absolute', inset: 0, filter: 'blur(3px)', opacity: 0.12, pointerEvents: 'none' }}>
+          <ArcGauge percent={55} status="ok" />
+        </div>
+        {/* Lock overlay */}
+        <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--ds-text-muted)', zIndex: 1 }}>lock</span>
+        <span style={{ fontSize: '7px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ds-text-muted)', textAlign: 'center', lineHeight: 1.4, zIndex: 1 }}>
+          {diag.label}
+        </span>
+        <span style={{ fontSize: '6.5px', color: 'var(--ds-text-muted)', textAlign: 'center', lineHeight: 1.4, zIndex: 1, opacity: 0.7 }}>
+          Add parts<br/>to unlock
+        </span>
+      </div>
+    )
+  }
+
+  return (
+    <button
+      onClick={() => onSelect(diag.key)}
+      style={{
+        background: isSelected ? 'var(--ds-surface-active)' : 'var(--ds-surface)',
+        border: `1px solid ${isSelected ? 'var(--ds-border-heavy)' : 'var(--ds-border)'}`,
+        borderRadius: '10px', padding: '10px 6px 8px',
+        cursor: 'pointer', display: 'flex', flexDirection: 'column',
+        alignItems: 'center', gap: '4px',
+        transition: 'border-color 0.2s, background 0.2s',
+        width: '100%', position: 'relative',
+      }}
+    >
+      <div style={{ position: 'relative' }}>
+        <span className="material-symbols-outlined" style={{
+          fontSize: '18px',
+          color: hasAlerts ? alertColor : 'var(--ds-text-muted)',
+          transition: 'color 0.2s',
+        }}>{diag.icon}</span>
+        {hasAlerts && (
+          <div style={{
+            position: 'absolute', top: '-2px', right: '-4px',
+            width: '6px', height: '6px', borderRadius: '50%',
+            background: alertColor,
+          }} />
+        )}
+      </div>
+      <div style={{ width: '100%' }}>
+        <ArcGauge percent={diag.percent} status={diag.status} />
+      </div>
+      <span style={{
+        fontSize: '8px', fontWeight: 600, letterSpacing: '0.07em',
+        textTransform: 'uppercase',
+        color: hasAlerts ? alertColor : 'var(--ds-text-muted)',
+        textAlign: 'center', lineHeight: 1.2,
+      }}>{diag.label}</span>
+    </button>
+  )
+}
+
+/* ── Swipeable Diagnostics + Specs Card ── */
+function SwipeableInfoCard({ diagnostics, bike }) {
+  const [activeSlide, setActiveSlide] = useState(0) // 0 = diagnostics, 1 = specs
+  const [dragX, setDragX] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const touchStartX = useRef(0)
+  const touchStartY = useRef(0)
+  const [isScrollIntent, setIsScrollIntent] = useState(false)
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX
+    touchStartY.current = e.touches[0].clientY
+    setDragX(0)
+    setIsDragging(false)
+    setIsScrollIntent(false)
+  }
+
+  const handleTouchMove = (e) => {
+    const dx = e.touches[0].clientX - touchStartX.current
+    const dy = e.touches[0].clientY - touchStartY.current
+    // Determine intent on first significant move
+    if (!isDragging && !isScrollIntent) {
+      if (Math.abs(dy) > Math.abs(dx) + 5) { setIsScrollIntent(true); return }
+      if (Math.abs(dx) > 6) setIsDragging(true)
+    }
+    if (isScrollIntent) return
+    if (isDragging) {
+      // Resist at edges
+      const resistance = (activeSlide === 0 && dx > 0) || (activeSlide === 1 && dx < 0) ? 0.25 : 1
+      setDragX(dx * resistance)
+    }
+  }
+
+  const handleTouchEnd = () => {
+    if (isScrollIntent || !isDragging) { setDragX(0); setIsDragging(false); return }
+    const threshold = 60
+    if (dragX < -threshold && activeSlide === 0) setActiveSlide(1)
+    else if (dragX > threshold && activeSlide === 1) setActiveSlide(0)
+    setDragX(0)
+    setIsDragging(false)
+  }
+
+  const slideOffset = activeSlide === 0
+    ? `translateX(${dragX}px)`
+    : `translateX(calc(-50% + ${dragX}px))`
+
+  return (
+    <SectionCard style={{ overflow: 'hidden' }}>
+      {/* Slide header / tabs */}
+      <div style={{ padding: '16px 16px 0' }}>
+        <div style={{ display: 'flex', gap: '4px', marginBottom: '14px' }}>
+          {['Diagnostics', 'Tech Specs'].map((label, i) => (
+            <button
+              key={label}
+              onClick={() => setActiveSlide(i)}
+              style={{
+                flex: 1, padding: '8px', borderRadius: '8px', border: 'none',
+                background: activeSlide === i ? 'var(--ds-surface-active)' : 'transparent',
+                color: activeSlide === i ? 'var(--ds-text-primary)' : 'var(--ds-text-secondary)',
+                fontSize: '12px', fontWeight: 700, cursor: 'pointer',
+                letterSpacing: '0.04em', transition: 'all 0.2s',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>
+                {i === 0 ? 'monitor_heart' : 'straighten'}
+              </span>
+              {label}
+            </button>
+          ))}
+        </div>
+        {/* Slide indicator bar */}
+        <div style={{ display: 'flex', gap: '4px', marginBottom: '16px' }}>
+          {[0, 1].map(i => (
+            <div key={i} style={{
+              height: '2px', flex: 1, borderRadius: '999px',
+              background: activeSlide === i ? 'var(--ds-amber)' : 'var(--ds-border)',
+              transition: 'background 0.3s',
+            }} />
+          ))}
+        </div>
+      </div>
+
+      {/* Swipe viewport */}
+      <div
+        style={{ overflow: 'hidden', touchAction: 'pan-y' }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        <div style={{
+          display: 'flex', width: '200%',
+          transform: slideOffset,
+          transition: isDragging ? 'none' : 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+        }}>
+          {/* Slide 0 — Diagnostics */}
+          <div style={{ width: '50%', flexShrink: 0 }}>
+            <DiagnosticsInner diagnostics={diagnostics} bikeId={bike.id} />
+          </div>
+          {/* Slide 1 — Tech Specs */}
+          <div style={{ width: '50%', flexShrink: 0, padding: '0 16px 16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              {specFields.map(({ icon, label, key }) => (
+                <div key={key} style={{
+                  padding: '12px 14px', background: DS.bg,
+                  border: `1px solid ${DS.border}`, borderRadius: '8px',
+                  display: 'flex', alignItems: 'center', gap: '10px',
+                }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--ds-text-muted)', flexShrink: 0 }}>{icon}</span>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: DS.textSecondary, marginBottom: '2px' }}>{label}</div>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: DS.textPrimary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{bike[key] || '—'}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Swipe hint */}
+      <div style={{ padding: '8px 16px 14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+        <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'var(--ds-text-muted)' }}>swipe_left</span>
+        <span style={{ fontSize: '10px', color: 'var(--ds-text-muted)', fontWeight: 500 }}>
+          {activeSlide === 0 ? 'Swipe left for Tech Specs' : 'Swipe right for Diagnostics'}
+        </span>
+      </div>
+    </SectionCard>
+  )
+}
+
+/* ── Overall Bike Health Card — master gauge, theme-aware ── */
+function OverallHealthCard({ diagnostics }) {
+  // Formula: average health of CONFIGURED (unlocked) categories only
+  // Locked categories (no components) are excluded — they don't drag the score down
+  const configured = diagnostics.filter(d => !d.isLocked)
+  const allLocked  = configured.length === 0
+  const avg = allLocked
+    ? 0
+    : Math.round(configured.reduce((s, d) => s + d.percent, 0) / configured.length)
+  const status = allLocked ? 'SETUP' : avg >= 70 ? 'GOOD' : avg >= 40 ? 'FAIR' : 'POOR'
+  const accentColor = allLocked
+    ? 'var(--ds-text-muted)'
+    : avg >= 70 ? 'var(--ds-green)' : avg >= 40 ? 'var(--ds-amber)' : 'var(--ds-red)'
+  const alertCount     = configured.reduce((s, d) => s + (d.alerts ? d.alerts.length : 0), 0)
+  const healthySystems = configured.filter(d => d.status === 'ok').length
+  const lockedCount    = diagnostics.length - configured.length
+
+  // 270° arc
+  const cx = 60, cy = 60, r = 44
+  const toRad = deg => deg * Math.PI / 180
+  const startAngle = 135, sweepTotal = 270
+  const sX = cx + r * Math.cos(toRad(startAngle))
+  const sY = cy + r * Math.sin(toRad(startAngle))
+  const eX = cx + r * Math.cos(toRad(startAngle + sweepTotal))
+  const eY = cy + r * Math.sin(toRad(startAngle + sweepTotal))
+  const fillSweep = sweepTotal * avg / 100
+  const fX = cx + r * Math.cos(toRad(startAngle + fillSweep))
+  const fY = cy + r * Math.sin(toRad(startAngle + fillSweep))
+  const largeArc = fillSweep >= 180 ? 1 : 0
+  const trackD = `M ${sX.toFixed(2)} ${sY.toFixed(2)} A ${r} ${r} 0 1 1 ${eX.toFixed(2)} ${eY.toFixed(2)}`
+  const fillD  = !allLocked && avg > 0
+    ? `M ${sX.toFixed(2)} ${sY.toFixed(2)} A ${r} ${r} 0 ${largeArc} 1 ${fX.toFixed(2)} ${fY.toFixed(2)}`
+    : null
+
+  // Per-category dots — green/amber/red for configured, gray for locked
+  const catColors = diagnostics.map(d =>
+    d.isLocked ? 'var(--ds-border-heavy)'
+    : d.status === 'critical' ? 'var(--ds-red)'
+    : d.status === 'warning'  ? 'var(--ds-amber)'
+    : 'var(--ds-green)'
+  )
+
+  return (
+    <div style={{
+      borderRadius: '10px', background: 'var(--ds-surface)',
+      border: `1px solid var(--ds-border)`,
+      height: '100%', display: 'flex', flexDirection: 'column',
+      overflow: 'hidden', position: 'relative',
+    }}>
+      <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: '3px', background: accentColor, borderRadius: '10px 0 0 10px' }} />
+
+      <div style={{ padding: '10px 10px 10px 14px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 0 }}>
+        <div style={{ fontSize: '7.5px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ds-text-muted)' }}>
+          Bike<br/>Health
+        </div>
+
+        <div style={{ position: 'relative', width: '100%' }}>
+          <svg viewBox="0 0 120 108" style={{ width: '100%', display: 'block' }}>
+            {fillD && <path d={fillD} fill="none" stroke={accentColor} strokeWidth="16" strokeLinecap="round" opacity="0.08" />}
+            <path d={trackD} fill="none" stroke="var(--ds-surface-active)" strokeWidth="9" strokeLinecap="round" />
+            {fillD && <path d={fillD} fill="none" stroke={accentColor} strokeWidth="9" strokeLinecap="round" />}
+            {fillD && avg > 2 && <circle cx={fX.toFixed(2)} cy={fY.toFixed(2)} r="4.5" fill={accentColor} />}
+
+            {/* Center content */}
+            <text x="60" y="40" textAnchor="middle" fontSize="8" fill="var(--ds-text-muted)" fontFamily="inherit">%</text>
+            {allLocked ? (
+              <>
+                <text x="60" y="63" textAnchor="middle" fontSize="14" fontWeight="800" fill="var(--ds-text-muted)" fontFamily="inherit">N/A</text>
+                <text x="60" y="74" textAnchor="middle" fontSize="7" fill="var(--ds-text-muted)" fontFamily="inherit">not set up</text>
+              </>
+            ) : (
+              <>
+                <text x="60" y="63" textAnchor="middle" fontSize="26" fontWeight="900" fill="var(--ds-text-primary)" fontFamily="inherit">{avg}</text>
+                <text x="60" y="74" textAnchor="middle" fontSize="7.5" fontWeight="800" letterSpacing="2.5" fill={accentColor} fontFamily="inherit">{status}</text>
+              </>
+            )}
+
+            {/* 5 system dots */}
+            {diagnostics.map((d, i) => {
+              const dotX = 60 - (diagnostics.length - 1) * 5.5 + i * 11
+              return (
+                <g key={d.key}>
+                  <circle cx={dotX} cy="88" r="3.5" fill={catColors[i]} opacity={d.isLocked ? '0.3' : d.status === 'ok' ? '0.4' : '0.9'} />
+                  {!d.isLocked && d.status !== 'ok' && <circle cx={dotX} cy="88" r="5.5" fill={catColors[i]} opacity="0.12" />}
+                </g>
+              )
+            })}
+            <text x="60" y="99" textAnchor="middle" fontSize="6" fill="var(--ds-text-muted)" fontFamily="inherit" letterSpacing="0.5">systems</text>
+          </svg>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+          {allLocked ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '10px', color: 'var(--ds-text-muted)' }}>build</span>
+              <span style={{ fontSize: '7.5px', color: 'var(--ds-text-muted)', fontWeight: 500, lineHeight: 1.3 }}>Finish setup to see health</span>
+            </div>
+          ) : (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--ds-green)', flexShrink: 0 }} />
+                <span style={{ fontSize: '8px', color: 'var(--ds-text-secondary)', fontWeight: 500 }}>
+                  {healthySystems}/{configured.length} ok
+                </span>
+              </div>
+              {lockedCount > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--ds-border-heavy)', flexShrink: 0 }} />
+                  <span style={{ fontSize: '7.5px', color: 'var(--ds-text-muted)', fontWeight: 500 }}>{lockedCount} not set up</span>
+                </div>
+              )}
+              {alertCount > 0 ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--ds-amber)', flexShrink: 0 }} />
+                  <span style={{ fontSize: '8px', color: 'var(--ds-amber)', fontWeight: 600 }}>{alertCount} alert{alertCount > 1 ? 's' : ''}</span>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--ds-border)', flexShrink: 0 }} />
+                  <span style={{ fontSize: '8px', color: 'var(--ds-text-muted)', fontWeight: 500 }}>no alerts</span>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ── Diagnostics inner content (extracted for swipeable use) ── */
+function DiagnosticsInner({ diagnostics, bikeId }) {
+  const navigate = useNavigate()
+  const [selectedKey, setSelectedKey] = useState(null)
+  const handleSelect = (key) => {
+    const diag = diagnostics.find(d => d.key === key)
+    if (!diag || diag.isLocked || !diag.alerts || diag.alerts.length === 0) return setSelectedKey(null)
+    setSelectedKey(prev => prev === key ? null : key)
+  }
+  const selectedDiag = diagnostics.find(d => d.key === selectedKey)
+  const lockedCategories = diagnostics.filter(d => d.isLocked)
+  const hasLocked = lockedCategories.length > 0
+
+  return (
+    <div style={{ padding: '0 16px 4px' }}>
+      {/* Left-right split: Overall Health card + 2-col category grid */}
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}>
+        {/* Left: Overall Health (tall) */}
+        <div style={{ width: '38%', flexShrink: 0 }}>
+          <OverallHealthCard diagnostics={diagnostics} />
+        </div>
+        {/* Right: 5 category cards in 2-col grid */}
+        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+          {diagnostics.map(d => (
+            <DiagCategoryCard key={d.key} diag={d} isSelected={selectedKey === d.key} onSelect={handleSelect} />
+          ))}
+        </div>
+      </div>
+
+      {/* Setup CTA banner — shown when any category has no components */}
+      {hasLocked && (
+        <div style={{
+          marginTop: '10px',
+          padding: '10px 12px',
+          borderRadius: '10px',
+          background: 'var(--ds-surface)',
+          border: '1px dashed var(--ds-border-heavy)',
+          display: 'flex', alignItems: 'center', gap: '10px',
+        }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--ds-text-muted)', flexShrink: 0 }}>build_circle</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--ds-text-primary)' }}>
+              {lockedCategories.length} {lockedCategories.length === 1 ? 'category' : 'categories'} not set up
+            </div>
+            <div style={{ fontSize: '10px', color: 'var(--ds-text-muted)', marginTop: '1px' }}>
+              {lockedCategories.map(d => d.label).join(' · ')}
+            </div>
+          </div>
+          <button
+            onClick={() => navigate(`/setup-vehicle/${bikeId}`)}
+            style={{
+              flexShrink: 0,
+              padding: '6px 12px',
+              borderRadius: '999px',
+              background: 'var(--ds-primary)',
+              color: 'var(--ds-bg)',
+              fontSize: '10px', fontWeight: 800,
+              letterSpacing: '0.06em',
+              border: 'none', cursor: 'pointer',
+              textTransform: 'uppercase',
+              transition: 'opacity 0.15s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
+            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+          >
+            Set Up
+          </button>
+        </div>
+      )}
+
+      <AnimatePresence>
+        {selectedDiag && selectedDiag.alerts && selectedDiag.alerts.length > 0 && (
+          <motion.div
+            key={selectedKey}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: selectedDiag.accentColor, marginBottom: '2px' }}>
+                {selectedDiag.label} — Alerts
+              </div>
+              {selectedDiag.alerts.map((a, i) => (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', gap: '10px',
+                  padding: '10px 12px', borderRadius: '10px',
+                  background: a.severity === 'critical' ? 'color-mix(in srgb, var(--ds-red) 10%, transparent)' : 'color-mix(in srgb, var(--ds-amber) 10%, transparent)',
+                  border: `1px solid ${a.severity === 'critical' ? 'color-mix(in srgb, var(--ds-red) 25%, transparent)' : 'color-mix(in srgb, var(--ds-amber) 25%, transparent)'}`,
+                }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px', color: a.severity === 'critical' ? 'var(--ds-red)' : 'var(--ds-amber)', flexShrink: 0 }}>{a.icon}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: DS.textPrimary }}>{a.name}</div>
+                    <div style={{ fontSize: '11px', color: DS.textSecondary, marginTop: '2px' }}>
+                      {a.severity === 'critical' ? 'Critical — replace immediately' : `Only ${a.health}% life remaining`}
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '11px', fontWeight: 800, color: a.severity === 'critical' ? 'var(--ds-red)' : 'var(--ds-amber)', flexShrink: 0 }}>{a.health}%</div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+/* ── Diagnostics Panel (kept for backwards compat — now delegates to SwipeableInfoCard) ── */
+function DiagnosticsPanel({ diagnostics }) {
+  return null // replaced by SwipeableInfoCard
 }
 
 /* ── List row (upgrades + history) ── */
@@ -142,7 +625,6 @@ function ListRow({ icon, iconColor, primary, secondary, trailing, trailingHint }
 export default function VehicleDetail() {
   const navigate   = useNavigate()
   const { bike }   = useOutletContext()
-  const [showSpecs, setShowSpecs] = useState(false)
 
   return (
     <div style={{ minHeight: '100dvh', background: DS.bg }}>
@@ -163,7 +645,7 @@ export default function VehicleDetail() {
         <h1 style={{ fontSize: '15px', fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: DS.amber }}>
           Digital Garage
         </h1>
-        <button style={{ width: '32px', height: '32px', borderRadius: '50%', border: 'none', background: 'transparent', cursor: 'pointer', color: DS.textSecondary, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <button onClick={() => navigate(`/setup-vehicle/${bike.id}`)} style={{ width: '32px', height: '32px', borderRadius: '50%', border: 'none', background: 'transparent', cursor: 'pointer', color: DS.textSecondary, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>settings</span>
         </button>
       </header>
@@ -189,102 +671,128 @@ export default function VehicleDetail() {
           </div>
         </div>
 
-        {/* ── Badges Card (Sample Badges) ── */}
+        {/* ── Rider Badges ── */}
         <div style={{
-          background: DS.surface, border: `1px solid ${DS.border}`,
-          borderRadius: '12px', padding: '16px'
+          background: DS.surface,
+          border: `1px solid ${DS.border}`,
+          borderRadius: '14px',
+          overflow: 'hidden',
         }}>
-          <h3 style={{ fontSize: '14px', fontWeight: 700, color: DS.textPrimary, marginBottom: '16px', display: 'flex', justifyContent: 'space-between' }}>
-            Rider Badges
-            <span style={{ fontSize: '12px', color: 'var(--ds-amber)', fontWeight: 600 }}>2 Earned</span>
-          </h3>
-          
-          <div style={{ display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '8px', msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
-            
-            {/* Busay Badge */}
-            <div style={{ flexShrink: 0, width: '80px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-              <div style={{
-                width: '64px', height: '64px', borderRadius: '50%',
-                background: 'linear-gradient(135deg, var(--ds-amber), #FF6B00)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 4px 16px color-mix(in srgb, var(--ds-amber) 40%, transparent)',
-                border: '2px solid var(--ds-bg)', position: 'relative'
-              }}>
-                <span className="material-symbols-outlined" style={{ fontSize: '32px', color: '#FFF' }}>landscape</span>
-                <div style={{ position: 'absolute', bottom: '-6px', background: 'var(--ds-bg)', border: '1px solid var(--ds-amber)', borderRadius: '12px', padding: '2px 6px', fontSize: '8px', fontWeight: 800, color: 'var(--ds-amber)', letterSpacing: '0.05em' }}>EARNED</div>
+          {/* Header */}
+          <div style={{
+            padding: '14px 16px 12px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            borderBottom: `1px solid ${DS.border}`,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--ds-amber)' }}>military_tech</span>
+              <span style={{ fontSize: '13px', fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--ds-text-primary)' }}>Rider Badges</span>
+            </div>
+            <div style={{
+              padding: '3px 10px', borderRadius: '999px',
+              background: 'var(--ds-primary-subtle)',
+              border: '1px solid var(--ds-primary-glow)',
+            }}>
+              <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '0.1em', color: 'var(--ds-primary)' }}>2 EARNED</span>
+            </div>
+          </div>
+
+          {/* Badge scroll rail */}
+          <div style={{
+            display: 'flex', gap: '0px',
+            overflowX: 'auto', padding: '16px 16px 16px',
+            msOverflowStyle: 'none', scrollbarWidth: 'none',
+            gap: '12px',
+          }}>
+
+            {/* ── Earned Badge: Trans-Cebu Busay Run ── */}
+            {[
+              { icon: 'landscape', label: 'Trans-Cebu', sub: 'Busay Run', color1: '#F5A623', color2: '#FF6B00', glow: 'rgba(245,166,35,0.35)', km: '42 km', date: 'Oct 2024' },
+              { icon: 'social_leaderboard', label: '1,000 KM', sub: 'Milestone', color1: 'var(--ds-green)', color2: '#00C853', glow: 'rgba(34,197,94,0.35)', km: '1,000 km', date: 'Nov 2024' },
+            ].map((badge, idx) => (
+              <div key={idx} style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '76px' }}>
+                {/* Hexagon badge */}
+                <div style={{ position: 'relative', width: '64px', height: '64px' }}>
+                  <svg viewBox="0 0 64 64" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
+                    <defs>
+                      <linearGradient id={`bg${idx}`} x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stopColor={badge.color1} />
+                        <stop offset="100%" stopColor={badge.color2} />
+                      </linearGradient>
+                      <filter id={`glow${idx}`}>
+                        <feGaussianBlur stdDeviation="2" result="blur" />
+                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                      </filter>
+                    </defs>
+                    {/* Hex shape */}
+                    <polygon
+                      points="32,4 57,18 57,46 32,60 7,46 7,18"
+                      fill={`url(#bg${idx})`}
+                      filter={`url(#glow${idx})`}
+                    />
+                    {/* Inner ring */}
+                    <polygon
+                      points="32,8 53,20 53,44 32,56 11,44 11,20"
+                      fill="none"
+                      stroke="rgba(255,255,255,0.2)"
+                      strokeWidth="1"
+                    />
+                  </svg>
+                  {/* Icon */}
+                  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '26px', color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,0.3)' }}>{badge.icon}</span>
+                  </div>
+                  {/* Earned chip */}
+                  <div style={{
+                    position: 'absolute', bottom: '-6px', left: '50%', transform: 'translateX(-50%)',
+                    background: 'var(--ds-bg)', border: `1px solid ${badge.color1}`,
+                    borderRadius: '99px', padding: '1px 5px', whiteSpace: 'nowrap',
+                  }}>
+                    <span style={{ fontSize: '7px', fontWeight: 900, color: badge.color1, letterSpacing: '0.06em' }}>✓ EARNED</span>
+                  </div>
+                </div>
+
+                {/* Label */}
+                <div style={{ textAlign: 'center', marginTop: '4px' }}>
+                  <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--ds-text-primary)', lineHeight: 1.2 }}>{badge.label}</div>
+                  <div style={{ fontSize: '9px', color: 'var(--ds-text-secondary)', marginTop: '1px' }}>{badge.sub}</div>
+                  <div style={{ fontSize: '8px', color: 'var(--ds-text-muted)', marginTop: '3px' }}>{badge.km} · {badge.date}</div>
+                </div>
               </div>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: DS.textPrimary, textAlign: 'center', lineHeight: 1.2 }}>Trans-Cebu<br/>Busay Run</span>
+            ))}
+
+            {/* ── Locked Badge: Iron Butt Challenge ── */}
+            <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '76px' }}>
+              <div style={{ position: 'relative', width: '64px', height: '64px', opacity: 0.5 }}>
+                <svg viewBox="0 0 64 64" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
+                  <polygon points="32,4 57,18 57,46 32,60 7,46 7,18" fill="var(--ds-surface-active)" />
+                  <polygon points="32,8 53,20 53,44 32,56 11,44 11,20" fill="none" stroke="var(--ds-border-heavy)" strokeWidth="1" strokeDasharray="3 2" />
+                </svg>
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '22px', color: 'var(--ds-text-muted)' }}>lock</span>
+                </div>
+              </div>
+              <div style={{ textAlign: 'center', marginTop: '4px' }}>
+                <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--ds-text-secondary)', lineHeight: 1.2 }}>Iron Butt</div>
+                <div style={{ fontSize: '9px', color: 'var(--ds-text-muted)', marginTop: '1px' }}>Challenge</div>
+                {/* XP progress bar */}
+                <div style={{ marginTop: '6px', width: '60px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
+                    <span style={{ fontSize: '7px', color: 'var(--ds-text-muted)' }}>1,000 km</span>
+                    <span style={{ fontSize: '7px', color: 'var(--ds-amber)', fontWeight: 700 }}>1,600</span>
+                  </div>
+                  <div style={{ height: '3px', background: 'var(--ds-surface-active)', borderRadius: '99px', overflow: 'hidden' }}>
+                    <div style={{ width: '62%', height: '100%', background: 'var(--ds-amber)', borderRadius: '99px' }} />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* 1000km Badge */}
-            <div style={{ flexShrink: 0, width: '80px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-              <div style={{
-                width: '64px', height: '64px', borderRadius: '50%',
-                background: 'linear-gradient(135deg, var(--ds-green), #00C853)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 4px 16px color-mix(in srgb, var(--ds-green) 40%, transparent)',
-                border: '2px solid var(--ds-bg)', position: 'relative'
-              }}>
-                <span className="material-symbols-outlined" style={{ fontSize: '30px', color: '#FFF' }}>social_leaderboard</span>
-              </div>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: DS.textPrimary, textAlign: 'center', lineHeight: 1.2 }}>1,000 KM<br/>Milestone</span>
-            </div>
-
-            {/* Locked Badge */}
-            <div style={{ flexShrink: 0, width: '80px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', opacity: 0.5 }}>
-              <div style={{
-                width: '64px', height: '64px', borderRadius: '50%',
-                background: 'var(--ds-surface-hover)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                border: `1px dashed ${DS.border}`
-              }}>
-                <span className="material-symbols-outlined" style={{ fontSize: '24px', color: DS.textMuted }}>lock</span>
-              </div>
-              <span style={{ fontSize: '11px', fontWeight: 600, color: DS.textSecondary, textAlign: 'center', lineHeight: 1.2 }}>Iron Butt<br/>Challenge</span>
-            </div>
-            
           </div>
         </div>
 
-        {/* ── Specs Collapsible ── */}
-        <div style={{ background: DS.surface, border: `1px solid ${DS.border}`, borderRadius: '12px', overflow: 'hidden' }}>
-          <button
-            onClick={() => setShowSpecs(!showSpecs)}
-            style={{ width: '100%', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'transparent', border: 'none', cursor: 'pointer', color: DS.textPrimary }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span className="material-symbols-outlined" style={{ color: DS.textSecondary, fontSize: '18px' }}>straighten</span>
-              <span style={{ fontSize: '14px', fontWeight: 700 }}>Technical Specifications</span>
-            </div>
-            <span className="material-symbols-outlined" style={{ transition: 'transform 0.2s', transform: showSpecs ? 'rotate(180deg)' : 'rotate(0deg)', color: DS.textSecondary }}>expand_more</span>
-          </button>
-          
-          <AnimatePresence>
-            {showSpecs && (
-              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: 'hidden' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', padding: '0 16px 16px' }}>
-                  {specFields.map(({ icon, label, key }) => (
-                    <div key={key} style={{
-                      padding: '12px 14px',
-                      background: DS.bg,
-                      border: `1px solid ${DS.border}`,
-                      borderRadius: '8px',
-                      display: 'flex', alignItems: 'center', gap: '10px',
-                    }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#555', flexShrink: 0 }}>{icon}</span>
-                      <div>
-                        <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: DS.textSecondary, marginBottom: '2px' }}>{label}</div>
-                        <div style={{ fontSize: '13px', fontWeight: 600, color: DS.textPrimary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '90px' }}>{bike[key]}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* ── Stat Tiles — 2-col, clear visual hierarchy ── */}
+        {/* ── Swipeable Diagnostics + Tech Specs Card ── */}
+        <SwipeableInfoCard diagnostics={bike.diagnostics} bike={bike} />
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
           {[
             { label: 'Odometer', value: bike.odometer.toLocaleString(), unit: 'km', icon: 'speed' },
@@ -310,26 +818,6 @@ export default function VehicleDetail() {
           ))}
         </div>
 
-        {/* ── Diagnostics Card ── */}
-        <SectionCard>
-          <div style={{ padding: '20px' }}>
-            <SectionLabel title="Diagnostics" />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {bike.diagnostics.map((d) => (
-                <div key={d.label}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: '16px', color: DS.textSecondary }}>{d.icon}</span>
-                      <span style={{ fontSize: '14px', color: DS.textSecondary }}>{d.label}</span>
-                    </div>
-                    <span style={{ fontSize: '13px', fontWeight: 700, color: DS.textPrimary }}>{d.percent}%</span>
-                  </div>
-                  <ProgressBar percent={d.percent} color={d.color} />
-                </div>
-              ))}
-            </div>
-          </div>
-        </SectionCard>
 
         {/* ── Action Buttons — 8px gap between ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>

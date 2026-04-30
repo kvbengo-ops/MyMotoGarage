@@ -189,3 +189,37 @@ export const deleteVehicle = async (req, res) => {
     res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };
+
+export const getMaintenanceLogs = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query(
+      'SELECT * FROM maintenance_logs WHERE vehicle_id = $1 ORDER BY date DESC, created_at DESC',
+      [id]
+    );
+    res.status(200).json({ success: true, data: result.rows });
+  } catch (error) {
+    console.error('Error fetching maintenance logs:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+};
+
+export const addMaintenanceLog = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { logType, title, description, odometerAtLog, cost, date } = req.body;
+
+    if (!title) return res.status(400).json({ success: false, error: 'Title is required' });
+
+    const result = await pool.query(
+      `INSERT INTO maintenance_logs (vehicle_id, log_type, title, description, odometer_at_log, cost, date)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [id, logType || 'maintenance', title, description || null, odometerAtLog || null, cost || null, date || new Date()]
+    );
+    res.status(201).json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    console.error('Error adding maintenance log:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+};
+

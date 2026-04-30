@@ -11,67 +11,125 @@ export default function BikeLayout() {
   useEffect(() => {
     const fetchBike = async () => {
       try {
-        const response = await fetch(`/api/vehicles/${bikeId}`)
-        const data = await response.json()
-        if (data.success) {
-          const v = data.data
-          setBike({
-            id: v.id,
-            name: `${v.year} ${v.make.toUpperCase()} ${v.model.toUpperCase()}`,
-            make: v.make,
-            model: v.model,
-            year: v.year,
-            category: v.category || '-',
-            engine: v.engine_displacement ? `${v.engine_displacement} cc` : '-', 
-            weight: v.weight ? `${v.weight} kg` : '-',
-            fuelType: v.fuel_type || '-',
-            fuelCapacity: v.fuel_capacity ? `${v.fuel_capacity} L` : '-',
-            fuelConsumption: v.fuel_consumption || '-',
-            status: v.status || 'needsSetup',
-            image: v.image_url || 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&q=80',
-            odometer: v.odometer || 0,
-            fuelRange: (v.fuel_capacity && v.fuel_consumption) ? Math.round(v.fuel_capacity * v.fuel_consumption) : '-',
-            diagnostics: (v.components || []).filter(c => c.replacement_threshold > 0).length > 0 
-              ? (v.components || []).filter(c => c.replacement_threshold > 0).map(c => {
-                  const kmUsed = (v.odometer || 0) - c.baseline_install_odometer;
-                  const percentUsed = (kmUsed / c.replacement_threshold) * 100;
-                  const healthPercent = Math.max(0, Math.min(100, Math.round(100 - percentUsed)));
-                  
-                  let color = 'green';
-                  if (healthPercent < 20) color = 'red';
-                  else if (healthPercent < 50) color = 'amber';
+        // Fetch vehicle + components
+        const [vehicleRes, logsRes] = await Promise.all([
+          fetch(`/api/vehicles/${bikeId}`),
+          fetch(`/api/vehicles/${bikeId}/logs`),
+        ])
+        const vehicleData = await vehicleRes.json()
+        const logsData    = await logsRes.json()
 
-                  let icon = 'build';
-                  if (c.category === 'Drivetrain') icon = 'settings';
-                  if (c.category === 'Tires') icon = 'tire_repair';
-                  if (c.category === 'Brakes') icon = 'stop_circle';
-                  if (c.category === 'Oils') icon = 'water_drop';
-
-                  return { label: c.component_type, percent: healthPercent, color, icon };
-              })
-              : [{ label: 'System Health', percent: 100, color: 'green', icon: 'check_circle' }],
-            maintenanceLogs: [],
-            rideHistory: [],
-            systemStatus: [
-              { id: '1', label: 'Engine Oil', percent: 80, lastKm: '2,500', lastDate: 'Oct 12', icon: 'oil_barrel' },
-              { id: '2', label: 'Brake Fluid', percent: 45, lastKm: '8,000', lastDate: 'Mar 01', icon: 'water_drop' },
-              { id: '3', label: 'Drive Chain', percent: 90, lastKm: '300', lastDate: 'Nov 05', icon: 'link' },
-            ],
-            smartAlerts: [
-              { id: 'a1', type: 'warning', title: 'Rear Tire Pressure Low', body: 'Pressure is at 32 PSI (Target: 36 PSI).', action: 'FIND AIR', icon: 'tire_repair' },
-            ],
-            recentUpgrades: [
-              { id: 'u1', title: 'Akrapovič Slip-on', subtitle: 'Exhaust System', date: 'Oct 20', borderColor: 'amber' },
-              { id: 'u2', title: 'Brembo Brake Pads', subtitle: 'Front & Rear', date: 'Sep 15', borderColor: 'gray' },
-            ],
-            chatThread: [
-              { id: 1, text: 'Hi! Im noticing a slight vibration at 105km/h. Could it be the chain?', isUser: true, time: '10:02 AM' },
-              { id: 2, text: 'Vibrations at specific speeds often point to wheel balance or alignment. However, since you last cleaned your chain 500 km ago, it is worth checking the slack first. Want me to pull up the factory spec for your chain tension?', isUser: false, time: '10:03 AM' }
-            ]
-          })
-        } else {
-          setError(data.error || 'Failed to fetch bike')
+        if (!vehicleData.success) {
+          setError(vehicleData.error || 'Failed to fetch bike')
+          return
         }
+
+        const v    = vehicleData.data
+        const logs = logsData.success ? logsData.data : []
+
+        // ── Category icon helper ──
+        const catIcon = (cat) => ({ Drivetrain:'settings', Tires:'tire_repair', Brakes:'disc_full', Oils:'water_drop', Electronics:'bolt' }[cat] || 'build')
+
+        // ── Diagnostic categories ──
+        const DIAG_CATEGORIES = [
+          { key: 'Engine',      label: 'Engine',        icon: 'settings',    accentColor: 'var(--ds-amber)', maps: ['Drivetrain'] },
+          { key: 'Tires',       label: 'Tires',         icon: 'tire_repair', accentColor: 'var(--ds-cyan)',  maps: ['Tires'] },
+          { key: 'Brakes',      label: 'Brakes',        icon: 'disc_full',   accentColor: 'var(--ds-red)',   maps: ['Brakes'] },
+          { key: 'Oils',        label: 'Oils & Fluids', icon: 'water_drop',  accentColor: 'var(--ds-primary)', maps: ['Oils'] },
+          { key: 'Electronics', label: 'Electronics',   icon: 'bolt',        accentColor: 'var(--ds-cyan)',  maps: ['Electronics'] },
+        ]
+
+        const allComps = (v.components || []).filter(c => c.replacement_threshold > 0)
+
+        // ── Per-component health helper ──
+        const compHealth = (c) => {
+          const kmUsed = (v.odometer || 0) - (c.baseline_install_odometer || 0)
+          return Math.max(0, Math.min(100, Math.round(100 - (kmUsed / c.replacement_threshold) * 100)))
+        }
+
+        // ── Diagnostics ──
+        // Formula per category: avg(component_health) where
+        //   component_health = max(0, min(100, 100 - (km_used / threshold × 100)))
+        // Empty category → isLocked:true (no components configured yet)
+        const diagnostics = DIAG_CATEGORIES.map(cat => {
+          const catComps = allComps.filter(c => cat.maps.includes(c.category))
+          if (catComps.length === 0) {
+            return { ...cat, percent: 0, status: 'ok', alerts: [], isLocked: true }
+          }
+          const healths = catComps.map(c => ({
+            name: c.component_type,
+            brand: c.brand,
+            health: compHealth(c),
+          }))
+          // Category health = weighted average across all its components
+          const avg    = Math.round(healths.reduce((s, h) => s + h.health, 0) / healths.length)
+          const status = avg < 20 ? 'critical' : avg < 50 ? 'warning' : 'ok'
+          const alerts = healths.filter(h => h.health < 30).map(h => ({
+            name: h.name, health: h.health,
+            icon: h.health < 10 ? 'error' : 'warning',
+            severity: h.health < 10 ? 'critical' : 'warning',
+          }))
+          return { ...cat, percent: avg, status, alerts, isLocked: false, componentCount: catComps.length }
+        })
+
+
+        // ── System status (real components) ──
+        const systemStatus = allComps.map(c => ({
+          id: c.id,
+          label: c.component_type,
+          percent: compHealth(c),
+          lastKm: (c.baseline_install_odometer || 0).toLocaleString(),
+          lastDate: c.last_service_date
+            ? new Date(c.last_service_date).toLocaleDateString('en', { month: 'short', day: 'numeric' })
+            : '—',
+          icon: catIcon(c.category),
+        }))
+
+        // ── Smart alerts (real low-health components) ──
+        const smartAlerts = allComps
+          .map(c => ({ c, health: compHealth(c) }))
+          .filter(({ health }) => health < 30)
+          .map(({ c, health }, i) => ({
+            id: `alert-${i}`,
+            type: health < 10 ? 'critical' : 'warning',
+            title: `${c.component_type} needs attention`,
+            body: health < 10
+              ? `Critical — only ${health}% life remaining. Replace immediately.`
+              : `Only ${health}% life remaining. Plan replacement soon.`,
+            action: 'VIEW',
+            icon: catIcon(c.category),
+          }))
+
+        // ── Maintenance logs (real DB data) ──
+        const maintenanceLogs = logs.map(l => ({
+          id: l.id,
+          title: l.title,
+          subtitle: l.description || l.log_type,
+          date: new Date(l.date).toLocaleDateString('en', { month: 'short', day: 'numeric' }),
+          borderColor: l.log_type === 'upgrade' ? 'amber' : 'gray',
+        }))
+
+        setBike({
+          id: v.id,
+          name: `${v.year} ${v.make.toUpperCase()} ${v.model.toUpperCase()}`,
+          make: v.make, model: v.model, year: v.year,
+          category: v.category || '—',
+          engine: v.engine_displacement ? `${v.engine_displacement} cc` : '—',
+          weight: v.weight ? `${v.weight} kg` : '—',
+          fuelType: v.fuel_type || '—',
+          fuelCapacity: v.fuel_capacity ? `${v.fuel_capacity} L` : '—',
+          fuelConsumption: v.fuel_consumption || '—',
+          status: v.status || 'needsSetup',
+          image: v.image_url || 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&q=80',
+          odometer: v.odometer || 0,
+          fuelRange: (v.fuel_capacity && v.fuel_consumption) ? Math.round(v.fuel_capacity * v.fuel_consumption) : '—',
+          diagnostics,
+          systemStatus,
+          smartAlerts,
+          maintenanceLogs,
+          rideHistory: [],
+          chatThread: [],
+        })
       } catch (err) {
         setError(err.message)
       } finally {
@@ -80,6 +138,7 @@ export default function BikeLayout() {
     }
     fetchBike()
   }, [bikeId])
+
 
   return (
     <div className="relative min-h-screen flex justify-center transition-colors duration-300" style={{ background: '#090909' }}>

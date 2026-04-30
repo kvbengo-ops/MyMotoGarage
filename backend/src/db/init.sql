@@ -11,8 +11,6 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- Create Vehicles table
-DROP TABLE IF EXISTS components CASCADE;
-DROP TABLE IF EXISTS vehicles CASCADE;
 
 CREATE TABLE IF NOT EXISTS vehicles (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -58,3 +56,17 @@ CREATE TABLE IF NOT EXISTS components (
 INSERT INTO users (id, email, name)
 VALUES ('00000000-0000-0000-0000-000000000000', 'testrider@digitalgarage.com', 'Test Rider')
 ON CONFLICT (email) DO NOTHING;
+
+-- Create Maintenance Logs table
+CREATE TABLE IF NOT EXISTS maintenance_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    vehicle_id UUID REFERENCES vehicles(id) ON DELETE CASCADE,
+    log_type VARCHAR(50) DEFAULT 'maintenance', -- maintenance | upgrade | repair
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    odometer_at_log INTEGER,
+    cost NUMERIC,
+    date DATE NOT NULL DEFAULT CURRENT_DATE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+

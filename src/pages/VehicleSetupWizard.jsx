@@ -1,31 +1,34 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import AmberButton from '../components/shared/AmberButton'
 import { Field, StyledInput, StyledSelect } from '../components/shared/FormUtils'
 
 const steps = [
-  { id: 'core', title: 'General Info', category: null, image: null },
-  { id: 'drivetrain', title: 'Drivetrain', category: 'Drivetrain', image: 'https://images.unsplash.com/photo-1558981852-426c6c22a060?auto=format&fit=crop&q=80' },
-  { id: 'tires', title: 'Tires', category: 'Tires', image: 'https://images.unsplash.com/photo-1629858718617-6d60ed6d3f2d?auto=format&fit=crop&q=80' },
-  { id: 'brakes', title: 'Brakes', category: 'Brakes', image: 'https://images.unsplash.com/photo-1598402685715-db1485a3dc8f?auto=format&fit=crop&q=80' },
-  { id: 'oils', title: 'Oils & Fluids', category: 'Oils', image: 'https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?auto=format&fit=crop&q=80' },
+  { id: 'core',        title: 'General Info',   category: null,          image: null },
+  { id: 'drivetrain',  title: 'Drivetrain',      category: 'Drivetrain',  image: '/banner_drivetrain.png' },
+  { id: 'tires',       title: 'Tires',           category: 'Tires',       image: '/banner_tires.png' },
+  { id: 'brakes',      title: 'Brakes',          category: 'Brakes',      image: '/banner_brakes.png' },
+  { id: 'oils',        title: 'Oils & Fluids',   category: 'Oils',        image: '/banner_oils.png' },
+  { id: 'electronics', title: 'Electronics',     category: 'Electronics', image: '/banner_electronics.png' },
 ]
 
-const TIME_DEGRADING_PARTS = ['Tubeless Sealant', 'Suspension Fluid', 'Brake Fluid']
+const TIME_DEGRADING_PARTS = ['Tubeless Sealant', 'Suspension Fluid', 'Brake Fluid', 'Battery']
 
 const CATEGORY_HINTS = {
-  'Drivetrain': 'Hint: Add parts you want to monitor like your Drive Chain, Front/Rear Sprockets, or Clutch Cable.',
-  'Tires': 'Hint: Track your Front and Rear Tires for tread life and replacement intervals.',
-  'Brakes': 'Hint: Monitor your Front Brake Pads, Rear Brake Pads, Rotors, or Brake Fluid lifespan.',
-  'Oils': 'Hint: Add fluids like Engine Oil, Gear Oil, or Coolant to stay on top of regular maintenance.'
+  'Drivetrain':   'Hint: Add parts you want to monitor like your Drive Chain, Front/Rear Sprockets, or Clutch Cable.',
+  'Tires':        'Hint: Track your Front and Rear Tires for tread life and replacement intervals.',
+  'Brakes':       'Hint: Monitor your Front Brake Pads, Rear Brake Pads, Rotors, or Brake Fluid lifespan.',
+  'Oils':         'Hint: Add fluids like Engine Oil, Gear Oil, or Coolant to stay on top of regular maintenance.',
+  'Electronics':  'Hint: Track components like your Battery, Headlight bulb, Tail Light, Fuse Box, or Indicators.',
 }
 
 const CATEGORY_PLACEHOLDERS = {
-  'Drivetrain': { name: 'e.g. Drive Chain', brand: 'e.g. DID, Sunstar', model: 'e.g. 525 VX3' },
-  'Tires': { name: 'e.g. Rear Tire', brand: 'e.g. Michelin', model: 'e.g. Road 6' },
-  'Brakes': { name: 'e.g. Front Brake Pads', brand: 'e.g. Brembo, EBC', model: 'e.g. Sintered Double-H' },
-  'Oils': { name: 'e.g. Engine Oil', brand: 'e.g. Motul, Liqui Moly', model: 'e.g. 7100 10W-40' }
+  'Drivetrain':  { name: 'e.g. Drive Chain',      brand: 'e.g. DID, Sunstar',       model: 'e.g. 525 VX3' },
+  'Tires':       { name: 'e.g. Rear Tire',         brand: 'e.g. Michelin',            model: 'e.g. Road 6' },
+  'Brakes':      { name: 'e.g. Front Brake Pads',  brand: 'e.g. Brembo, EBC',        model: 'e.g. Sintered Double-H' },
+  'Oils':        { name: 'e.g. Engine Oil',         brand: 'e.g. Motul, Liqui Moly',  model: 'e.g. 7100 10W-40' },
+  'Electronics': { name: 'e.g. Battery',            brand: 'e.g. Yuasa, Motobatt',    model: 'e.g. YTZ10S' },
 }
 
 function ComponentCard({ comp, updateComp, removeComp, bikeCondition }) {
@@ -107,6 +110,160 @@ function ComponentCard({ comp, updateComp, removeComp, bikeCondition }) {
   )
 }
 
+const GUIDE_SLIDES = [
+  {
+    image: '/guide_track_parts.png',
+    title: 'Track Your Parts',
+    caption: 'Register components like your chain, tires, and oil so the app can monitor wear for you.'
+  },
+  {
+    image: '/guide_add_component.png',
+    title: 'Adding a Component',
+    caption: 'Tap the ADD PART button, then fill in the name, brand, and model of the part.'
+  },
+  {
+    image: '/guide_wear_state.png',
+    title: 'Brand New vs. Currently Used',
+    caption: 'Just installed it? Choose Brand New. Already riding on it? Choose Currently Used and tell us the km.'
+  },
+  {
+    image: '/guide_threshold.png',
+    title: 'Replacement Threshold',
+    caption: 'Set the km lifespan of each part. We will alert you when it is getting close to replacement time.'
+  },
+  {
+    image: '/guide_optional.png',
+    title: 'Everything is Optional',
+    caption: 'Skip any section and come back later via the Settings icon on your bike\'s detail page.'
+  },
+]
+
+function ComponentGuide({ onClose }) {
+  const [slide, setSlide] = useState(0)
+  const isLast = slide === GUIDE_SLIDES.length - 1
+  const current = GUIDE_SLIDES[slide]
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 999,
+          background: 'rgba(0,0,0,0.82)',
+          display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+          backdropFilter: 'blur(6px)',
+        }}
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 100, opacity: 0 }}
+          transition={{ type: 'spring', stiffness: 340, damping: 30 }}
+          onClick={e => e.stopPropagation()}
+          style={{
+            width: '100%', maxWidth: '430px',
+            background: 'var(--ds-surface)',
+            borderRadius: '24px 24px 0 0',
+            border: '1px solid var(--ds-border)',
+            borderBottom: 'none',
+            overflow: 'hidden',
+            display: 'flex', flexDirection: 'column',
+          }}
+        >
+          {/* Infographic image */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={slide}
+              initial={{ opacity: 0, x: 40 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -40 }}
+              transition={{ duration: 0.22 }}
+            >
+              <img
+                src={current.image}
+                alt={current.title}
+                style={{ width: '100%', height: '220px', objectFit: 'cover', display: 'block' }}
+              />
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Content area */}
+          <div style={{ padding: '20px 24px 36px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {/* Title + caption */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`text-${slide}`}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+              >
+                <h3 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--ds-text-primary)', marginBottom: '6px' }}>
+                  {current.title}
+                </h3>
+                <p style={{ fontSize: '13px', lineHeight: 1.65, color: 'var(--ds-text-secondary)' }}>
+                  {current.caption}
+                </p>
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Dot indicators */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '6px' }}>
+              {GUIDE_SLIDES.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setSlide(i)}
+                  style={{
+                    width: i === slide ? '22px' : '6px', height: '6px',
+                    borderRadius: '999px', border: 'none', cursor: 'pointer',
+                    background: i === slide ? 'var(--ds-amber)' : 'var(--ds-border)',
+                    transition: 'all 0.3s', padding: 0,
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: '10px' }}>
+              {!isLast && (
+                <button
+                  onClick={onClose}
+                  style={{
+                    flex: 1, padding: '14px', borderRadius: '12px',
+                    border: '1px solid var(--ds-border)', background: 'transparent',
+                    color: 'var(--ds-text-secondary)', fontSize: '13px',
+                    fontWeight: 700, cursor: 'pointer', letterSpacing: '0.05em',
+                  }}
+                >
+                  SKIP
+                </button>
+              )}
+              <button
+                onClick={() => isLast ? onClose() : setSlide(s => s + 1)}
+                style={{
+                  flex: 2, padding: '14px', borderRadius: '12px', border: 'none',
+                  background: 'var(--ds-amber)', color: '#000', fontSize: '13px',
+                  fontWeight: 800, cursor: 'pointer', letterSpacing: '0.05em',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                }}
+              >
+                {isLast ? (
+                  <><span className="material-symbols-outlined" style={{ fontSize: '18px' }}>check</span> GOT IT</>
+                ) : (
+                  <><span>NEXT</span><span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_forward</span></>
+                )}
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  )
+}
+
 export default function VehicleSetupWizard() {
   const { bikeId } = useParams()
   const navigate = useNavigate()
@@ -128,8 +285,57 @@ export default function VehicleSetupWizard() {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [showGuide, setShowGuide] = useState(false)
+  const [guideShown, setGuideShown] = useState(false)
+
+  useEffect(() => {
+    const fetchBike = async () => {
+      try {
+        const response = await fetch(`/api/vehicles/${bikeId}`)
+        const data = await response.json()
+        if (data.success && data.data) {
+          const v = data.data
+          if (v.bike_condition) setBikeCondition(v.bike_condition)
+          if (v.riding_habit) setRidingHabit(v.riding_habit)
+          if (v.engine_displacement) setEngineDisplacement(v.engine_displacement.toString())
+          if (v.weight) setWeight(v.weight.toString())
+          if (v.fuel_type) setFuelType(v.fuel_type)
+          if (v.fuel_capacity) setFuelCapacity(v.fuel_capacity.toString())
+          if (v.fuel_consumption) setFuelConsumption(v.fuel_consumption.toString())
+          
+          if (v.components && v.components.length > 0) {
+            setComponents(v.components.map(c => ({
+              id: c.id || Math.random().toString(36).substring(2, 9),
+              category: c.category,
+              componentType: c.component_type,
+              brand: c.brand,
+              model: c.model,
+              wearState: 'Currently Used',
+              estimatedKmUsed: v.odometer ? v.odometer - c.baseline_install_odometer : '',
+              replacementThreshold: c.replacement_threshold || '',
+              lastServiceDate: c.last_service_date ? new Date(c.last_service_date).toISOString().split('T')[0] : ''
+            })))
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching bike:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchBike()
+  }, [bikeId])
 
   const activeCategory = steps[step].category
+
+  // Auto-show guide once when user first hits the Drivetrain step (step 1)
+  useEffect(() => {
+    if (step === 1 && !guideShown) {
+      setShowGuide(true)
+      setGuideShown(true)
+    }
+  }, [step])
 
   const addComponent = () => {
     setComponents(prev => [
@@ -348,8 +554,17 @@ export default function VehicleSetupWizard() {
     )
   }
 
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100dvh', background: 'var(--ds-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ color: 'var(--ds-text-secondary)' }}>Loading setup...</p>
+      </div>
+    )
+  }
+
   return (
     <div style={{ minHeight: '100dvh', background: 'var(--ds-bg)', display: 'flex', flexDirection: 'column' }}>
+      {showGuide && <ComponentGuide onClose={() => setShowGuide(false)} />}
       
       {/* ── Progress & App Bar ── */}
       <header className="px-5 pt-8 pb-4" style={{ background: 'var(--ds-bg)', position: 'sticky', top: 0, zIndex: 40 }}>
@@ -358,7 +573,16 @@ export default function VehicleSetupWizard() {
             <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>arrow_back_ios_new</span>
           </button>
           <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: 'var(--ds-amber)' }}>SETUP: {steps[step].title}</span>
-          <div style={{ width: '32px' }} />
+          {step > 0 ? (
+            <button
+              onClick={() => setShowGuide(true)}
+              style={{ width: '32px', height: '32px', borderRadius: '50%', border: 'none', background: 'var(--ds-surface)', cursor: 'pointer', color: 'var(--ds-text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>help</span>
+            </button>
+          ) : (
+            <div style={{ width: '32px' }} />
+          )}
         </div>
 
         <div className="flex gap-2">
@@ -377,7 +601,7 @@ export default function VehicleSetupWizard() {
       </header>
 
       {/* ── Slide Viewport ── */}
-      <main className="flex-1 relative overflow-hidden px-5 py-8" style={{ display: 'flex', flexDirection: 'column' }}>
+      <main className="flex-1 relative overflow-hidden" style={{ display: 'flex', flexDirection: 'column' }}>
         <AnimatePresence initial={false} custom={direction}>
           <motion.div
             key={step}
@@ -387,7 +611,7 @@ export default function VehicleSetupWizard() {
             animate="center"
             exit="exit"
             transition={{ x: { type: "spring", stiffness: 300, damping: 30 }, opacity: { duration: 0.2 } }}
-            style={{ width: '100%', position: 'absolute', left: 0, padding: '0 20px', boxSizing: 'border-box' }}
+            style={{ width: '100%', height: '100%', overflowY: 'auto', position: 'absolute', top: 0, left: 0, padding: '32px 20px', boxSizing: 'border-box' }}
           >
             {StepContent}
           </motion.div>
