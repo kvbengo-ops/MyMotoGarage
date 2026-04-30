@@ -23,17 +23,33 @@ export default function BikeLayout() {
             year: v.year,
             category: v.category || '-',
             engine: v.engine_displacement ? `${v.engine_displacement} cc` : '-', 
-            weight: v.weight ? `${v.weight} lbs` : '-',
+            weight: v.weight ? `${v.weight} kg` : '-',
             fuelType: v.fuel_type || '-',
+            fuelCapacity: v.fuel_capacity ? `${v.fuel_capacity} L` : '-',
+            fuelConsumption: v.fuel_consumption || '-',
             status: v.status || 'needsSetup',
             image: v.image_url || 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&q=80',
             odometer: v.odometer || 0,
-            fuelRange: 120,
-            diagnostics: [
-              { label: 'Battery Health', percent: 98, color: 'green', icon: 'battery_full' },
-              { label: 'Oil Life', percent: 100, color: 'green', icon: 'water_drop' },
-              { label: 'Tire Tread', percent: 100, color: 'green', icon: 'tire_repair' }
-            ],
+            fuelRange: (v.fuel_capacity && v.fuel_consumption) ? Math.round(v.fuel_capacity * v.fuel_consumption) : '-',
+            diagnostics: (v.components || []).filter(c => c.replacement_threshold > 0).length > 0 
+              ? (v.components || []).filter(c => c.replacement_threshold > 0).map(c => {
+                  const kmUsed = (v.odometer || 0) - c.baseline_install_odometer;
+                  const percentUsed = (kmUsed / c.replacement_threshold) * 100;
+                  const healthPercent = Math.max(0, Math.min(100, Math.round(100 - percentUsed)));
+                  
+                  let color = 'green';
+                  if (healthPercent < 20) color = 'red';
+                  else if (healthPercent < 50) color = 'amber';
+
+                  let icon = 'build';
+                  if (c.category === 'Drivetrain') icon = 'settings';
+                  if (c.category === 'Tires') icon = 'tire_repair';
+                  if (c.category === 'Brakes') icon = 'stop_circle';
+                  if (c.category === 'Oils') icon = 'water_drop';
+
+                  return { label: c.component_type, percent: healthPercent, color, icon };
+              })
+              : [{ label: 'System Health', percent: 100, color: 'green', icon: 'check_circle' }],
             maintenanceLogs: [],
             rideHistory: [],
             systemStatus: [
@@ -49,8 +65,8 @@ export default function BikeLayout() {
               { id: 'u2', title: 'Brembo Brake Pads', subtitle: 'Front & Rear', date: 'Sep 15', borderColor: 'gray' },
             ],
             chatThread: [
-              { id: 1, text: 'Hi! Im noticing a slight vibration at 65mph. Could it be the chain?', isUser: true, time: '10:02 AM' },
-              { id: 2, text: 'Vibrations at specific speeds often point to wheel balance or alignment. However, since you last cleaned your chain 300 miles ago, it is worth checking the slack first. Want me to pull up the factory spec for your chain tension?', isUser: false, time: '10:03 AM' }
+              { id: 1, text: 'Hi! Im noticing a slight vibration at 105km/h. Could it be the chain?', isUser: true, time: '10:02 AM' },
+              { id: 2, text: 'Vibrations at specific speeds often point to wheel balance or alignment. However, since you last cleaned your chain 500 km ago, it is worth checking the slack first. Want me to pull up the factory spec for your chain tension?', isUser: false, time: '10:03 AM' }
             ]
           })
         } else {

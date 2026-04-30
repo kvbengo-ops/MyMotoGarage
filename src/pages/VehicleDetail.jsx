@@ -24,7 +24,9 @@
     9999  pill / avatar
 */
 
+import { useState } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import AmberButton from '../components/shared/AmberButton'
 import SecondaryButton from '../components/shared/SecondaryButton'
 
@@ -56,6 +58,7 @@ const specFields = [
   { icon: 'settings',       label: 'Engine',   key: 'engine'   },
   { icon: 'monitor_weight', label: 'Weight',   key: 'weight'   },
   { icon: 'local_gas_station', label: 'Fuel',  key: 'fuelType' },
+  { icon: 'opacity',          label: 'Capacity', key: 'fuelCapacity' },
 ]
 
 /* ── Reusable SectionCard ── */
@@ -139,6 +142,7 @@ function ListRow({ icon, iconColor, primary, secondary, trailing, trailingHint }
 export default function VehicleDetail() {
   const navigate   = useNavigate()
   const { bike }   = useOutletContext()
+  const [showSpecs, setShowSpecs] = useState(false)
 
   return (
     <div style={{ minHeight: '100dvh', background: DS.bg }}>
@@ -185,30 +189,106 @@ export default function VehicleDetail() {
           </div>
         </div>
 
-        {/* ── Spec Grid — 2-col, 8px cells, 8px gap ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-          {specFields.map(({ icon, label, key }) => (
-            <div key={key} style={{
-              padding: '12px 14px',
-              background: DS.surface,
-              border: `1px solid ${DS.border}`,
-              borderRadius: '8px',
-              display: 'flex', alignItems: 'center', gap: '10px',
-            }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#555', flexShrink: 0 }}>{icon}</span>
-              <div>
-                <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: DS.textSecondary, marginBottom: '2px' }}>{label}</div>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: DS.textPrimary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '90px' }}>{bike[key]}</div>
+        {/* ── Badges Card (Sample Badges) ── */}
+        <div style={{
+          background: DS.surface, border: `1px solid ${DS.border}`,
+          borderRadius: '12px', padding: '16px'
+        }}>
+          <h3 style={{ fontSize: '14px', fontWeight: 700, color: DS.textPrimary, marginBottom: '16px', display: 'flex', justifyContent: 'space-between' }}>
+            Rider Badges
+            <span style={{ fontSize: '12px', color: 'var(--ds-amber)', fontWeight: 600 }}>2 Earned</span>
+          </h3>
+          
+          <div style={{ display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '8px', msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
+            
+            {/* Busay Badge */}
+            <div style={{ flexShrink: 0, width: '80px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+              <div style={{
+                width: '64px', height: '64px', borderRadius: '50%',
+                background: 'linear-gradient(135deg, var(--ds-amber), #FF6B00)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 4px 16px color-mix(in srgb, var(--ds-amber) 40%, transparent)',
+                border: '2px solid var(--ds-bg)', position: 'relative'
+              }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '32px', color: '#FFF' }}>landscape</span>
+                <div style={{ position: 'absolute', bottom: '-6px', background: 'var(--ds-bg)', border: '1px solid var(--ds-amber)', borderRadius: '12px', padding: '2px 6px', fontSize: '8px', fontWeight: 800, color: 'var(--ds-amber)', letterSpacing: '0.05em' }}>EARNED</div>
               </div>
+              <span style={{ fontSize: '11px', fontWeight: 700, color: DS.textPrimary, textAlign: 'center', lineHeight: 1.2 }}>Trans-Cebu<br/>Busay Run</span>
             </div>
-          ))}
+
+            {/* 1000km Badge */}
+            <div style={{ flexShrink: 0, width: '80px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+              <div style={{
+                width: '64px', height: '64px', borderRadius: '50%',
+                background: 'linear-gradient(135deg, var(--ds-green), #00C853)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 4px 16px color-mix(in srgb, var(--ds-green) 40%, transparent)',
+                border: '2px solid var(--ds-bg)', position: 'relative'
+              }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '30px', color: '#FFF' }}>social_leaderboard</span>
+              </div>
+              <span style={{ fontSize: '11px', fontWeight: 700, color: DS.textPrimary, textAlign: 'center', lineHeight: 1.2 }}>1,000 KM<br/>Milestone</span>
+            </div>
+
+            {/* Locked Badge */}
+            <div style={{ flexShrink: 0, width: '80px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', opacity: 0.5 }}>
+              <div style={{
+                width: '64px', height: '64px', borderRadius: '50%',
+                background: 'var(--ds-surface-hover)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                border: `1px dashed ${DS.border}`
+              }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '24px', color: DS.textMuted }}>lock</span>
+              </div>
+              <span style={{ fontSize: '11px', fontWeight: 600, color: DS.textSecondary, textAlign: 'center', lineHeight: 1.2 }}>Iron Butt<br/>Challenge</span>
+            </div>
+            
+          </div>
+        </div>
+
+        {/* ── Specs Collapsible ── */}
+        <div style={{ background: DS.surface, border: `1px solid ${DS.border}`, borderRadius: '12px', overflow: 'hidden' }}>
+          <button
+            onClick={() => setShowSpecs(!showSpecs)}
+            style={{ width: '100%', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'transparent', border: 'none', cursor: 'pointer', color: DS.textPrimary }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span className="material-symbols-outlined" style={{ color: DS.textSecondary, fontSize: '18px' }}>straighten</span>
+              <span style={{ fontSize: '14px', fontWeight: 700 }}>Technical Specifications</span>
+            </div>
+            <span className="material-symbols-outlined" style={{ transition: 'transform 0.2s', transform: showSpecs ? 'rotate(180deg)' : 'rotate(0deg)', color: DS.textSecondary }}>expand_more</span>
+          </button>
+          
+          <AnimatePresence>
+            {showSpecs && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: 'hidden' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', padding: '0 16px 16px' }}>
+                  {specFields.map(({ icon, label, key }) => (
+                    <div key={key} style={{
+                      padding: '12px 14px',
+                      background: DS.bg,
+                      border: `1px solid ${DS.border}`,
+                      borderRadius: '8px',
+                      display: 'flex', alignItems: 'center', gap: '10px',
+                    }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#555', flexShrink: 0 }}>{icon}</span>
+                      <div>
+                        <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: DS.textSecondary, marginBottom: '2px' }}>{label}</div>
+                        <div style={{ fontSize: '13px', fontWeight: 600, color: DS.textPrimary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '90px' }}>{bike[key]}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* ── Stat Tiles — 2-col, clear visual hierarchy ── */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
           {[
-            { label: 'Odometer', value: bike.odometer.toLocaleString(), unit: 'mi', icon: 'speed' },
-            { label: 'Fuel Range', value: bike.fuelRange, unit: 'mi', icon: 'local_gas_station' },
+            { label: 'Odometer', value: bike.odometer.toLocaleString(), unit: 'km', icon: 'speed' },
+            { label: 'Efficiency', value: bike.fuelConsumption, unit: 'km/L', icon: 'local_gas_station' },
           ].map(({ label, value, unit, icon }) => (
             <div key={label} style={{
               padding: '20px 16px 16px',
@@ -288,7 +368,7 @@ export default function VehicleDetail() {
                   iconColor={ride.iconColor}
                   primary={ride.title}
                   secondary={ride.subtitle}
-                  trailing={`${ride.distance.toLocaleString()} mi`}
+                  trailing={`${ride.distance.toLocaleString()} km`}
                 />
               ))}
             </div>

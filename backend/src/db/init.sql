@@ -33,6 +33,8 @@ CREATE TABLE IF NOT EXISTS vehicles (
     engine_displacement INTEGER,
     weight INTEGER,
     fuel_type VARCHAR(100),
+    fuel_capacity NUMERIC,
+    fuel_consumption NUMERIC,
     bike_condition VARCHAR(50),
     riding_habit VARCHAR(100),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -47,6 +49,7 @@ CREATE TABLE IF NOT EXISTS components (
     brand VARCHAR(100) NOT NULL,
     model VARCHAR(100) NOT NULL,
     baseline_install_odometer INTEGER NOT NULL,
+    replacement_threshold INTEGER,
     last_service_date DATE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

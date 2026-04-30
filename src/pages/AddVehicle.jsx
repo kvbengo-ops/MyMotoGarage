@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import AmberButton from '../components/shared/AmberButton'
 import { Field, StyledInput, StyledSelect, FormGroup } from '../components/shared/FormUtils'
 import Cropper from 'react-easy-crop'
+import { BRAND_META, MAKES } from '../data/brandLogos'
 
 const createImage = (url) =>
   new Promise((resolve, reject) => {
@@ -50,13 +51,108 @@ async function getCroppedImg(imageSrc, pixelCrop) {
 }
 
 
-const makes = [
-  'Yamaha', 'Ducati', 'Honda', 'Kawasaki', 'Suzuki', 'BMW', 'Triumph', 'KTM', 'Harley-Davidson', 'Indian', 'Aprilia', 'Other'
-]
-
 const categories = [
   'Naked / Streetfighter', 'Sportbike', 'Cruiser', 'Adventure / Touring', 'Scrambler', 'Cafe Racer', 'Dirt / Enduro', 'Scooter', 'Other'
 ]
+
+/* ── Brand Picker Grid ── */
+function BrandPickerGrid({ value, onChange }) {
+  return (
+    <div>
+      <label style={{
+        display: 'block',
+        fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
+        color: 'var(--ds-text-secondary)', marginBottom: '10px',
+      }}>Make</label>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: '10px',
+      }}>
+        {MAKES.map((make) => {
+          const meta = BRAND_META[make]
+          const isSelected = value === make
+          return (
+            <button
+              key={make}
+              type="button"
+              onClick={() => onChange(make)}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '14px 8px 10px',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                background: isSelected ? meta.bgColor : 'var(--ds-surface)',
+                border: isSelected
+                  ? `2px solid ${meta.color}`
+                  : '1.5px solid var(--ds-border)',
+                transition: 'all 0.18s ease',
+                boxShadow: isSelected
+                  ? `0 0 18px ${meta.bgColor}`
+                  : 'none',
+                minHeight: '84px',
+              }}
+              onMouseEnter={(e) => {
+                if (!isSelected) {
+                  e.currentTarget.style.borderColor = meta.color
+                  e.currentTarget.style.background = meta.bgColor
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isSelected) {
+                  e.currentTarget.style.borderColor = 'var(--ds-border)'
+                  e.currentTarget.style.background = 'var(--ds-surface)'
+                }
+              }}
+            >
+              {/* Brand logo */}
+              <div style={{
+                width: '100%', height: '32px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                overflow: 'hidden',
+              }}>
+                {meta.logo ? (
+                  <img
+                    src={meta.logo}
+                    alt={make}
+                    style={{
+                      maxWidth: '80%',
+                      maxHeight: '100%',
+                      objectFit: 'contain',
+                      filter: isSelected ? 'none' : 'brightness(0.6) invert(0.5)',
+                      transition: 'filter 0.2s ease',
+                    }}
+                  />
+                ) : (
+                  <span className="material-symbols-outlined" style={{
+                    fontSize: '26px',
+                    color: isSelected ? meta.color : 'var(--ds-text-muted)',
+                  }}>two_wheeler</span>
+                )}
+              </div>
+              {/* Make name */}
+              <span style={{
+                fontSize: '8px',
+                fontWeight: 700,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: isSelected ? meta.color : 'var(--ds-text-secondary)',
+                fontFamily: "'DM Sans', sans-serif",
+                lineHeight: 1,
+              }}>
+                {meta.shortName}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
 
 /* ── Image Upload Component ── */
 function ImageUploadField({ image, onFileSelect }) {
@@ -221,7 +317,7 @@ export default function AddVehicle() {
       setSuccess(true)
       setTimeout(() => {
         setSuccess(false)
-        navigate(`/setup-vehicle/${data.data.id}`)
+        navigate(`/`)
       }, 2000)
     } catch (err) {
       console.error('Add vehicle error:', err)
@@ -263,14 +359,7 @@ export default function AddVehicle() {
           <ImageUploadField image={image} onFileSelect={handleFileSelect} />
 
           <FormGroup title="Identification">
-            <Field label="Make">
-              <StyledSelect value={make} onChange={(e) => setMake(e.target.value)}>
-                <option value="" disabled style={{ background: 'var(--ds-surface)' }}>Select make…</option>
-                {makes.map((m) => (
-                  <option key={m} value={m} style={{ background: 'var(--ds-surface)' }}>{m}</option>
-                ))}
-              </StyledSelect>
-            </Field>
+            <BrandPickerGrid value={make} onChange={setMake} />
             
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
               <Field label="Model">

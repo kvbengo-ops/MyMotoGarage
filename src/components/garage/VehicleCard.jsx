@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, useAnimation } from 'framer-motion'
+import { BRAND_META } from '../../data/brandLogos'
 
 const statusMap = {
   readyToRide: {
@@ -96,6 +97,39 @@ export default function VehicleCard({ bike, onDelete }) {
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.35) 45%, transparent 100%)' }} />
           {/* Top accent line */}
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: `linear-gradient(90deg, ${s.accentColor}, transparent 70%)` }} />
+
+          {/* Brand Logo Badge — bottom left */}
+          {(() => {
+            const meta = BRAND_META[bike.make] || null
+            if (!meta) return null
+            return (
+              <div style={{
+                position: 'absolute', bottom: '12px', left: '12px',
+                display: 'flex', alignItems: 'center', gap: '8px',
+                padding: '5px 10px 5px 8px',
+                borderRadius: '6px',
+                background: 'rgba(0,0,0,0.65)',
+                backdropFilter: 'blur(14px)',
+                border: `1px solid ${meta.color}33`,
+              }}>
+                {meta.logo ? (
+                  <img
+                    src={meta.logo}
+                    alt={bike.make}
+                    style={{ height: '16px', width: 'auto', objectFit: 'contain' }}
+                  />
+                ) : (
+                  <span style={{
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontSize: '13px', fontWeight: 900, letterSpacing: '0.04em',
+                    color: meta.color, lineHeight: 1,
+                  }}>
+                    {meta.abbrev}
+                  </span>
+                )}
+              </div>
+            )
+          })()}
 
           {/* Status badge — top right, angular */}
           <div style={{ position: 'absolute', top: '12px', right: '12px' }}>
@@ -196,10 +230,10 @@ export default function VehicleCard({ bike, onDelete }) {
             <div style={{ display: 'flex', align: 'center', gap: '6px' }}>
               <span className="material-symbols-outlined" style={{ fontSize: '14px', color: 'var(--ds-text-muted)' }}>speed</span>
               {bike.status === 'needsSetup' ? (
-                <span style={{ fontSize: '12px', color: 'var(--ds-text-muted)', fontFamily: "'DM Sans', sans-serif" }}>—  mi</span>
+                <span style={{ fontSize: '12px', color: 'var(--ds-text-muted)', fontFamily: "'DM Sans', sans-serif" }}>—  km</span>
               ) : (
                 <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: '16px', fontWeight: 700, color: 'var(--ds-text-secondary)', letterSpacing: '0.03em' }}>
-                  {bike.odometer.toLocaleString()} <span style={{ fontSize: '11px', fontWeight: 400 }}>MI</span>
+                  {bike.odometer.toLocaleString()} <span style={{ fontSize: '11px', fontWeight: 400 }}>KM</span>
                 </span>
               )}
             </div>

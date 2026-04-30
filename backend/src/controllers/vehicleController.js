@@ -60,7 +60,7 @@ export const setupVehicle = async (req, res) => {
   try {
     const { id } = req.params;
     const { 
-      engineDisplacement, weight, fuelType,
+      engineDisplacement, weight, fuelType, fuelCapacity, fuelConsumption,
       bikeCondition, ridingHabit,
       components // array of components
     } = req.body;
@@ -72,10 +72,12 @@ export const setupVehicle = async (req, res) => {
         engine_displacement = $1,
         weight = $2,
         fuel_type = $3,
-        bike_condition = $4,
-        riding_habit = $5,
+        fuel_capacity = $4,
+        fuel_consumption = $5,
+        bike_condition = $6,
+        riding_habit = $7,
         status = 'active'
-      WHERE id = $6
+      WHERE id = $8
       RETURNING *;
     `;
     
@@ -83,6 +85,8 @@ export const setupVehicle = async (req, res) => {
       engineDisplacement || null,
       weight || null,
       fuelType || null,
+      fuelCapacity || null,
+      fuelConsumption || null,
       bikeCondition || null,
       ridingHabit || null,
       id
@@ -105,14 +109,14 @@ export const setupVehicle = async (req, res) => {
       for (const comp of components) {
         let baselineOdometer = initialOdometer;
 
-        if (comp.wearState === 'Currently Used' && comp.estimatedMilesUsed) {
-          baselineOdometer = initialOdometer - comp.estimatedMilesUsed;
+        if (comp.wearState === 'Currently Used' && comp.estimatedKmUsed) {
+          baselineOdometer = initialOdometer - comp.estimatedKmUsed;
           if (baselineOdometer < 0) baselineOdometer = 0;
         }
 
         const compQuery = `
-          INSERT INTO components (vehicle_id, category, component_type, brand, model, baseline_install_odometer, last_service_date)
-          VALUES ($1, $2, $3, $4, $5, $6, $7)
+          INSERT INTO components (vehicle_id, category, component_type, brand, model, baseline_install_odometer, replacement_threshold, last_service_date)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         `;
         
         const serviceDate = comp.lastServiceDate ? new Date(comp.lastServiceDate) : null;
@@ -124,6 +128,7 @@ export const setupVehicle = async (req, res) => {
           comp.brand,
           comp.model,
           baselineOdometer,
+          comp.replacementThreshold ? parseInt(comp.replacementThreshold) : null,
           serviceDate
         ]);
       }
@@ -150,9 +155,14 @@ export const getVehicleById = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Vehicle not found' });
     }
 
+    const vehicle = result.rows[0];
+
+    const componentsResult = await pool.query('SELECT * FROM components WHERE vehicle_id = $1 ORDER BY created_at ASC', [id]);
+    vehicle.components = componentsResult.rows;
+
     res.status(200).json({
       success: true,
-      data: result.rows[0]
+      data: vehicle
     });
   } catch (error) {
     console.error('Error fetching vehicle by id:', error);

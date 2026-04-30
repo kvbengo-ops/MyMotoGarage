@@ -5,22 +5,32 @@ import AmberButton from '../components/shared/AmberButton'
 import { Field, StyledInput, StyledSelect } from '../components/shared/FormUtils'
 
 const steps = [
-  { id: 'core', title: 'General Info', category: null },
-  { id: 'drivetrain', title: 'Drivetrain', category: 'Drivetrain' },
-  { id: 'brakes', title: 'Brakes', category: 'Brakes' },
-  { id: 'wheels', title: 'Wheels & Tires', category: 'Wheels/Tires' },
+  { id: 'core', title: 'General Info', category: null, image: null },
+  { id: 'drivetrain', title: 'Drivetrain', category: 'Drivetrain', image: 'https://images.unsplash.com/photo-1558981852-426c6c22a060?auto=format&fit=crop&q=80' },
+  { id: 'tires', title: 'Tires', category: 'Tires', image: 'https://images.unsplash.com/photo-1629858718617-6d60ed6d3f2d?auto=format&fit=crop&q=80' },
+  { id: 'brakes', title: 'Brakes', category: 'Brakes', image: 'https://images.unsplash.com/photo-1598402685715-db1485a3dc8f?auto=format&fit=crop&q=80' },
+  { id: 'oils', title: 'Oils & Fluids', category: 'Oils', image: 'https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?auto=format&fit=crop&q=80' },
 ]
 
 const TIME_DEGRADING_PARTS = ['Tubeless Sealant', 'Suspension Fluid', 'Brake Fluid']
 
-const COMPONENT_TYPES = {
-  'Drivetrain': ['Chain', 'Cassette', 'Chainring', 'Derailleur Pulley', 'Bottom Bracket'],
-  'Brakes': ['Front Brake Pads', 'Rear Brake Pads', 'Brake Fluid', 'Brake Rotors'],
-  'Wheels/Tires': ['Front Tire', 'Rear Tire', 'Tubeless Sealant', 'Wheel Bearings']
+const CATEGORY_HINTS = {
+  'Drivetrain': 'Hint: Add parts you want to monitor like your Drive Chain, Front/Rear Sprockets, or Clutch Cable.',
+  'Tires': 'Hint: Track your Front and Rear Tires for tread life and replacement intervals.',
+  'Brakes': 'Hint: Monitor your Front Brake Pads, Rear Brake Pads, Rotors, or Brake Fluid lifespan.',
+  'Oils': 'Hint: Add fluids like Engine Oil, Gear Oil, or Coolant to stay on top of regular maintenance.'
+}
+
+const CATEGORY_PLACEHOLDERS = {
+  'Drivetrain': { name: 'e.g. Drive Chain', brand: 'e.g. DID, Sunstar', model: 'e.g. 525 VX3' },
+  'Tires': { name: 'e.g. Rear Tire', brand: 'e.g. Michelin', model: 'e.g. Road 6' },
+  'Brakes': { name: 'e.g. Front Brake Pads', brand: 'e.g. Brembo, EBC', model: 'e.g. Sintered Double-H' },
+  'Oils': { name: 'e.g. Engine Oil', brand: 'e.g. Motul, Liqui Moly', model: 'e.g. 7100 10W-40' }
 }
 
 function ComponentCard({ comp, updateComp, removeComp, bikeCondition }) {
   const isTimeDegrading = TIME_DEGRADING_PARTS.includes(comp.componentType)
+  const ph = CATEGORY_PLACEHOLDERS[comp.category] || { name: 'e.g. Part Name', brand: 'e.g. Brand', model: 'e.g. Model' }
 
   return (
     <div style={{
@@ -35,23 +45,22 @@ function ComponentCard({ comp, updateComp, removeComp, bikeCondition }) {
       </button>
 
       <div className="flex flex-col gap-4 mt-2">
-        <Field label="Component Type">
-          <StyledSelect value={comp.componentType} onChange={e => updateComp({ componentType: e.target.value })}>
-            <option value="" disabled>Select a part...</option>
-            {COMPONENT_TYPES[comp.category].map(t => (
-              <option key={t} value={t}>{t}</option>
-            ))}
-          </StyledSelect>
+        <Field label="Component Name">
+          <StyledInput placeholder={ph.name} value={comp.componentType} onChange={e => updateComp({ componentType: e.target.value })} />
         </Field>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
           <Field label="Brand">
-            <StyledInput placeholder="e.g. Shimano" value={comp.brand} onChange={e => updateComp({ brand: e.target.value })} />
+            <StyledInput placeholder={ph.brand} value={comp.brand} onChange={e => updateComp({ brand: e.target.value })} />
           </Field>
           <Field label="Model">
-            <StyledInput placeholder="e.g. 105" value={comp.model} onChange={e => updateComp({ model: e.target.value })} />
+            <StyledInput placeholder={ph.model} value={comp.model} onChange={e => updateComp({ model: e.target.value })} />
           </Field>
         </div>
+
+        <Field label="Replacement Threshold (km)">
+          <StyledInput type="number" placeholder="e.g. 24000" value={comp.replacementThreshold} onChange={e => updateComp({ replacementThreshold: e.target.value })} />
+        </Field>
 
         <Field label="Wear State">
           <div style={{ display: 'flex', background: 'var(--ds-bg)', borderRadius: '8px', padding: '4px' }}>
@@ -80,8 +89,8 @@ function ComponentCard({ comp, updateComp, removeComp, bikeCondition }) {
 
         {comp.wearState === 'Currently Used' && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-            <Field label="Estimated Miles Used">
-              <StyledInput type="number" placeholder="e.g. 500" value={comp.estimatedMilesUsed} onChange={e => updateComp({ estimatedMilesUsed: e.target.value })} />
+            <Field label="Current Usage (km)">
+              <StyledInput type="number" placeholder="e.g. 500" value={comp.estimatedKmUsed} onChange={e => updateComp({ estimatedKmUsed: e.target.value })} />
             </Field>
           </motion.div>
         )}
@@ -110,7 +119,9 @@ export default function VehicleSetupWizard() {
   const [ridingHabit, setRidingHabit] = useState('Weekend Warrior')
   const [engineDisplacement, setEngineDisplacement] = useState('')
   const [weight, setWeight] = useState('')
-  const [fuelType, setFuelType] = useState('Premium (91)')
+  const [fuelType, setFuelType] = useState('Standard (87)')
+  const [fuelCapacity, setFuelCapacity] = useState('')
+  const [fuelConsumption, setFuelConsumption] = useState('')
   
   // Steps 2+: Components
   const [components, setComponents] = useState([])
@@ -130,7 +141,7 @@ export default function VehicleSetupWizard() {
         brand: '',
         model: '',
         wearState: bikeCondition === 'Brand New' ? 'Brand New' : 'Currently Used',
-        estimatedMilesUsed: '',
+        estimatedKmUsed: '',
         lastServiceDate: ''
       }
     ])
@@ -159,6 +170,8 @@ export default function VehicleSetupWizard() {
             engineDisplacement: parseInt(engineDisplacement) || null,
             weight: parseInt(weight) || null,
             fuelType: fuelType || null,
+            fuelCapacity: parseFloat(fuelCapacity) || null,
+            fuelConsumption: parseFloat(fuelConsumption) || null,
             bikeCondition,
             ridingHabit,
             components: components.filter(c => c.componentType && c.brand && c.model) // only send filled ones
@@ -236,31 +249,73 @@ export default function VehicleSetupWizard() {
             <Field label="Displacement (cc)">
               <StyledInput type="number" placeholder="e.g. 689" value={engineDisplacement} onChange={e => setEngineDisplacement(e.target.value)} />
             </Field>
-            <Field label="Weight (lbs)">
-              <StyledInput type="number" placeholder="e.g. 405" value={weight} onChange={e => setWeight(e.target.value)} />
+            <Field label="Weight (kg)">
+              <StyledInput type="number" placeholder="e.g. 195" value={weight} onChange={e => setWeight(e.target.value)} />
             </Field>
           </div>
           <Field label="Fuel Type">
-            <StyledSelect value={fuelType} onChange={e => setFuelType(e.target.value)}>
-              <option value="Unleaded (87)">Unleaded (87)</option>
-              <option value="Premium (91)">Premium (91)</option>
-              <option value="Premium (93)">Premium (93)</option>
-            </StyledSelect>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <button
+                key="Standard (87)"
+                onClick={() => setFuelType('Standard (87)')}
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+                  padding: '16px', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s',
+                  background: fuelType === 'Standard (87)' ? 'color-mix(in srgb, var(--ds-green) 15%, transparent)' : 'var(--ds-surface)',
+                  border: `2px solid ${fuelType === 'Standard (87)' ? 'var(--ds-green)' : 'var(--ds-border)'}`
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '28px', color: fuelType === 'Standard (87)' ? 'var(--ds-green)' : 'var(--ds-text-muted)' }}>local_gas_station</span>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: fuelType === 'Standard (87)' ? 'var(--ds-green)' : 'var(--ds-text-secondary)' }}>Standard (87)</span>
+              </button>
+              <button
+                key="Premium (91+)"
+                onClick={() => setFuelType('Premium (91+)')}
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+                  padding: '16px', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s',
+                  background: fuelType === 'Premium (91+)' ? 'color-mix(in srgb, var(--ds-amber) 15%, transparent)' : 'var(--ds-surface)',
+                  border: `2px solid ${fuelType === 'Premium (91+)' ? 'var(--ds-amber)' : 'var(--ds-border)'}`
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '28px', color: fuelType === 'Premium (91+)' ? 'var(--ds-amber)' : 'var(--ds-text-muted)' }}>ev_station</span>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: fuelType === 'Premium (91+)' ? 'var(--ds-amber)' : 'var(--ds-text-secondary)' }}>Premium (91+)</span>
+              </button>
+            </div>
           </Field>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '4px' }}>
+            <Field label="Fuel Capacity (Liters)">
+              <StyledInput type="number" step="0.1" placeholder="e.g. 14" value={fuelCapacity} onChange={e => setFuelCapacity(e.target.value)} />
+            </Field>
+            <Field label="Consumption (km/L)">
+              <StyledInput type="number" step="0.1" placeholder="e.g. 20" value={fuelConsumption} onChange={e => setFuelConsumption(e.target.value)} />
+            </Field>
+          </div>
         </div>
       </div>
     )
   } else {
     const categoryComponents = components.filter(c => c.category === activeCategory)
+    const currentStepConfig = steps[step]
     
     StepContent = (
       <div className="flex flex-col gap-6">
-        <div>
-          <h2 className="text-[20px] font-bold mb-2" style={{ color: 'var(--ds-text-primary)' }}>{activeCategory} Components</h2>
-          <p className="text-[13px] leading-relaxed mb-4" style={{ color: 'var(--ds-text-secondary)' }}>
-            Add any specific {activeCategory.toLowerCase()} parts you want to track for wear and upgrades.
-          </p>
+        <div style={{ position: 'relative', borderRadius: '16px', overflow: 'hidden', height: '140px', border: '1px solid var(--ds-border)' }}>
+          {currentStepConfig.image && <img src={currentStepConfig.image} alt={activeCategory} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, var(--ds-bg) 0%, transparent 100%)' }} />
+          <div style={{ position: 'absolute', bottom: '16px', left: '16px' }}>
+            <h2 className="text-[24px] font-bold" style={{ color: 'var(--ds-text-primary)' }}>{activeCategory} Components</h2>
+            <p className="text-[12px] opacity-80" style={{ color: 'var(--ds-text-secondary)' }}>Add parts to track wear and upgrades.</p>
+          </div>
         </div>
+
+        {CATEGORY_HINTS[activeCategory] && (
+          <div style={{ display: 'flex', gap: '10px', padding: '14px', background: 'color-mix(in srgb, var(--ds-amber) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--ds-amber) 25%, transparent)', borderRadius: '12px', color: 'var(--ds-amber)' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>lightbulb</span>
+            <span style={{ fontSize: '12px', fontWeight: 500, lineHeight: 1.5 }}>{CATEGORY_HINTS[activeCategory]}</span>
+          </div>
+        )}
 
         <div className="flex flex-col gap-4">
           <AnimatePresence>

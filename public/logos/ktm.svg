@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 55">
+  <!-- KTM angular badge style -->
+  <polygon points="10,5 150,5 155,50 5,50" fill="#FF6600" rx="3"/>
+  <text x="80" y="38" text-anchor="middle" font-family="Arial Black, Impact, sans-serif" font-weight="900" font-size="34" fill="#FFFFFF" letter-spacing="8">KTM</text>
+</svg>

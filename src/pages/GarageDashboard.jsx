@@ -19,6 +19,7 @@ export default function GarageDashboard() {
         if (data.success) {
           const mappedFleet = data.data.map(v => ({
             id: v.id,
+            make: v.make || '',
             name: `${v.year} ${v.make.toUpperCase()} ${v.model.toUpperCase()}`,
             category: v.category || 'Unknown Category',
             status: v.status || 'needsSetup',

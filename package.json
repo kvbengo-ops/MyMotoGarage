@@ -4,7 +4,7 @@
   "description": "The Digital Garage — Motorcycle Maintenance & Telemetry UI",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "preview": "vite preview"
   },
