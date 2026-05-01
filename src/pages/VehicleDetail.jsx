@@ -24,7 +24,7 @@
     9999  pill / avatar
 */
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import AmberButton from '../components/shared/AmberButton'
@@ -209,6 +209,211 @@ function DiagCategoryCard({ diag, isSelected, onSelect }) {
         textAlign: 'center', lineHeight: 1.2,
       }}>{diag.label}</span>
     </button>
+  )
+}
+
+/* ── Instrument Cluster: Speedometer + Drum Odometer ── */
+function InstrumentCluster({ bike, odoMode, setOdoMode, odoInput, setOdoInput, odoPreview, setOdoPreview, odoSaved, onSave, cameraRef }) {
+  const [needleAngle, setNeedleAngle] = useState(135)
+  const CX = 140, CY = 140
+  const MAX  = 160
+  const SA   = 135  // start angle (0 = top, CW)
+  const SWEEP = 270
+
+  // Startup needle sweep
+  useEffect(() => {
+    const peak = SA + (100 / MAX) * SWEEP
+    const dur  = 1300
+    let raf, t0
+    const animate = (now) => {
+      if (!t0) t0 = now
+      const p = Math.min((now - t0) / dur, 1)
+      let a
+      if (p < 0.5)      a = SA + (peak - SA) * (p / 0.5)
+      else if (p < 0.7) a = peak
+      else              a = peak - (peak - SA) * ((p - 0.7) / 0.3)
+      setNeedleAngle(a)
+      if (p < 1) raf = requestAnimationFrame(animate)
+      else setNeedleAngle(SA)
+    }
+    const tmr = setTimeout(() => { raf = requestAnimationFrame(animate) }, 300)
+    return () => { clearTimeout(tmr); cancelAnimationFrame(raf) }
+  }, [])
+
+  const rad  = (deg) => (deg - 90) * Math.PI / 180
+  const pt   = (r, deg) => ({ x: CX + r * Math.cos(rad(deg)), y: CY + r * Math.sin(rad(deg)) })
+  const arc  = (r, a1, a2) => {
+    const s = pt(r, a1), e = pt(r, a2)
+    const sw = ((a2 - a1) + 720) % 360
+    return `M ${s.x.toFixed(2)} ${s.y.toFixed(2)} A ${r} ${r} 0 ${sw > 180 ? 1 : 0} 1 ${e.x.toFixed(2)} ${e.y.toFixed(2)}`
+  }
+  const sToA = (s) => SA + (s / MAX) * SWEEP
+
+  const greenEnd = sToA(80), amberEnd = sToA(120), redEnd = SA + SWEEP
+  const majorTicks = [0, 40, 80, 120, 160]
+  const minorTicks = [20, 60, 100, 140]
+  const microTicks = [10, 30, 50, 70, 90, 110, 130, 150]
+
+  const tip  = pt(94, needleAngle)
+  const base1 = pt(7, needleAngle + 90)
+  const base2 = pt(7, needleAngle - 90)
+  const ctip  = pt(18, needleAngle + 180)
+
+  // Odometer
+  const digits = String(Math.floor(bike.odometer)).padStart(6, '0').split('')
+
+  return (
+    <div style={{ background: '#06060a', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.09)' }}>
+
+      {/* ── Speedometer ── */}
+      <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '16px' }}>
+        <svg width="280" height="210" viewBox="0 0 280 210">
+          <defs>
+            <radialGradient id="gaugeGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#1a1a2e" />
+              <stop offset="100%" stopColor="#06060a" />
+            </radialGradient>
+            <filter id="nglow" x="-40%" y="-40%" width="180%" height="180%">
+              <feGaussianBlur stdDeviation="3" result="b" />
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          {/* Outer ring */}
+          <circle cx={CX} cy={CY} r="132" fill="url(#gaugeGlow)" stroke="rgba(255,255,255,0.12)" strokeWidth="2"/>
+          <circle cx={CX} cy={CY} r="128" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1"/>
+
+          {/* Track */}
+          <path d={arc(112, SA, SA+SWEEP)} fill="none" stroke="#18181f" strokeWidth="18" strokeLinecap="round"/>
+
+          {/* Color zones */}
+          <path d={arc(112, SA, greenEnd)} fill="none" stroke="#22c55e" strokeWidth="7" opacity="0.65"/>
+          <path d={arc(112, greenEnd, amberEnd)} fill="none" stroke="#f59e0b" strokeWidth="7" opacity="0.65"/>
+          <path d={arc(112, amberEnd, redEnd)} fill="none" stroke="#ef4444" strokeWidth="7" strokeLinecap="round" opacity="0.65"/>
+
+          {/* Micro ticks */}
+          {microTicks.map(s => { const a=sToA(s), o=pt(103,a), i=pt(97,a); return <line key={s} x1={o.x} y1={o.y} x2={i.x} y2={i.y} stroke="rgba(255,255,255,0.25)" strokeWidth="1"/> })}
+          {/* Minor ticks */}
+          {minorTicks.map(s => { const a=sToA(s), o=pt(103,a), i=pt(93,a); return <line key={s} x1={o.x} y1={o.y} x2={i.x} y2={i.y} stroke="rgba(255,255,255,0.5)" strokeWidth="1.5"/> })}
+          {/* Major ticks + labels */}
+          {majorTicks.map(s => {
+            const a=sToA(s), o=pt(103,a), i=pt(88,a), l=pt(76,a)
+            return (
+              <g key={s}>
+                <line x1={o.x} y1={o.y} x2={i.x} y2={i.y} stroke="rgba(255,255,255,0.85)" strokeWidth="2.5" strokeLinecap="round"/>
+                <text x={l.x} y={l.y+4} textAnchor="middle" fill="rgba(255,255,255,0.8)" fontSize="10" fontWeight="700" fontFamily="'Courier New',monospace">{s}</text>
+              </g>
+            )
+          })}
+
+          {/* Unit label */}
+          <text x={CX} y={CY+26} textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize="10" fontWeight="700" letterSpacing="3" fontFamily="monospace">KM/H</text>
+          <text x={CX} y={CY+8} textAnchor="middle" fill="rgba(255,255,255,0.12)" fontSize="9" fontWeight="600" fontFamily="monospace">——  0  ——</text>
+
+          {/* Needle */}
+          <polygon
+            points={`${tip.x},${tip.y} ${base1.x},${base1.y} ${ctip.x},${ctip.y} ${base2.x},${base2.y}`}
+            fill="white" filter="url(#nglow)"
+            style={{ transition: 'all 0.04s linear' }}
+          />
+          {/* Hub */}
+          <circle cx={CX} cy={CY} r="12" fill="#111118" stroke="rgba(255,255,255,0.18)" strokeWidth="2"/>
+          <circle cx={CX} cy={CY} r="5" fill="rgba(255,255,255,0.5)"/>
+        </svg>
+      </div>
+
+      {/* ── Odometer drums ── */}
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', padding: '8px 20px 16px' }}>
+        <span style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.14em', textTransform: 'uppercase' }}>ODO</span>
+        {/* Chrome frame */}
+        <div style={{
+          background: 'linear-gradient(180deg,#555 0%,#999 30%,#bbb 50%,#999 70%,#444 100%)',
+          borderRadius: '6px', padding: '2px',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.4)',
+        }}>
+          <div style={{ display: 'flex', borderRadius: '4px', overflow: 'hidden', background: '#08080c' }}>
+            {digits.map((d, i) => {
+              const isLast = i === digits.length - 1
+              return (
+                <div key={i} style={{
+                  width: '34px', height: '54px', position: 'relative',
+                  background: isLast ? '#140404' : '#08080c',
+                  borderRight: !isLast ? '1px solid rgba(255,255,255,0.07)' : 'none',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  overflow: 'hidden',
+                }}>
+                  {/* Top drum shadow */}
+                  <div style={{ position:'absolute', top:0, left:0, right:0, height:'35%', background:'linear-gradient(to bottom,rgba(0,0,0,0.95),transparent)', zIndex:2 }}/>
+                  {/* Bottom drum shadow */}
+                  <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'35%', background:'linear-gradient(to top,rgba(0,0,0,0.95),transparent)', zIndex:2 }}/>
+                  {/* Mid lines (real odometer has thin lines above/below digit) */}
+                  <div style={{ position:'absolute', top:'31%', left:0, right:0, height:'1px', background:'rgba(255,255,255,0.05)' }}/>
+                  <div style={{ position:'absolute', bottom:'31%', left:0, right:0, height:'1px', background:'rgba(255,255,255,0.05)' }}/>
+                  <span style={{
+                    fontSize: '28px', fontWeight: 900, lineHeight: 1,
+                    fontFamily: '"Courier New",monospace',
+                    color: isLast ? '#f87171' : '#f0f0f0',
+                    textShadow: isLast ? '0 0 14px rgba(239,68,68,0.6)' : '0 0 6px rgba(255,255,255,0.15)',
+                    animation: `oRoll 0.38s cubic-bezier(0.2,0.8,0.4,1) ${i*60}ms both`,
+                    position: 'relative', zIndex: 1,
+                  }}>{d}</span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+        <span style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.14em', textTransform: 'uppercase' }}>km</span>
+      </div>
+
+      <style>{`@keyframes oRoll { from{transform:translateY(55%);opacity:0} to{transform:translateY(0);opacity:1} }`}</style>
+
+      {/* ── Input section ── */}
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', padding: '14px 16px' }}>
+        {odoMode === 'idle' && !odoSaved && (
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button onClick={() => setOdoMode('manual')} style={{ flex:1, padding:'10px 0', borderRadius:'10px', border:'1px solid rgba(255,255,255,0.1)', background:'rgba(255,255,255,0.04)', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', gap:'5px' }}>
+              <span className="material-symbols-outlined" style={{ fontSize:'20px', color:'var(--ds-cyan)' }}>edit</span>
+              <span style={{ fontSize:'10px', fontWeight:700, color:'rgba(255,255,255,0.5)', letterSpacing:'0.06em' }}>Manual</span>
+            </button>
+            <button onClick={() => cameraRef.current?.click()} style={{ flex:1, padding:'10px 0', borderRadius:'10px', border:'1px solid rgba(255,255,255,0.1)', background:'rgba(255,255,255,0.04)', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', gap:'5px' }}>
+              <span className="material-symbols-outlined" style={{ fontSize:'20px', color:'var(--ds-amber)' }}>photo_camera</span>
+              <span style={{ fontSize:'10px', fontWeight:700, color:'rgba(255,255,255,0.5)', letterSpacing:'0.06em' }}>Camera</span>
+            </button>
+          </div>
+        )}
+        {(odoMode === 'manual' || odoMode === 'camera') && !odoSaved && (
+          <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
+            {odoMode === 'camera' && odoPreview && (
+              <div style={{ position:'relative', borderRadius:'8px', overflow:'hidden', height:'100px' }}>
+                <img src={odoPreview} alt="odo" style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
+                <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(0,0,0,0.6),transparent)' }}/>
+              </div>
+            )}
+            <div style={{ display:'flex', alignItems:'center', gap:'8px', background:'rgba(255,255,255,0.05)', borderRadius:'10px', border:'1px solid rgba(255,255,255,0.1)', padding:'0 12px' }}>
+              <span className="material-symbols-outlined" style={{ fontSize:'18px', color:'rgba(255,255,255,0.3)' }}>speed</span>
+              <input type="number" placeholder={`Current: ${bike.odometer.toLocaleString()}`} value={odoInput} onChange={e=>setOdoInput(e.target.value)}
+                style={{ flex:1, background:'none', border:'none', outline:'none', color:'#fff', fontSize:'18px', fontWeight:800, padding:'12px 0', fontFamily:'"Courier New",monospace' }}/>
+              <span style={{ fontSize:'11px', color:'rgba(255,255,255,0.3)' }}>km</span>
+            </div>
+            <div style={{ display:'flex', gap:'8px' }}>
+              {odoMode === 'camera' && <button onClick={() => cameraRef.current?.click()} style={{ padding:'10px 12px', borderRadius:'10px', border:'1px solid rgba(255,255,255,0.1)', background:'none', cursor:'pointer', color:'var(--ds-amber)', fontSize:'11px', fontWeight:700 }}>Retake</button>}
+              <button onClick={() => { setOdoMode('idle'); setOdoInput(''); setOdoPreview(null) }} style={{ flex:1, padding:'10px', borderRadius:'10px', border:'1px solid rgba(255,255,255,0.1)', background:'none', cursor:'pointer', color:'rgba(255,255,255,0.5)', fontSize:'11px', fontWeight:700 }}>Cancel</button>
+              <button onClick={onSave} disabled={!odoInput||Number(odoInput)<=bike.odometer}
+                style={{ flex:2, padding:'10px', borderRadius:'10px', border:'none', background: odoInput&&Number(odoInput)>bike.odometer?'var(--ds-primary)':'rgba(255,255,255,0.06)', cursor: odoInput&&Number(odoInput)>bike.odometer?'pointer':'not-allowed', color: odoInput&&Number(odoInput)>bike.odometer?'#000':'rgba(255,255,255,0.2)', fontSize:'11px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase' }}>Save</button>
+            </div>
+          </div>
+        )}
+        {odoSaved && (
+          <div style={{ display:'flex', alignItems:'center', gap:'10px', padding:'8px 0' }}>
+            <span className="material-symbols-outlined" style={{ fontSize:'22px', color:'var(--ds-green)' }}>check_circle</span>
+            <div>
+              <div style={{ fontSize:'13px', fontWeight:700, color:'var(--ds-green)' }}>Odometer Updated</div>
+              <div style={{ fontSize:'10px', color:'rgba(255,255,255,0.4)', marginTop:'1px' }}>{Number(odoInput).toLocaleString()} km saved</div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
 
@@ -625,6 +830,27 @@ function ListRow({ icon, iconColor, primary, secondary, trailing, trailingHint }
 export default function VehicleDetail() {
   const navigate   = useNavigate()
   const { bike }   = useOutletContext()
+  const [flipped, setFlipped]     = useState(false)
+  const [odoMode, setOdoMode]     = useState('idle')   // 'idle' | 'manual' | 'camera'
+  const [odoInput, setOdoInput]   = useState('')
+  const [odoPreview, setOdoPreview] = useState(null)   // base64 image preview
+  const [odoSaved, setOdoSaved]   = useState(false)
+  const cameraRef                 = useRef(null)
+
+  const handleCameraCapture = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => setOdoPreview(ev.target.result)
+    reader.readAsDataURL(file)
+    setOdoMode('camera')
+  }
+
+  const saveOdometer = () => {
+    // In a real app: PATCH /api/bikes/:id with { odometer: odoInput }
+    setOdoSaved(true)
+    setTimeout(() => { setOdoSaved(false); setOdoMode('idle'); setOdoInput(''); setOdoPreview(null) }, 1800)
+  }
 
   return (
     <div style={{ minHeight: '100dvh', background: DS.bg }}>
@@ -653,143 +879,166 @@ export default function VehicleDetail() {
       {/* ── Scrollable Content — 16px sides, 24px top ── */}
       <main style={{ padding: '24px 16px 104px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
-        {/* ── Hero Banner — 16px radius ── */}
-        <div style={{ position: 'relative', borderRadius: '16px', overflow: 'hidden', height: '224px', border: `1px solid ${DS.border}` }}>
-          <img src={bike.image} alt={bike.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, var(--ds-surface) 0%, transparent 60%)' }} />
-          <div style={{ position: 'absolute', bottom: '20px', left: '20px', right: '20px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-              <span style={{ position: 'relative', display: 'flex', width: '8px', height: '8px' }}>
-                <span className="animate-ping" style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'var(--ds-green)', opacity: 0.6 }} />
-                <span style={{ position: 'relative', width: '8px', height: '8px', borderRadius: '50%', background: 'var(--ds-green)', display: 'block' }} />
-              </span>
-              <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ds-green)' }}>
-                {bike.status === 'readyToRide' ? 'Ready to Ride' : 'Service Due'}
-              </span>
-            </div>
-            <h2 style={{ fontSize: '20px', fontWeight: 800, color: DS.textPrimary, letterSpacing: '0.02em' }}>{bike.name}</h2>
-          </div>
-        </div>
-
-        {/* ── Rider Badges ── */}
-        <div style={{
-          background: DS.surface,
-          border: `1px solid ${DS.border}`,
-          borderRadius: '14px',
-          overflow: 'hidden',
-        }}>
-          {/* Header */}
+        {/* ── Flip Card: Front = Moto image, Back = Badges ── */}
+        <div
+          onClick={() => setFlipped(f => !f)}
+          style={{
+            position: 'relative', height: '224px',
+            cursor: 'pointer',
+            perspective: '1200px',
+          }}
+        >
+          {/* Inner — rotates */}
           <div style={{
-            padding: '14px 16px 12px',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            borderBottom: `1px solid ${DS.border}`,
+            position: 'absolute', inset: 0,
+            transformStyle: 'preserve-3d',
+            transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+            transition: 'transform 0.55s cubic-bezier(0.4,0.2,0.2,1)',
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--ds-amber)' }}>military_tech</span>
-              <span style={{ fontSize: '13px', fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--ds-text-primary)' }}>Rider Badges</span>
-            </div>
+
+            {/* ── FRONT: motorcycle image ── */}
             <div style={{
-              padding: '3px 10px', borderRadius: '999px',
-              background: 'var(--ds-primary-subtle)',
-              border: '1px solid var(--ds-primary-glow)',
+              position: 'absolute', inset: 0,
+              backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden',
+              borderRadius: '16px', overflow: 'hidden',
+              border: `1px solid ${DS.border}`,
             }}>
-              <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '0.1em', color: 'var(--ds-primary)' }}>2 EARNED</span>
-            </div>
-          </div>
-
-          {/* Badge scroll rail */}
-          <div style={{
-            display: 'flex', gap: '0px',
-            overflowX: 'auto', padding: '16px 16px 16px',
-            msOverflowStyle: 'none', scrollbarWidth: 'none',
-            gap: '12px',
-          }}>
-
-            {/* ── Earned Badge: Trans-Cebu Busay Run ── */}
-            {[
-              { icon: 'landscape', label: 'Trans-Cebu', sub: 'Busay Run', color1: '#F5A623', color2: '#FF6B00', glow: 'rgba(245,166,35,0.35)', km: '42 km', date: 'Oct 2024' },
-              { icon: 'social_leaderboard', label: '1,000 KM', sub: 'Milestone', color1: 'var(--ds-green)', color2: '#00C853', glow: 'rgba(34,197,94,0.35)', km: '1,000 km', date: 'Nov 2024' },
-            ].map((badge, idx) => (
-              <div key={idx} style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '76px' }}>
-                {/* Hexagon badge */}
-                <div style={{ position: 'relative', width: '64px', height: '64px' }}>
-                  <svg viewBox="0 0 64 64" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
-                    <defs>
-                      <linearGradient id={`bg${idx}`} x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stopColor={badge.color1} />
-                        <stop offset="100%" stopColor={badge.color2} />
-                      </linearGradient>
-                      <filter id={`glow${idx}`}>
-                        <feGaussianBlur stdDeviation="2" result="blur" />
-                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                      </filter>
-                    </defs>
-                    {/* Hex shape */}
-                    <polygon
-                      points="32,4 57,18 57,46 32,60 7,46 7,18"
-                      fill={`url(#bg${idx})`}
-                      filter={`url(#glow${idx})`}
-                    />
-                    {/* Inner ring */}
-                    <polygon
-                      points="32,8 53,20 53,44 32,56 11,44 11,20"
-                      fill="none"
-                      stroke="rgba(255,255,255,0.2)"
-                      strokeWidth="1"
-                    />
-                  </svg>
-                  {/* Icon */}
-                  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: '26px', color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,0.3)' }}>{badge.icon}</span>
-                  </div>
-                  {/* Earned chip */}
-                  <div style={{
-                    position: 'absolute', bottom: '-6px', left: '50%', transform: 'translateX(-50%)',
-                    background: 'var(--ds-bg)', border: `1px solid ${badge.color1}`,
-                    borderRadius: '99px', padding: '1px 5px', whiteSpace: 'nowrap',
-                  }}>
-                    <span style={{ fontSize: '7px', fontWeight: 900, color: badge.color1, letterSpacing: '0.06em' }}>✓ EARNED</span>
-                  </div>
+              <img src={bike.image} alt={bike.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, var(--ds-surface) 0%, transparent 60%)' }} />
+              <div style={{ position: 'absolute', bottom: '20px', left: '20px', right: '20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                  <span style={{ position: 'relative', display: 'flex', width: '8px', height: '8px' }}>
+                    <span className="animate-ping" style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'var(--ds-green)', opacity: 0.6 }} />
+                    <span style={{ position: 'relative', width: '8px', height: '8px', borderRadius: '50%', background: 'var(--ds-green)', display: 'block' }} />
+                  </span>
+                  <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ds-green)' }}>
+                    {bike.status === 'readyToRide' ? 'Ready to Ride' : 'Service Due'}
+                  </span>
                 </div>
-
-                {/* Label */}
-                <div style={{ textAlign: 'center', marginTop: '4px' }}>
-                  <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--ds-text-primary)', lineHeight: 1.2 }}>{badge.label}</div>
-                  <div style={{ fontSize: '9px', color: 'var(--ds-text-secondary)', marginTop: '1px' }}>{badge.sub}</div>
-                  <div style={{ fontSize: '8px', color: 'var(--ds-text-muted)', marginTop: '3px' }}>{badge.km} · {badge.date}</div>
-                </div>
+                <h2 style={{ fontSize: '20px', fontWeight: 800, color: DS.textPrimary, letterSpacing: '0.02em' }}>{bike.name}</h2>
               </div>
-            ))}
-
-            {/* ── Locked Badge: Iron Butt Challenge ── */}
-            <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '76px' }}>
-              <div style={{ position: 'relative', width: '64px', height: '64px', opacity: 0.5 }}>
-                <svg viewBox="0 0 64 64" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
-                  <polygon points="32,4 57,18 57,46 32,60 7,46 7,18" fill="var(--ds-surface-active)" />
-                  <polygon points="32,8 53,20 53,44 32,56 11,44 11,20" fill="none" stroke="var(--ds-border-heavy)" strokeWidth="1" strokeDasharray="3 2" />
-                </svg>
-                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '22px', color: 'var(--ds-text-muted)' }}>lock</span>
-                </div>
-              </div>
-              <div style={{ textAlign: 'center', marginTop: '4px' }}>
-                <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--ds-text-secondary)', lineHeight: 1.2 }}>Iron Butt</div>
-                <div style={{ fontSize: '9px', color: 'var(--ds-text-muted)', marginTop: '1px' }}>Challenge</div>
-                {/* XP progress bar */}
-                <div style={{ marginTop: '6px', width: '60px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
-                    <span style={{ fontSize: '7px', color: 'var(--ds-text-muted)' }}>1,000 km</span>
-                    <span style={{ fontSize: '7px', color: 'var(--ds-amber)', fontWeight: 700 }}>1,600</span>
-                  </div>
-                  <div style={{ height: '3px', background: 'var(--ds-surface-active)', borderRadius: '99px', overflow: 'hidden' }}>
-                    <div style={{ width: '62%', height: '100%', background: 'var(--ds-amber)', borderRadius: '99px' }} />
-                  </div>
-                </div>
+              {/* Flip hint */}
+              <div style={{
+                position: 'absolute', top: '12px', right: '12px',
+                display: 'flex', alignItems: 'center', gap: '4px',
+                background: 'rgba(0,0,0,0.45)', borderRadius: '99px',
+                padding: '4px 10px', backdropFilter: 'blur(6px)',
+              }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)' }}>military_tech</span>
+                <span style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.08em' }}>TAP FOR BADGES</span>
               </div>
             </div>
 
+            {/* ── BACK: rider badges ── */}
+            <div style={{
+              position: 'absolute', inset: 0,
+              backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden',
+              transform: 'rotateY(180deg)',
+              borderRadius: '16px', overflow: 'hidden',
+              border: `1px solid ${DS.border}`,
+              background: DS.surface,
+              display: 'flex', flexDirection: 'column',
+            }}>
+              {/* Back header */}
+              <div style={{
+                padding: '12px 16px 10px',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                borderBottom: `1px solid ${DS.border}`, flexShrink: 0,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--ds-amber)' }}>military_tech</span>
+                  <span style={{ fontSize: '12px', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: DS.textPrimary }}>Rider Badges</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ padding: '3px 10px', borderRadius: '999px', background: 'var(--ds-primary-subtle)', border: '1px solid var(--ds-primary-glow)' }}>
+                    <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '0.1em', color: 'var(--ds-primary)' }}>2 EARNED</span>
+                  </div>
+                  <span className="material-symbols-outlined" style={{ fontSize: '16px', color: DS.textSecondary }}>flip</span>
+                </div>
+              </div>
+
+              {/* Badges scroll area */}
+              <div style={{
+                display: 'flex', gap: '12px', overflowX: 'auto',
+                padding: '16px 16px', scrollbarWidth: 'none', flex: 1, alignItems: 'flex-start',
+              }}>
+
+                {/* Earned badges */}
+                {[
+                  { icon: 'landscape', label: 'Trans-Cebu', sub: 'Busay Run', color1: '#F5A623', color2: '#FF6B00', km: '42 km', date: 'Oct 2024' },
+                  { icon: 'social_leaderboard', label: '1,000 KM', sub: 'Milestone', color1: 'var(--ds-green)', color2: '#00C853', km: '1,000 km', date: 'Nov 2024' },
+                ].map((badge, idx) => (
+                  <div key={idx} style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '76px' }}>
+                    <div style={{ position: 'relative', width: '60px', height: '60px' }}>
+                      <svg viewBox="0 0 64 64" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
+                        <defs>
+                          <linearGradient id={`bbg${idx}`} x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stopColor={badge.color1} />
+                            <stop offset="100%" stopColor={badge.color2} />
+                          </linearGradient>
+                        </defs>
+                        <polygon points="32,4 57,18 57,46 32,60 7,46 7,18" fill={`url(#bbg${idx})`} />
+                        <polygon points="32,8 53,20 53,44 32,56 11,44 11,20" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+                      </svg>
+                      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#fff' }}>{badge.icon}</span>
+                      </div>
+                      <div style={{ position: 'absolute', bottom: '-5px', left: '50%', transform: 'translateX(-50%)', background: DS.bg, border: `1px solid ${badge.color1}`, borderRadius: '99px', padding: '1px 5px', whiteSpace: 'nowrap' }}>
+                        <span style={{ fontSize: '6px', fontWeight: 900, color: badge.color1 }}>✓ EARNED</span>
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'center', marginTop: '4px' }}>
+                      <div style={{ fontSize: '10px', fontWeight: 800, color: DS.textPrimary, lineHeight: 1.2 }}>{badge.label}</div>
+                      <div style={{ fontSize: '8px', color: DS.textSecondary, marginTop: '1px' }}>{badge.sub}</div>
+                      <div style={{ fontSize: '7px', color: DS.textMuted, marginTop: '2px' }}>{badge.km} · {badge.date}</div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Locked badge */}
+                <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '76px' }}>
+                  <div style={{ position: 'relative', width: '60px', height: '60px', opacity: 0.45 }}>
+                    <svg viewBox="0 0 64 64" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
+                      <polygon points="32,4 57,18 57,46 32,60 7,46 7,18" fill="var(--ds-surface-active)" />
+                      <polygon points="32,8 53,20 53,44 32,56 11,44 11,20" fill="none" stroke="var(--ds-border-heavy)" strokeWidth="1" strokeDasharray="3 2" />
+                    </svg>
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '20px', color: DS.textMuted }}>lock</span>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'center', marginTop: '4px' }}>
+                    <div style={{ fontSize: '10px', fontWeight: 800, color: DS.textSecondary, lineHeight: 1.2 }}>Iron Butt</div>
+                    <div style={{ fontSize: '8px', color: DS.textMuted, marginTop: '1px' }}>Challenge</div>
+                    <div style={{ marginTop: '5px', width: '56px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                        <span style={{ fontSize: '6px', color: DS.textMuted }}>1,000 km</span>
+                        <span style={{ fontSize: '6px', color: 'var(--ds-amber)', fontWeight: 700 }}>1,600</span>
+                      </div>
+                      <div style={{ height: '3px', background: 'var(--ds-surface-active)', borderRadius: '99px', overflow: 'hidden' }}>
+                        <div style={{ width: '62%', height: '100%', background: 'var(--ds-amber)', borderRadius: '99px' }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* ── Instrument Cluster (Speedometer + Odometer) ── */}
+        <InstrumentCluster
+          bike={bike}
+          odoMode={odoMode}     setOdoMode={setOdoMode}
+          odoInput={odoInput}   setOdoInput={setOdoInput}
+          odoPreview={odoPreview} setOdoPreview={setOdoPreview}
+          odoSaved={odoSaved}   onSave={saveOdometer}
+          cameraRef={cameraRef}
+        />
+
+        {/* Hidden camera input */}
+        <input ref={cameraRef} type="file" accept="image/*" capture="environment"
+          style={{ display: 'none' }} onChange={handleCameraCapture} />
 
         {/* ── Swipeable Diagnostics + Tech Specs Card ── */}
         <SwipeableInfoCard diagnostics={bike.diagnostics} bike={bike} />

@@ -4,6 +4,7 @@ import AmberButton from '../components/shared/AmberButton'
 import { Field, StyledInput, StyledSelect, FormGroup } from '../components/shared/FormUtils'
 import Cropper from 'react-easy-crop'
 import { BRAND_META, MAKES } from '../data/brandLogos'
+import { searchModels, getSpec, getYearsForModel } from '../data/bikeSpecs'
 
 const createImage = (url) =>
   new Promise((resolve, reject) => {
@@ -242,6 +243,47 @@ export default function AddVehicle() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState(null)
 
+  // Model search state
+  const [modelQuery, setModelQuery] = useState('')
+  const [showModelDropdown, setShowModelDropdown] = useState(false)
+  const [matchedSpec, setMatchedSpec] = useState(null)
+  const modelRef = useRef(null)
+
+  const modelSuggestions = searchModels(make, modelQuery)
+  const availableYears = getYearsForModel(make, model)
+
+  const handleMakeChange = (newMake) => {
+    setMake(newMake)
+    setModel('')
+    setModelQuery('')
+    setYear('')
+    setCategory('')
+    setMatchedSpec(null)
+  }
+
+  const handleModelSelect = (selectedModel) => {
+    setModel(selectedModel)
+    setModelQuery(selectedModel)
+    setShowModelDropdown(false)
+    const spec = getSpec(make, selectedModel)
+    setMatchedSpec(spec)
+    if (spec) {
+      setCategory(spec.category)
+      const years = getYearsForModel(make, selectedModel)
+      if (years.length > 0) setYear(years[0].toString())
+    }
+  }
+
+  const handleModelQueryChange = (e) => {
+    const val = e.target.value
+    setModelQuery(val)
+    setShowModelDropdown(val.length > 0)
+    if (!val) {
+      setModel('')
+      setMatchedSpec(null)
+    }
+  }
+
   // Cropper States
   const [tempImageSrc, setTempImageSrc] = useState(null)
   const [crop, setCrop] = useState({ x: 0, y: 0 })
@@ -294,18 +336,28 @@ export default function AddVehicle() {
     setError(null)
 
     try {
+      const payload = {
+        userId: '00000000-0000-0000-0000-000000000000',
+        make,
+        model: model || modelQuery,
+        year: parseInt(year),
+        category,
+        odometer: parseInt(odometer) || 0,
+        imageUrl: image,
+      }
+      // Pass factory specs if we have a matched spec from the database
+      if (matchedSpec) {
+        payload.engineDisplacement = matchedSpec.cc
+        payload.weight = matchedSpec.weight
+        payload.fuelType = matchedSpec.fuelType
+        payload.fuelCapacity = matchedSpec.fuelCapacity
+        payload.fuelConsumption = matchedSpec.fuelConsumption
+      }
+
       const response = await fetch('/api/vehicles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: '00000000-0000-0000-0000-000000000000', // Test user ID
-          make,
-          model,
-          year: parseInt(year),
-          category,
-          odometer: parseInt(odometer) || 0,
-          imageUrl: image, 
-        })
+        body: JSON.stringify(payload)
       })
 
       const data = await response.json()
@@ -359,33 +411,129 @@ export default function AddVehicle() {
           <ImageUploadField image={image} onFileSelect={handleFileSelect} />
 
           <FormGroup title="Identification">
-            <BrandPickerGrid value={make} onChange={setMake} />
+            <BrandPickerGrid value={make} onChange={handleMakeChange} />
             
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
+            {/* Model search */}
+            <div style={{ position: 'relative' }} ref={modelRef}>
               <Field label="Model">
-                <StyledInput placeholder="e.g. MT-07" value={model} onChange={(e) => setModel(e.target.value)} />
+                <StyledInput
+                  placeholder={make ? `Search ${make} models…` : 'Select a brand first'}
+                  value={modelQuery}
+                  onChange={handleModelQueryChange}
+                />
               </Field>
+              {showModelDropdown && modelSuggestions.length > 0 && (
+                <div style={{
+                  position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
+                  background: 'var(--ds-surface)', border: '1px solid var(--ds-border)',
+                  borderRadius: '0 0 12px 12px', maxHeight: '200px', overflowY: 'auto',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+                }}>
+                  {modelSuggestions.map(m => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => handleModelSelect(m)}
+                      style={{
+                        width: '100%', padding: '12px 16px', border: 'none',
+                        background: 'transparent', color: 'var(--ds-text-primary)',
+                        fontSize: '14px', textAlign: 'left', cursor: 'pointer',
+                        borderBottom: '1px solid var(--ds-border)',
+                        transition: 'background 0.15s',
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'var(--ds-surface-hover)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <span style={{ fontWeight: 700 }}>{m}</span>
+                      {(() => { const s = getSpec(make, m); return s ? ` — ${s.cc}cc, ${s.category}` : '' })()}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {/* Allow custom model if not found */}
+              {make && modelQuery && modelSuggestions.length === 0 && showModelDropdown && (
+                <div style={{
+                  position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
+                  background: 'var(--ds-surface)', border: '1px solid var(--ds-border)',
+                  borderRadius: '0 0 12px 12px', padding: '12px 16px',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => { setModel(modelQuery); setShowModelDropdown(false); setMatchedSpec(null) }}
+                    style={{
+                      width: '100%', padding: '8px 0', border: 'none',
+                      background: 'transparent', color: 'var(--ds-amber)',
+                      fontSize: '13px', textAlign: 'left', cursor: 'pointer', fontWeight: 600,
+                    }}
+                  >
+                    + Use "{modelQuery}" as custom model
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Year — dropdown if spec matched, manual input otherwise */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <Field label="Year">
-                <StyledInput type="number" placeholder="YYYY" value={year} onChange={(e) => setYear(e.target.value)} />
+                {availableYears.length > 0 ? (
+                  <StyledSelect value={year} onChange={(e) => setYear(e.target.value)}>
+                    {availableYears.map(y => (
+                      <option key={y} value={y} style={{ background: 'var(--ds-surface)' }}>{y}</option>
+                    ))}
+                  </StyledSelect>
+                ) : (
+                  <StyledInput type="number" placeholder="YYYY" value={year} onChange={(e) => setYear(e.target.value)} />
+                )}
+              </Field>
+              <Field label="Category / Style">
+                {matchedSpec ? (
+                  <div style={{
+                    padding: '14px 16px', background: 'var(--ds-input)', border: '1.5px solid var(--ds-border)',
+                    borderRadius: '8px', fontSize: '14px', color: 'var(--ds-text-primary)',
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                  }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '14px', color: 'var(--ds-green)' }}>check_circle</span>
+                    {category}
+                  </div>
+                ) : (
+                  <StyledSelect value={category} onChange={(e) => setCategory(e.target.value)}>
+                    <option value="" disabled style={{ background: 'var(--ds-surface)' }}>Select…</option>
+                    {categories.map((c) => (
+                      <option key={c} value={c} style={{ background: 'var(--ds-surface)' }}>{c}</option>
+                    ))}
+                  </StyledSelect>
+                )}
               </Field>
             </div>
+
+            {/* Auto-filled specs badge */}
+            {matchedSpec && (
+              <div style={{
+                display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '12px',
+                background: 'color-mix(in srgb, var(--ds-green) 8%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--ds-green) 25%, transparent)',
+                borderRadius: '10px',
+              }}>
+                <span style={{ width: '100%', fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ds-green)', marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>auto_awesome</span>
+                  Factory specs auto-filled
+                </span>
+                {[`${matchedSpec.cc}cc`, `${matchedSpec.weight}kg`, matchedSpec.fuelType, `${matchedSpec.fuelCapacity}L tank`, `${matchedSpec.fuelConsumption} km/L`].map(tag => (
+                  <span key={tag} style={{
+                    padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 600,
+                    background: 'var(--ds-surface)', color: 'var(--ds-text-secondary)',
+                    border: '1px solid var(--ds-border)',
+                  }}>{tag}</span>
+                ))}
+              </div>
+            )}
           </FormGroup>
 
-          <FormGroup title="Specifications">
-            <Field label="Category / Style">
-              <StyledSelect value={category} onChange={(e) => setCategory(e.target.value)}>
-                <option value="" disabled style={{ background: 'var(--ds-surface)' }}>Select category…</option>
-                {categories.map((c) => (
-                  <option key={c} value={c} style={{ background: 'var(--ds-surface)' }}>{c}</option>
-                ))}
-              </StyledSelect>
+          <FormGroup title="Odometer">
+            <Field label="Initial Odometer (km)">
+              <StyledInput type="number" placeholder="e.g. 4500" value={odometer} onChange={(e) => setOdometer(e.target.value)} />
             </Field>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
-              <Field label="Initial Odometer">
-                <StyledInput type="number" placeholder="e.g. 4500" value={odometer} onChange={(e) => setOdometer(e.target.value)} />
-              </Field>
-            </div>
           </FormGroup>
 
           {error && (

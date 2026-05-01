@@ -28,15 +28,28 @@ export default function BikeLayout() {
         const logs = logsData.success ? logsData.data : []
 
         // ── Category icon helper ──
-        const catIcon = (cat) => ({ Drivetrain:'settings', Tires:'tire_repair', Brakes:'disc_full', Oils:'water_drop', Electronics:'bolt' }[cat] || 'build')
+        // The 5 unified categories — shared by Diagnostics and Status pages
+        const CATEGORY_META = {
+          Engine:      { icon: 'settings',    label: 'Engine',        color: 'var(--ds-amber)' },
+          Tires:       { icon: 'tire_repair', label: 'Tires',         color: 'var(--ds-cyan)' },
+          Brakes:      { icon: 'disc_full',   label: 'Brakes',        color: 'var(--ds-red)' },
+          Oils:        { icon: 'water_drop',  label: 'Oils & Fluids', color: 'var(--ds-primary)' },
+          Electronics: { icon: 'bolt',        label: 'Electronics',   color: 'var(--ds-cyan)' },
+        }
+        // Remap DB-level preset categories → unified display categories
+        const remapCat = (cat) => {
+          if (['Drivetrain', 'Filters', 'Ignition'].includes(cat)) return 'Engine'
+          return cat
+        }
+        const catIcon = (cat) => CATEGORY_META[remapCat(cat)]?.icon || 'build'
 
-        // ── Diagnostic categories ──
+        // ── Diagnostic categories (5 unified) ──
         const DIAG_CATEGORIES = [
-          { key: 'Engine',      label: 'Engine',        icon: 'settings',    accentColor: 'var(--ds-amber)', maps: ['Drivetrain'] },
-          { key: 'Tires',       label: 'Tires',         icon: 'tire_repair', accentColor: 'var(--ds-cyan)',  maps: ['Tires'] },
-          { key: 'Brakes',      label: 'Brakes',        icon: 'disc_full',   accentColor: 'var(--ds-red)',   maps: ['Brakes'] },
+          { key: 'Engine',      label: 'Engine',        icon: 'settings',    accentColor: 'var(--ds-amber)',   maps: ['Drivetrain', 'Filters', 'Ignition'] },
+          { key: 'Tires',       label: 'Tires',         icon: 'tire_repair', accentColor: 'var(--ds-cyan)',    maps: ['Tires'] },
+          { key: 'Brakes',      label: 'Brakes',        icon: 'disc_full',   accentColor: 'var(--ds-red)',     maps: ['Brakes'] },
           { key: 'Oils',        label: 'Oils & Fluids', icon: 'water_drop',  accentColor: 'var(--ds-primary)', maps: ['Oils'] },
-          { key: 'Electronics', label: 'Electronics',   icon: 'bolt',        accentColor: 'var(--ds-cyan)',  maps: ['Electronics'] },
+          { key: 'Electronics', label: 'Electronics',   icon: 'bolt',        accentColor: 'var(--ds-cyan)',    maps: ['Electronics'] },
         ]
 
         const allComps = (v.components || []).filter(c => c.replacement_threshold > 0)
@@ -74,16 +87,22 @@ export default function BikeLayout() {
 
 
         // ── System status (real components) ──
-        const systemStatus = allComps.map(c => ({
-          id: c.id,
-          label: c.component_type,
-          percent: compHealth(c),
-          lastKm: (c.baseline_install_odometer || 0).toLocaleString(),
-          lastDate: c.last_service_date
-            ? new Date(c.last_service_date).toLocaleDateString('en', { month: 'short', day: 'numeric' })
-            : '—',
-          icon: catIcon(c.category),
-        }))
+        const systemStatus = allComps.map(c => {
+          const displayCat = remapCat(c.category)
+          return {
+            id: c.id,
+            label: c.component_type,
+            category: displayCat,
+            categoryMeta: CATEGORY_META[displayCat] || { icon: 'build', label: displayCat, color: 'var(--ds-amber)' },
+            percent: compHealth(c),
+            threshold: c.replacement_threshold,
+            lastKm: (c.baseline_install_odometer || 0).toLocaleString(),
+            lastDate: c.last_service_date
+              ? new Date(c.last_service_date).toLocaleDateString('en', { month: 'short', day: 'numeric' })
+              : '—',
+            icon: catIcon(c.category),
+          }
+        })
 
         // ── Smart alerts (real low-health components) ──
         const smartAlerts = allComps

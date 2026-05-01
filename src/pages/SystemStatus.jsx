@@ -1,30 +1,124 @@
+import { useState } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
-import AmberButton from '../components/shared/AmberButton'
 
-const DS = {
-  bg:            'var(--ds-bg)',
-  surface:       'var(--ds-surface)',
-  border:        'var(--ds-border)',
-  textPrimary:   'var(--ds-text-primary)',
-  textSecondary: 'var(--ds-text-secondary)',
-  amber:         'var(--ds-amber)',
+
+/* ── Design tokens — aligned to global CSS design system ──────────
+   BG / surfaces / borders / text → CSS vars (auto dark/light)
+   Health semantics → explicit hex, used ONLY on health indicators
+   Brand accent (Acid Lime) → interactive chrome only
+   ─────────────────────────────────────────────────────────────── */
+
+/* Health — semantic only: arc strokes, bars, % numbers, dots */
+const GOOD  = '#22c55e'    // --ds-green
+const WARN  = '#f59e0b'    // amber
+const CRIT  = '#ef4444'    // --ds-red
+
+/* Structural — mirror the CSS vars */
+const BG      = 'var(--ds-bg)'
+const CARD    = 'var(--ds-surface)'
+const BORDER  = 'var(--ds-border)'
+const TEXT1   = 'var(--ds-text-primary)'
+const TEXT2   = 'var(--ds-text-secondary)'
+const TEXT3   = 'var(--ds-text-muted)'
+const LIME    = 'var(--ds-primary)'         // brand accent for chrome
+
+/* back-compat aliases */
+const MUTED   = TEXT2
+const DIM     = TEXT3
+
+/* ── Health helpers ── */
+const healthColor = (p) => p >= 70 ? GOOD : p >= 40 ? WARN : CRIT
+const statusMeta  = (h) => {
+  if (h >= 85) return { label: 'All Systems Go',  color: GOOD }
+  if (h >= 60) return { label: 'Fair',             color: WARN }
+  if (h >= 40) return { label: 'Monitor',          color: WARN }
+  return               { label: 'Needs Attention', color: CRIT }
 }
 
-/* ── Section label — same across all screens ── */
-function SectionLabel({ title }) {
+
+
+/* ── Shared 270° open-arc gauge (same as diagnostics) ── */
+function ArcGauge({ percent }) {
+  const cx = 50, cy = 56, r = 36
+  const toRad = deg => (deg * Math.PI) / 180
+  const startAngle = 150, sweepTotal = 240
+  const startX = cx + r * Math.cos(toRad(startAngle))
+  const startY = cy + r * Math.sin(toRad(startAngle))
+  const endX = cx + r * Math.cos(toRad(startAngle + sweepTotal))
+  const endY = cy + r * Math.sin(toRad(startAngle + sweepTotal))
+  const fillSweep = sweepTotal * percent / 100
+  const fillAngle = startAngle + fillSweep
+  const fillX = cx + r * Math.cos(toRad(fillAngle))
+  const fillY = cy + r * Math.sin(toRad(fillAngle))
+  const fillLargeArc = fillSweep >= 180 ? 1 : 0
+  const arcColor =
+    percent >= 90 ? GOOD
+    : percent >= 70 ? '#86efac'
+    : percent >= 40 ? WARN
+    : CRIT
   return (
-    <p style={{
-      fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em',
-      textTransform: 'uppercase', color: 'var(--ds-text-muted)',
-      marginBottom: '12px', paddingLeft: '4px',
-    }}>
-      {title}
-    </p>
+    <svg viewBox="0 0 100 76" style={{ width: '100%', display: 'block' }}>
+      <path d={`M ${startX.toFixed(2)} ${startY.toFixed(2)} A ${r} ${r} 0 1 1 ${endX.toFixed(2)} ${endY.toFixed(2)}`}
+        fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="5" strokeLinecap="round" />
+      {percent > 0 && (
+        <path d={`M ${startX.toFixed(2)} ${startY.toFixed(2)} A ${r} ${r} 0 ${fillLargeArc} 1 ${fillX.toFixed(2)} ${fillY.toFixed(2)}`}
+          fill="none" stroke={arcColor} strokeWidth="5" strokeLinecap="round"
+        />
+      )}
+      <text x="50" y="54" textAnchor="middle" fontSize="14" fontWeight="800"
+        fill={arcColor} fontFamily="inherit">{percent}</text>
+      <text x="50" y="63" textAnchor="middle" fontSize="6.5" fontWeight="500"
+        fill={arcColor} opacity="0.45" fontFamily="inherit">%</text>
+    </svg>
   )
 }
 
-/* ── Health bar color by percent ── */
-const barFill = (p) => p >= 70 ? DS.amber : p >= 40 ? '#fbbf24' : 'var(--ds-red)'
+/* ── Category definitions ── */
+const CAT_ORDER = ['Engine', 'Tires', 'Brakes', 'Oils', 'Electronics']
+const CAT_ICONS = {
+  Engine: 'settings',
+  Tires: 'tire_repair',
+  Brakes: 'disc_full',
+  Oils: 'water_drop',
+  Electronics: 'bolt',
+}
+
+/* ── Per-category accent colors (visual identity, not health) ── */
+const CAT_COLORS = {
+  Engine:      '#fb923c',   // orange    — heat, combustion
+  Tires:       '#94a3b8',   // slate     — rubber, road
+  Brakes:      '#f43f5e',   // rose      — stop, friction
+  Oils:        '#fbbf24',   // gold      — fluid, lubrication
+  Electronics: '#38bdf8',   // sky blue  — circuits, power
+}
+
+/* ── Component-type → icon map ── */
+const COMP_ICON = {
+  'CVT Belt': 'sync_alt',
+  'Roller Weights': 'fitness_center',
+  'CVT Clutch Shoes': 'settings',
+  'Drive Face': 'radio_button_checked',
+  'Front Tire': 'tire_repair',
+  'Rear Tire': 'tire_repair',
+  'Front Brake Pads': 'disc_full',
+  'Rear Brake Pads': 'disc_full',
+  'Brake Fluid': 'water_drop',
+  'Engine Oil': 'oil_barrel',
+  'Gear Oil': 'opacity',
+  'Air Filter': 'air',
+  'Fuel Filter': 'filter_alt',
+  'Oil Filter': 'filter_list',
+  'Spark Plug': 'bolt',
+  'Battery': 'battery_full',
+}
+const compIcon = (label) => COMP_ICON[label] || 'build_circle'
+
+/* ── 4-dot efficiency indicator ── */
+const dotsFilled = (p) => p >= 75 ? 4 : p >= 50 ? 3 : p >= 25 ? 2 : p >= 10 ? 1 : 0
+
+/* ── Carbon fiber pattern (SVG data URI) ── */
+
+const CARBON_BG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Crect width='4' height='4' fill='%23141414'/%3E%3Crect x='4' width='4' height='4' fill='%230f0f0f'/%3E%3Crect y='4' width='4' height='4' fill='%230f0f0f'/%3E%3Crect x='4' y='4' width='4' height='4' fill='%23141414'/%3E%3C/svg%3E")`
 
 export default function SystemStatus() {
   const navigate = useNavigate()
@@ -32,103 +126,179 @@ export default function SystemStatus() {
 
   const items = bike.systemStatus || []
   const alerts = bike.smartAlerts || []
-  const upgrades = bike.recentUpgrades || []
+  const logs = bike.maintenanceLogs || bike.recentUpgrades || []
+
+  // Which category modal is open (null = none)
+  const [openCat, setOpenCat]       = useState(null)
+  // Show all categories or just first 4
+  const [showAllCats, setShowAllCats] = useState(false)
 
   const totalHealth = items.length
     ? Math.round(items.reduce((s, i) => s + i.percent, 0) / items.length)
     : 100
 
-  return (
-    <div style={{ minHeight: '100dvh', background: DS.bg }}>
+  const { label: sLabel, color: sColor } = statusMeta(totalHealth)
 
-      {/* ── App Bar — 56px ── */}
+  /* Gauge math */
+  const R = 78
+  const SW = 10
+  const circ = 2 * Math.PI * R
+  const off = circ - (totalHealth / 100) * circ
+
+  /* Group items */
+  const groups = {}
+  items.forEach(item => {
+    if (!groups[item.category]) groups[item.category] = { meta: item.categoryMeta, parts: [] }
+    groups[item.category].parts.push(item)
+  })
+
+  /* Category avg for icon strip */
+  const catAvg = (cat) => {
+    if (!groups[cat]) return null
+    const ps = groups[cat].parts
+    return Math.round(ps.reduce((s, p) => s + p.percent, 0) / ps.length)
+  }
+
+  return (
+    <div style={{ minHeight: '100dvh', background: BG }}>
+
+      {/* ── App Bar ── */}
       <header style={{
-        position: 'sticky', top: 0, zIndex: 40,
+        position: 'sticky', top: 0, zIndex: 50,
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        height: '56px', padding: '0 20px',
-        background: 'var(--ds-glass-bg)',
-        borderBottom: `1px solid var(--ds-glass-border)`,
-        backdropFilter: 'blur(20px)',
-        transition: 'background-color 0.3s'
+        height: '52px', padding: '0 20px',
+        background: 'rgba(10,10,10,0.85)',
+        borderBottom: `1px solid ${BORDER}`,
+        backdropFilter: 'blur(24px)',
       }}>
-        <button onClick={() => navigate('/')} style={{ width: '32px', height: '32px', borderRadius: '50%', border: 'none', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: DS.textSecondary }}>
+        <button onClick={() => navigate(-1)} style={{ width: '32px', height: '32px', border: 'none', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: MUTED }}>
           <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>arrow_back</span>
         </button>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span className="material-symbols-outlined" style={{ fontSize: '20px', color: DS.amber }}>settings_input_component</span>
-          <h1 style={{ fontSize: '15px', fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: DS.amber }}>
-            {bike.model} Status
-          </h1>
-        </div>
-        <span style={{ fontSize: '13px', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: DS.amber, opacity: 0.6 }}>
-          SYNC
+        <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase', color: MUTED }}>
+          {bike.make} · {bike.model}
         </span>
+        <button onClick={() => navigate(`/bike/${bike.id}/add-log`)} style={{ width: '32px', height: '32px', borderRadius: '50%', border: `1px solid ${BORDER}`, background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: LIME }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add</span>
+        </button>
       </header>
 
-      {/* ── Page — 16px sides, 24px top, 32px between sections ── */}
-      <main style={{ padding: '24px 16px 104px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
+      <main style={{ paddingBottom: '120px' }}>
 
-        {/* ── Health Gauge Card ── */}
-        <div style={{ background: DS.surface, border: `1px solid ${DS.border}`, borderRadius: '12px', padding: '24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-            <div>
-              <p style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: DS.textSecondary, marginBottom: '8px' }}>
-                Total System Health
-              </p>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
-                <span style={{ fontSize: '52px', fontWeight: 900, lineHeight: 1, color: DS.amber }}>{totalHealth}</span>
-                <span style={{ fontSize: '24px', fontWeight: 700, color: DS.amber }}>%</span>
-              </div>
+        {/* ── Hero Gauge Section ── */}
+        <div style={{ padding: '32px 24px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
+
+          {/* Gauge wrapper */}
+          <div style={{ position: 'relative', width: `${(R + SW) * 2}px`, height: `${(R + SW) * 2}px` }}>
+            <svg width={(R + SW) * 2} height={(R + SW) * 2} style={{ transform: 'rotate(-90deg)', position: 'relative', zIndex: 2 }}>
+              {/* Track ring */}
+              <circle cx={R + SW} cy={R + SW} r={R}
+                fill="none"
+                stroke="url(#trackGrad)"
+                strokeWidth={SW}
+              />
+              {/* Health arc */}
+              <circle cx={R + SW} cy={R + SW} r={R}
+                fill="none"
+                stroke={sColor}
+                strokeWidth={SW}
+                strokeLinecap="round"
+                strokeDasharray={circ}
+                strokeDashoffset={off}
+                style={{ transition: 'stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1), stroke 0.4s' }}
+              />
+              <defs>
+                <linearGradient id="trackGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="#2a2a2a" />
+                  <stop offset="50%" stopColor="#1a1a1a" />
+                  <stop offset="100%" stopColor="#2a2a2a" />
+                </linearGradient>
+              </defs>
+            </svg>
+
+            {/* Center readout */}
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px', zIndex: 3 }}>
+              <span style={{ fontSize: '46px', fontWeight: 900, lineHeight: 1, letterSpacing: '-0.04em', color: sColor }}>
+                {totalHealth}
+              </span>
+              <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.16em', color: DIM, textTransform: 'uppercase' }}>% Health</span>
             </div>
-            <span style={{
-              marginTop: '4px', padding: '4px 12px', borderRadius: '9999px',
-              fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
-              color: '#4ade80', background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.2)',
-            }}>OPTIMAL</span>
           </div>
-          {/* Progress track */}
-          <div style={{ height: '6px', borderRadius: '4px', background: 'var(--ds-surface-active)', overflow: 'hidden' }}>
-            <div style={{
-              height: '100%', width: `${totalHealth}%`, borderRadius: '4px',
-              background: DS.amber, boxShadow: '0 0 12px color-mix(in srgb, var(--ds-amber) 40%, transparent)',
-              transition: 'width 1s ease',
-            }} />
+
+
+          {/* Status label — plain, no heavy tint */}
+          <span style={{
+            fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em',
+            color: sColor,
+            borderBottom: `1px solid ${sColor}50`,
+            paddingBottom: '2px',
+          }}>
+            {sLabel}
+          </span>
+
+          {/* ── 5-Category Icon + Dot Strip ── */}
+          <div style={{ display: 'flex', gap: '10px', width: '100%', justifyContent: 'center', marginTop: '4px' }}>
+            {CAT_ORDER.map(cat => {
+              const avg      = catAvg(cat)
+              const hasData  = avg !== null
+              const fc       = hasData ? healthColor(avg) : DIM    // dots → health color
+              const catColor = CAT_COLORS[cat]                      // icon → category color
+              const filled   = hasData ? dotsFilled(avg) : 0
+              return (
+                <div key={cat} style={{
+                  flex: 1, maxWidth: '64px',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+                  padding: '10px 4px 8px',
+                  background: CARD,
+                  border: `1px solid ${BORDER}`,
+                  borderRadius: '14px',
+                }}>
+                  {/* Category icon — category color */}
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px', color: hasData ? catColor : DIM }}>
+                    {CAT_ICONS[cat]}
+                  </span>
+
+                  {/* Label */}
+                  <span style={{ fontSize: '7px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: DIM, textAlign: 'center', lineHeight: 1 }}>
+                    {cat}
+                  </span>
+
+                  {/* 4 dots — health color */}
+                  <div style={{ display: 'flex', gap: '3px' }}>
+                    {[1, 2, 3, 4].map(d => (
+                      <div key={d} style={{
+                        width: '6px', height: '6px', borderRadius: '50%',
+                        background: d <= filled ? fc : 'rgba(255,255,255,0.08)',
+                      }} />
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
           </div>
+
+
         </div>
+
+        {/* ── Divider ── */}
+        <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)', margin: '0 20px' }} />
 
         {/* ── Smart Alerts ── */}
         {alerts.length > 0 && (
-          <div>
-            <SectionLabel title="Smart Alerts" />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {alerts.map((alert) => {
-                const warn = alert.type === 'warning'
-                const col  = warn ? 'var(--ds-red)' : DS.amber
-                const bord = warn ? 'color-mix(in srgb, var(--ds-red) 20%, transparent)' : 'color-mix(in srgb, var(--ds-amber) 20%, transparent)'
+          <div style={{ padding: '20px 20px 0' }}>
+            <p style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '0.2em', color: DIM, textTransform: 'uppercase', marginBottom: '12px' }}>Alerts</p>
+            <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: '4px' }}>
+              {alerts.map(alert => {
+                const col = alert.type !== 'warning' ? '#ff3b3b' : '#fbbf24'
                 return (
                   <div key={alert.id} style={{
-                    background: DS.surface, border: `1px solid ${bord}`,
-                    borderRadius: '12px', padding: '16px',
-                    display: 'flex', alignItems: 'flex-start', gap: '12px',
+                    flexShrink: 0, minWidth: '180px',
+                    background: `color-mix(in srgb, ${col} 6%, ${CARD})`,
+                    border: `1px solid color-mix(in srgb, ${col} 18%, transparent)`,
+                    borderRadius: '12px', padding: '14px',
                   }}>
-                    <div style={{
-                      width: '36px', height: '36px', borderRadius: '8px', flexShrink: 0,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      background: warn ? 'color-mix(in srgb, var(--ds-red) 10%, transparent)' : 'color-mix(in srgb, var(--ds-amber) 10%, transparent)',
-                      border: `1px solid ${bord}`,
-                    }}>
-                      <span className="material-symbols-filled" style={{ fontSize: '18px', color: col }}>{alert.icon}</span>
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: '14px', fontWeight: 700, color: col, marginBottom: '4px', lineHeight: 1.3 }}>{alert.title}</p>
-                      <p style={{ fontSize: '12px', color: DS.textSecondary, lineHeight: 1.5 }}>{alert.body}</p>
-                      <button style={{
-                        marginTop: '12px', fontSize: '11px', fontWeight: 700,
-                        letterSpacing: '0.1em', textTransform: 'uppercase',
-                        color: col, background: 'none', border: 'none',
-                        borderBottom: `1px solid ${col}50`, padding: '0 0 2px', cursor: 'pointer',
-                      }}>{alert.action}</button>
-                    </div>
+                    <span className="material-symbols-filled" style={{ fontSize: '18px', color: col, display: 'block', marginBottom: '8px' }}>{alert.icon}</span>
+                    <p style={{ fontSize: '12px', fontWeight: 700, color: col, lineHeight: 1.3, marginBottom: '4px' }}>{alert.title}</p>
+                    <p style={{ fontSize: '10px', color: MUTED, lineHeight: 1.5 }}>{alert.body}</p>
                   </div>
                 )
               })}
@@ -136,78 +306,249 @@ export default function SystemStatus() {
           </div>
         )}
 
-        {/* ── Maintenance Status ── */}
-        <div>
-          <SectionLabel title="Maintenance Status" />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {items.map((item) => (
-              <div key={item.id} style={{
-                background: DS.surface, border: `1px solid ${DS.border}`,
-                borderRadius: '12px', padding: '16px',
-                display: 'flex', alignItems: 'center', gap: '16px',
-              }}>
-                {/* Icon block */}
-                <div style={{
-                  width: '40px', height: '40px', borderRadius: '8px', flexShrink: 0,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: 'rgba(255,140,0,0.08)', border: '1px solid rgba(255,140,0,0.15)',
-                }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '20px', color: DS.amber }}>{item.icon}</span>
-                </div>
-                {/* Data */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '4px' }}>
-                    <span style={{ fontSize: '14px', fontWeight: 600, color: DS.textPrimary }}>{item.label}</span>
-                    <span style={{ fontSize: '14px', fontWeight: 800, color: barFill(item.percent), marginLeft: '8px' }}>{item.percent}%</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                    <span style={{ fontSize: '11px', color: DS.textSecondary }}>Last: {item.lastKm}</span>
-                    <span style={{ fontSize: '11px', color: DS.textSecondary }}>{item.lastDate}</span>
-                  </div>
-                  <div style={{ height: '4px', borderRadius: '4px', background: 'var(--ds-surface-active)', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${item.percent}%`, borderRadius: '4px', background: barFill(item.percent) }} />
-                  </div>
-                </div>
+        {/* ── Insights Strip ── */}
+        {(() => {
+          // Build insight cards from component health
+          const urgent  = items.filter(i => i.percent < 40)
+          const caution = items.filter(i => i.percent >= 40 && i.percent < 70)
+
+          const insights = [
+            // Urgent items first
+            ...urgent.map(i => ({
+              id: `urg-${i.id}`,
+              type: 'urgent',
+              icon: 'warning',
+              color: CRIT,
+              title: `Replace ${i.label}`,
+              body: `At ${i.percent}% — service needed soon`,
+            })),
+            // Caution items
+            ...caution.map(i => ({
+              id: `cau-${i.id}`,
+              type: 'caution',
+              icon: 'schedule',
+              color: WARN,
+              title: `Monitor ${i.label}`,
+              body: `At ${i.percent}% — plan ahead`,
+            })),
+            // Static tips / upgrade nudges when health is good
+            ...(totalHealth >= 85 ? [{
+              id: 'tip-optimal',
+              type: 'tip',
+              icon: 'tips_and_updates',
+              color: LIME,
+              title: 'All Systems Optimal',
+              body: 'Great time to log a service record',
+            }] : []),
+            ...(items.some(i => i.label?.toLowerCase().includes('oil')) ? [{
+              id: 'tip-oil',
+              type: 'upgrade',
+              icon: 'upgrade',
+              color: CAT_COLORS.Oils,
+              title: 'Consider Synthetic Oil',
+              body: 'Extends engine life by up to 20%',
+            }] : []),
+          ]
+
+          if (insights.length === 0) return null
+          return (
+            <div style={{ padding: '20px 0 0' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 16px', marginBottom: '10px' }}>
+                <p style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '0.2em', color: DIM, textTransform: 'uppercase' }}>Insights</p>
+                <span style={{ fontSize: '9px', color: DIM }}>{insights.length} notice{insights.length !== 1 ? 's' : ''}</span>
               </div>
-            ))}
+              <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', scrollbarWidth: 'none', padding: '0 16px 4px' }}>
+                {insights.map(n => (
+                  <div key={n.id} style={{
+                    flexShrink: 0, width: '180px',
+                    background: CARD,
+                    border: `1px solid ${n.type === 'urgent' ? `${CRIT}30` : n.type === 'caution' ? `${WARN}25` : BORDER}`,
+                    borderRadius: '14px', padding: '14px',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '16px', color: n.color }}>{n.icon}</span>
+                      <span style={{ fontSize: '10px', fontWeight: 800, color: n.color, letterSpacing: '0.02em', lineHeight: 1.2 }}>{n.title}</span>
+                    </div>
+                    <p style={{ fontSize: '10px', color: MUTED, lineHeight: 1.5 }}>{n.body}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        })()}
+
+        {/* ── Categories: 2-column card grid ── */}
+        <div style={{ padding: '24px 16px 0' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+            <p style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '0.2em', color: DIM, textTransform: 'uppercase' }}>Components</p>
+            {!showAllCats && (
+              <button onClick={() => setShowAllCats(true)} style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em', color: LIME, background: 'none', border: 'none', cursor: 'pointer', textTransform: 'uppercase' }}>
+                View All
+              </button>
+            )}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', alignItems: 'start' }}>
+            {(() => {
+              const available = CAT_ORDER.filter(c => groups[c])
+              const visible   = showAllCats ? available : available.slice(0, 4)
+              const hiddenCount = available.length - 4
+              return (
+                <>
+                  {visible.map(cat => {
+                    const { parts } = groups[cat]
+                    const catColor = CAT_COLORS[cat]
+                    const avg = Math.round(parts.reduce((s, p) => s + p.percent, 0) / parts.length)
+                    return (
+                      <button
+                        key={cat}
+                        onClick={() => setOpenCat(cat)}
+                        style={{
+                          background: CARD, border: `1px solid ${BORDER}`,
+                          borderRadius: '16px', cursor: 'pointer', textAlign: 'left',
+                          padding: '14px 12px 12px', display: 'flex', flexDirection: 'column',
+                          gap: '8px', width: '100%',
+                        }}
+                      >
+                        <div style={{ width: '80px', margin: '0 auto' }}>
+                          <ArcGauge percent={avg} />
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: '15px', color: catColor }}>
+                            {CAT_ICONS[cat]}
+                          </span>
+                          <span style={{ fontSize: '10px', fontWeight: 800, color: TEXT1, letterSpacing: '0.06em', textTransform: 'uppercase', flex: 1 }}>
+                            {cat}
+                          </span>
+                          <span className="material-symbols-outlined" style={{ fontSize: '15px', color: DIM }}>chevron_right</span>
+                        </div>
+                        <p style={{ fontSize: '9px', color: DIM }}>{parts.length} parts</p>
+                      </button>
+                    )
+                  })}
+
+                  {/* Collapse button — shown when all cats are visible */}
+                  {showAllCats && available.length > 4 && (
+                    <button
+                      onClick={() => setShowAllCats(false)}
+                      style={{
+                        gridColumn: '1 / -1', background: 'none', border: 'none',
+                        cursor: 'pointer', color: DIM, fontSize: '9px',
+                        fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
+                        padding: '8px', marginTop: '2px',
+                      }}
+                    >
+                      Show less ↑
+                    </button>
+                  )}
+                </>
+              )
+            })()}
           </div>
         </div>
 
-        {/* ── Log CTA ── */}
-        <AmberButton icon="add_circle" onClick={() => navigate(`/bike/${bike.id}/add-log`)}>LOG NEW UPGRADE</AmberButton>
 
-        {/* ── Recent Upgrades ── */}
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', paddingLeft: '4px' }}>
-            <p style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5A5A5A' }}>
-              Recent Upgrades & Fixes
-            </p>
-            <button style={{ fontSize: '11px', fontWeight: 700, color: DS.amber, background: 'none', border: 'none', cursor: 'pointer' }}>VIEW ALL</button>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {upgrades.map((item) => (
-              <div key={item.id} style={{
-                background: DS.surface,
-                border: `1px solid ${DS.border}`,
-                borderLeft: `3px solid ${item.borderColor === 'amber' ? DS.amber : 'var(--ds-border-heavy)'}`,
-                borderRadius: '8px',
-                padding: '14px 16px',
-                display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px',
-              }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: '14px', fontWeight: 600, color: DS.textPrimary }}>{item.title}</p>
-                  <p style={{ fontSize: '12px', color: DS.textSecondary, marginTop: '2px' }}>{item.subtitle}</p>
+        {/* ── Log Timeline ── */}
+        {logs.length > 0 && (
+          <div style={{ padding: '8px 20px 0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <p style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '0.2em', color: DIM, textTransform: 'uppercase' }}>Recent Logs</p>
+              <button style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.1em', color: LIME, background: 'none', border: 'none', cursor: 'pointer', textTransform: 'uppercase' }}>
+                View All
+              </button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {logs.map((item, i) => (
+                <div key={item.id} style={{ display: 'flex', gap: '14px', paddingBottom: i < logs.length - 1 ? '16px' : 0 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+                    <div style={{
+                      width: '7px', height: '7px', borderRadius: '50%', marginTop: '3px',
+                      background: item.borderColor === 'amber' ? WARN : TEXT3,
+                    }} />
+                    {i < logs.length - 1 && <div style={{ width: '1px', flex: 1, background: BORDER, marginTop: '5px' }} />}
+                  </div>
+                  <div style={{ flex: 1, paddingBottom: i < logs.length - 1 ? '6px' : 0 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <p style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.8)', lineHeight: 1.3 }}>{item.title}</p>
+                      <span style={{ fontSize: '9px', color: DIM, flexShrink: 0, marginLeft: '8px', marginTop: '2px' }}>{item.date}</span>
+                    </div>
+                    <p style={{ fontSize: '10px', color: DIM, marginTop: '2px' }}>{item.subtitle}</p>
+                  </div>
                 </div>
-                <span style={{
-                  fontSize: '10px', fontWeight: 600, color: DS.textSecondary, flexShrink: 0,
-                  background: 'var(--ds-surface-hover)', padding: '3px 8px', borderRadius: '4px', marginTop: '2px',
-                }}>{item.date}</span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
       </main>
+
+      {/* ── Category Bottom-Sheet Modal ── */}
+      {openCat && groups[openCat] && (() => {
+        const { parts } = groups[openCat]
+        const catColor = CAT_COLORS[openCat]
+        const avg = Math.round(parts.reduce((s, p) => s + p.percent, 0) / parts.length)
+        return (
+          <>
+            <div onClick={() => setOpenCat(null)} style={{
+              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)',
+              zIndex: 100, backdropFilter: 'blur(3px)',
+              animation: 'bsFadeIn 0.2s ease',
+            }} />
+            <div style={{
+              position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 101,
+              background: 'var(--ds-surface)',
+              borderRadius: '20px 20px 0 0',
+              border: `1px solid ${BORDER}`, borderBottom: 'none',
+              maxHeight: '80dvh', display: 'flex', flexDirection: 'column',
+              animation: 'bsSlideUp 0.32s cubic-bezier(0.4,0,0.2,1)',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 0' }}>
+                <div style={{ width: '36px', height: '4px', borderRadius: '2px', background: 'rgba(255,255,255,0.15)' }} />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 20px 12px' }}>
+                <div style={{ width: '72px', flexShrink: 0 }}><ArcGauge percent={avg} /></div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '3px' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '18px', color: catColor }}>{CAT_ICONS[openCat]}</span>
+                    <span style={{ fontSize: '14px', fontWeight: 800, color: TEXT1, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{openCat}</span>
+                  </div>
+                  <p style={{ fontSize: '10px', color: DIM }}>{parts.length} parts monitored</p>
+                </div>
+                <button onClick={() => setOpenCat(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: DIM, padding: '4px', display: 'flex', alignItems: 'center' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>close</span>
+                </button>
+              </div>
+              <div style={{ height: '1px', background: BORDER, margin: '0 20px' }} />
+              <div style={{ overflowY: 'auto', padding: '18px 20px 40px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {parts.map(item => {
+                  const fc = healthColor(item.percent)
+                  const kmLeft = item.threshold
+                    ? Math.max(0, Math.round((item.percent / 100) * item.threshold))
+                    : null
+                  return (
+                    <div key={item.id}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '7px' }}>
+                        <span style={{ fontSize: '13px', fontWeight: 600, color: TEXT1 }}>{item.label}</span>
+                        <span style={{ fontSize: '12px', fontWeight: 800, color: fc }}>{item.percent}%</span>
+                      </div>
+                      <div style={{ height: '3px', background: 'rgba(255,255,255,0.08)', borderRadius: '2px', overflow: 'hidden', marginBottom: '5px' }}>
+                        <div style={{ height: '100%', width: `${item.percent}%`, background: fc, borderRadius: '2px', transition: 'width 0.9s cubic-bezier(0.4,0,0.2,1)' }} />
+                      </div>
+                      <span style={{ fontSize: '10px', color: DIM }}>
+                        {kmLeft !== null ? `~${kmLeft.toLocaleString()} km remaining` : `Last: ${item.lastDate}`}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+            <style>{`
+              @keyframes bsFadeIn  { from{opacity:0} to{opacity:1} }
+              @keyframes bsSlideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+            `}</style>
+          </>
+        )
+      })()}
+
     </div>
   )
 }

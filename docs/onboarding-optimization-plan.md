@@ -90,7 +90,7 @@ Target flow time: ~45 seconds per bike.
       Accept spec fields during addVehicle POST so General Info step can be skipped.
 
 
-### Layer 2: Smart Component Presets (HIGH IMPACT)
+### Layer 2: Smart Component Presets + Clean Slate Setup (HIGH IMPACT)
 
   Based on the motorcycle's category, offer a "Quick Setup" that pre-fills
   common components with industry-standard replacement thresholds.
@@ -115,6 +115,40 @@ Target flow time: ~45 seconds per bike.
     User just reviews, optionally tweaks brand/model names, hits "Complete Setup".
 
 
+  #### Clean Slate Setup (Layer 2 Modifier)
+
+  Most users download the app right after buying a new bike or completing a
+  full service — they want to track maintenance from a clean starting point.
+  Asking them to estimate current wear on every component is the highest-
+  friction step in the wizard and the #1 cause of bad data or abandonment.
+
+  When Quick Setup is selected, offer a wear-state selector with two modes:
+
+    🏍️ Brand New Bike:
+      All components initialized to 0 km wear.
+      Last service date set to today.
+      Best for: users who just purchased a brand-new motorcycle.
+
+    🔧 Fresh Service:
+      Consumables (engine oil, brake pads, chain, sprockets) → 0 km wear.
+      Long-life items (battery, coolant, tires) → marked as "Unknown".
+      Dashboard will nudge the user to inspect/confirm those items later.
+      Best for: used bike owners who just did a baseline service.
+
+    📋 I'll Estimate Myself:
+      Falls through to the current per-component wear review (default).
+      For experienced owners who know their part history.
+
+  This modifier eliminates the per-component wear estimation step for the
+  ~80% of users whose answer is effectively "everything is fresh." It
+  composes with the Quick Setup presets: presets answer WHAT to track +
+  thresholds, Clean Slate answers WHERE you are in the wear cycle.
+
+  Note: This is an explicit user choice, NOT auto-inferred from odometer.
+  A user at 15,000 km may still want a Fresh Service reset; a user at 0 km
+  on a demo bike may not mean "brand new everything."
+
+
 ### Layer 3: Progressive Setup (OPTIONAL)
 
   Don't force all setup upfront. Merge General Info into AddVehicle screen
@@ -135,9 +169,14 @@ Target flow time: ~45 seconds per bike.
            → Eliminates 5+ manual fields
            → Effort: 1 session
 
-  Phase 2: Component presets + Quick Setup choice screen
-           → Reduces 5 wizard steps to 1 review step
-           → Effort: 1 session
+  Phase 2a: Component presets + Quick Setup choice screen
+            → Reduces 5 wizard steps to 1 review step
+            → Effort: 1 session
+
+  Phase 2b: Clean Slate wear-state selector
+            → Eliminates per-component wear estimation for ~80% of users
+            → Builds on Phase 2a's Quick Setup path
+            → Effort: 0.5 session
 
   Phase 3 (optional): Merge General Info into AddVehicle
            → Collapses 2 screens into 1
@@ -146,16 +185,32 @@ Target flow time: ~45 seconds per bike.
 
 ## End-State User Experience
 
-  1. Tap "Add Vehicle"                              →  1 second
-  2. Pick brand from grid                           →  2 seconds
-  3. Search/tap model (e.g. "MT-07")                →  3 seconds (specs auto-filled)
-  4. Enter odometer "12500"                         →  3 seconds
-  5. Upload photo (optional)                        →  5 seconds
-  6. Submit → bike appears on dashboard             →  2 seconds
-  7. Tap "Set Up" on dashboard                      →  1 second
-  8. Choose "Quick Setup" → all parts pre-filled    →  2 seconds
-  9. Review → tweak brand names if desired           →  20 seconds
-  10. Done ✅                                        →  ~45 seconds total
+  Best case (Brand New Bike + Quick Setup):
+    1. Tap "Add Vehicle"                              →  1 second
+    2. Pick brand from grid                           →  2 seconds
+    3. Search/tap model (e.g. "MT-07")                →  3 seconds (specs auto-filled)
+    4. Enter odometer "0"                             →  2 seconds
+    5. Upload photo (optional)                        →  5 seconds
+    6. Submit → bike appears on dashboard             →  2 seconds
+    7. Tap "Set Up" on dashboard                      →  1 second
+    8. Choose "Quick Setup"                           →  2 seconds
+    9. Select "Brand New Bike" → all wear = 0         →  1 second
+    10. Confirm → Done ✅                              →  1 second
+    Total: ~20 seconds
+
+  Typical case (Used bike + Fresh Service):
+    1. Tap "Add Vehicle"                              →  1 second
+    2. Pick brand from grid                           →  2 seconds
+    3. Search/tap model (e.g. "MT-07")                →  3 seconds (specs auto-filled)
+    4. Enter odometer "12500"                         →  3 seconds
+    5. Upload photo (optional)                        →  5 seconds
+    6. Submit → bike appears on dashboard             →  2 seconds
+    7. Tap "Set Up" on dashboard                      →  1 second
+    8. Choose "Quick Setup" → all parts pre-filled    →  2 seconds
+    9. Select "Fresh Service" → consumables zeroed    →  1 second
+    10. Review long-life items flagged as unknown      →  10 seconds
+    11. Confirm → Done ✅                              →  1 second
+    Total: ~35 seconds
 
 
 ## Files Affected

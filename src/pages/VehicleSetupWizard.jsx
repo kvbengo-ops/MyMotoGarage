@@ -2,15 +2,24 @@ import { useState, useMemo, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import AmberButton from '../components/shared/AmberButton'
-import { Field, StyledInput, StyledSelect } from '../components/shared/FormUtils'
+import { Field, StyledInput, StyledSelect, FormGroup } from '../components/shared/FormUtils'
+import { getPresetsForCategory, applyCleanSlate } from '../data/componentPresets'
 
-const steps = [
+const SETUP_MODE_STEP = { id: 'setupMode', title: 'Setup Mode', category: null, image: null }
+
+const MANUAL_STEPS = [
   { id: 'core',        title: 'General Info',   category: null,          image: null },
   { id: 'drivetrain',  title: 'Drivetrain',      category: 'Drivetrain',  image: '/banner_drivetrain.png' },
   { id: 'tires',       title: 'Tires',           category: 'Tires',       image: '/banner_tires.png' },
   { id: 'brakes',      title: 'Brakes',          category: 'Brakes',      image: '/banner_brakes.png' },
   { id: 'oils',        title: 'Oils & Fluids',   category: 'Oils',        image: '/banner_oils.png' },
   { id: 'electronics', title: 'Electronics',     category: 'Electronics', image: '/banner_electronics.png' },
+]
+
+const QUICK_STEPS = [
+  { id: 'core',       title: 'General Info',   category: null, image: null },
+  { id: 'setupMode',  title: 'Setup Mode',     category: null, image: null },
+  { id: 'review',     title: 'Review Parts',   category: null, image: null },
 ]
 
 const TIME_DEGRADING_PARTS = ['Tubeless Sealant', 'Suspension Fluid', 'Brake Fluid', 'Battery']
@@ -283,6 +292,15 @@ export default function VehicleSetupWizard() {
   // Steps 2+: Components
   const [components, setComponents] = useState([])
 
+  // Setup flow mode: null = not chosen yet, 'quick' or 'custom'
+  const [setupMode, setSetupMode] = useState(null)
+  const [cleanSlateMode, setCleanSlateMode] = useState(null) // 'brandNew', 'freshService', or null (manual)
+  const [bikeCategory, setBikeCategory] = useState('')
+
+  // Default to QUICK_STEPS so the Setup Mode choice screen always shows at step 1.
+  // Only switch to MANUAL_STEPS if the user explicitly chose Custom Setup.
+  const steps = setupMode === 'custom' ? MANUAL_STEPS : QUICK_STEPS
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -303,6 +321,7 @@ export default function VehicleSetupWizard() {
           if (v.fuel_type) setFuelType(v.fuel_type)
           if (v.fuel_capacity) setFuelCapacity(v.fuel_capacity.toString())
           if (v.fuel_consumption) setFuelConsumption(v.fuel_consumption.toString())
+          if (v.category) setBikeCategory(v.category)
           
           if (v.components && v.components.length > 0) {
             setComponents(v.components.map(c => ({
@@ -329,13 +348,14 @@ export default function VehicleSetupWizard() {
 
   const activeCategory = steps[step].category
 
-  // Auto-show guide once when user first hits the Drivetrain step (step 1)
+  // Auto-show guide once when user first hits the Drivetrain step in manual mode
   useEffect(() => {
-    if (step === 1 && !guideShown) {
+    const isDrivetrainStep = steps[step]?.id === 'drivetrain'
+    if (isDrivetrainStep && !guideShown) {
       setShowGuide(true)
       setGuideShown(true)
     }
-  }, [step])
+  }, [step, steps])
 
   const addComponent = () => {
     setComponents(prev => [
@@ -380,7 +400,10 @@ export default function VehicleSetupWizard() {
             fuelConsumption: parseFloat(fuelConsumption) || null,
             bikeCondition,
             ridingHabit,
-            components: components.filter(c => c.componentType && c.brand && c.model) // only send filled ones
+            components: components.filter(c =>
+              // Quick Setup only requires a name; Custom requires brand+model too
+              setupMode === 'quick' ? c.componentType : (c.componentType && c.brand && c.model)
+            )
           }),
         })
 
@@ -499,6 +522,184 @@ export default function VehicleSetupWizard() {
             </Field>
           </div>
         </div>
+      </div>
+    )
+  } else if (steps[step].id === 'setupMode') {
+    StepContent = (
+      <div className="flex flex-col gap-6">
+        <div>
+          <h2 className="text-[20px] font-bold mb-2" style={{ color: 'var(--ds-text-primary)' }}>Setup Mode</h2>
+          <p className="text-[13px] leading-relaxed mb-6" style={{ color: 'var(--ds-text-secondary)' }}>
+            How do you want to set up your components?
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <button
+            onClick={() => {
+              setSetupMode('quick')
+              // Pre-fill parts for category
+              const presets = getPresetsForCategory(bikeCategory || 'Naked / Streetfighter')
+              // If we already set clean slate mode, apply it right away
+              if (cleanSlateMode) {
+                setComponents(applyCleanSlate(cleanSlateMode, presets))
+              } else {
+                setComponents(presets)
+              }
+            }}
+            style={{
+              padding: '20px', borderRadius: '16px', cursor: 'pointer', transition: 'all 0.2s', textAlign: 'left',
+              background: setupMode === 'quick' ? 'color-mix(in srgb, var(--ds-amber) 15%, transparent)' : 'var(--ds-surface)',
+              border: `2px solid ${setupMode === 'quick' ? 'var(--ds-amber)' : 'var(--ds-border)'}`,
+            }}
+          >
+            <div className="flex items-center gap-4 mb-2">
+              <span className="material-symbols-outlined" style={{ fontSize: '28px', color: setupMode === 'quick' ? 'var(--ds-amber)' : 'var(--ds-text-secondary)' }}>flash_on</span>
+              <h3 className="text-[16px] font-bold" style={{ color: setupMode === 'quick' ? 'var(--ds-amber)' : 'var(--ds-text-primary)' }}>Quick Setup (Recommended)</h3>
+            </div>
+            <p className="text-[13px] leading-relaxed" style={{ color: 'var(--ds-text-secondary)', marginLeft: '44px' }}>
+              We'll pre-fill the most common parts for your bike category with standard replacement thresholds.
+            </p>
+          </button>
+
+          <button
+            onClick={() => {
+              setSetupMode('custom')
+              // Reset to just one empty part to start custom
+              setComponents([])
+              setCleanSlateMode(null) // Custom doesn't use the global clean slate
+            }}
+            style={{
+              padding: '20px', borderRadius: '16px', cursor: 'pointer', transition: 'all 0.2s', textAlign: 'left',
+              background: setupMode === 'custom' ? 'color-mix(in srgb, var(--ds-text-secondary) 15%, transparent)' : 'var(--ds-surface)',
+              border: `2px solid ${setupMode === 'custom' ? 'var(--ds-text-secondary)' : 'var(--ds-border)'}`,
+            }}
+          >
+            <div className="flex items-center gap-4 mb-2">
+              <span className="material-symbols-outlined" style={{ fontSize: '28px', color: 'var(--ds-text-secondary)' }}>build</span>
+              <h3 className="text-[16px] font-bold" style={{ color: 'var(--ds-text-primary)' }}>Custom Setup</h3>
+            </div>
+            <p className="text-[13px] leading-relaxed" style={{ color: 'var(--ds-text-secondary)', marginLeft: '44px' }}>
+              Add each part manually. You choose exactly what to track and enter custom replacement thresholds.
+            </p>
+          </button>
+        </div>
+
+        <AnimatePresence>
+          {setupMode === 'quick' && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mt-4">
+              <FormGroup title="Wear State modifier">
+                <p className="text-[12px] mb-4" style={{ color: 'var(--ds-text-secondary)' }}>
+                  Save time by setting initial wear states automatically.
+                </p>
+
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={() => {
+                      setCleanSlateMode('brandNew')
+                      setComponents(applyCleanSlate('brandNew', components))
+                    }}
+                    style={{
+                      padding: '12px 16px', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s', textAlign: 'left',
+                      background: cleanSlateMode === 'brandNew' ? 'color-mix(in srgb, var(--ds-green) 15%, transparent)' : 'var(--ds-surface)',
+                      border: `1.5px solid ${cleanSlateMode === 'brandNew' ? 'var(--ds-green)' : 'var(--ds-border)'}`,
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="material-symbols-outlined" style={{ color: cleanSlateMode === 'brandNew' ? 'var(--ds-green)' : 'var(--ds-text-secondary)' }}>two_wheeler</span>
+                      <div>
+                        <span className="block text-[13px] font-bold" style={{ color: cleanSlateMode === 'brandNew' ? 'var(--ds-green)' : 'var(--ds-text-primary)' }}>Brand New Bike</span>
+                        <span className="block text-[11px]" style={{ color: 'var(--ds-text-secondary)' }}>All parts set to 0 km wear.</span>
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setCleanSlateMode('freshService')
+                      setComponents(applyCleanSlate('freshService', components))
+                    }}
+                    style={{
+                      padding: '12px 16px', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s', textAlign: 'left',
+                      background: cleanSlateMode === 'freshService' ? 'color-mix(in srgb, var(--ds-amber) 15%, transparent)' : 'var(--ds-surface)',
+                      border: `1.5px solid ${cleanSlateMode === 'freshService' ? 'var(--ds-amber)' : 'var(--ds-border)'}`,
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="material-symbols-outlined" style={{ color: cleanSlateMode === 'freshService' ? 'var(--ds-amber)' : 'var(--ds-text-secondary)' }}>handyman</span>
+                      <div>
+                        <span className="block text-[13px] font-bold" style={{ color: cleanSlateMode === 'freshService' ? 'var(--ds-amber)' : 'var(--ds-text-primary)' }}>Fresh Service (Used Bike)</span>
+                        <span className="block text-[11px]" style={{ color: 'var(--ds-text-secondary)' }}>Consumables (oil, pads, chain) set to 0 km. Others flagged for review.</span>
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setCleanSlateMode(null)
+                      // reset wear states to brand new or used depending on global condition
+                      const baseMode = bikeCondition === 'Brand New' ? 'brandNew' : null
+                      setComponents(applyCleanSlate(baseMode, components))
+                    }}
+                    style={{
+                      padding: '12px 16px', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s', textAlign: 'left',
+                      background: cleanSlateMode === null ? 'var(--ds-surface-hover)' : 'var(--ds-surface)',
+                      border: `1.5px solid ${cleanSlateMode === null ? 'var(--ds-text-secondary)' : 'var(--ds-border)'}`,
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="material-symbols-outlined" style={{ color: 'var(--ds-text-secondary)' }}>edit_note</span>
+                      <div>
+                        <span className="block text-[13px] font-bold" style={{ color: 'var(--ds-text-primary)' }}>I'll Estimate Myself</span>
+                        <span className="block text-[11px]" style={{ color: 'var(--ds-text-secondary)' }}>Review and estimate wear for each part.</span>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              </FormGroup>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    )
+  } else if (steps[step].id === 'review') {
+    // Quick Setup Review Screen
+    StepContent = (
+      <div className="flex flex-col gap-6">
+        <div>
+          <h2 className="text-[20px] font-bold mb-2" style={{ color: 'var(--ds-text-primary)' }}>Review Parts</h2>
+          <p className="text-[13px] leading-relaxed mb-6" style={{ color: 'var(--ds-text-secondary)' }}>
+            We've pre-filled the standard parts for a {bikeCategory || 'Naked / Streetfighter'}. Tap any part to customize brands or adjust wear estimates.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <AnimatePresence>
+            {components.map(comp => (
+              <motion.div key={comp.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, height: 0 }}>
+                <ComponentCard comp={comp} updateComp={(u) => updateComponent(comp.id, u)} removeComp={() => removeComponent(comp.id)} bikeCondition={bikeCondition} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+
+          <button
+            onClick={addComponent}
+            style={{
+              width: '100%', padding: '16px', background: 'var(--ds-surface-hover)', border: '1.5px dashed var(--ds-border-heavy)',
+              borderRadius: '12px', color: 'var(--ds-text-primary)', fontSize: '13px', fontWeight: 700, letterSpacing: '0.05em',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s'
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>add_circle</span>
+            ADD ADDITIONAL PART
+          </button>
+        </div>
+
+        {error && step === steps.length - 1 && (
+          <div style={{ color: 'var(--ds-red)', fontSize: '12px', fontWeight: 600, padding: '8px', background: 'color-mix(in srgb, var(--ds-red) 10%, transparent)', borderRadius: '8px', marginTop: '16px' }}>
+            Error: {error}
+          </div>
+        )}
       </div>
     )
   } else {
@@ -620,7 +821,11 @@ export default function VehicleSetupWizard() {
 
       {/* ── Sticky Action Button ── */}
       <div className="p-5" style={{ background: 'var(--ds-bg)', zIndex: 50 }}>
-        <AmberButton onClick={goToNext} icon={step === steps.length - 1 ? 'task_alt' : 'arrow_forward'} disabled={isSubmitting}>
+        <AmberButton 
+          onClick={goToNext} 
+          icon={step === steps.length - 1 ? 'task_alt' : 'arrow_forward'} 
+          disabled={isSubmitting || (steps[step].id === 'setupMode' && !setupMode)}
+        >
           {step === steps.length - 1 ? (isSubmitting ? 'SAVING...' : 'COMPLETE SETUP') : 'CONTINUE'}
         </AmberButton>
       </div>

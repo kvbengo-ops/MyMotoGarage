@@ -3,7 +3,8 @@ import crypto from 'crypto';
 
 export const addVehicle = async (req, res) => {
   try {
-    const { userId, make, model, year, category, odometer, nickname, imageUrl } = req.body;
+    const { userId, make, model, year, category, odometer, nickname, imageUrl,
+            engineDisplacement, weight, fuelType, fuelCapacity, fuelConsumption } = req.body;
 
     if (!userId || !make || !model || !year) {
       return res.status(400).json({ success: false, error: 'Missing required fields' });
@@ -12,14 +13,18 @@ export const addVehicle = async (req, res) => {
     const id = crypto.randomUUID();
     const status = 'needsSetup'; // Default status for new vehicles
 
-    // Insert into DB
+    // Insert into DB — includes optional factory specs from bikeSpecs auto-fill
     const query = `
-      INSERT INTO vehicles (id, user_id, make, model, year, category, odometer, nickname, image_url, status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      INSERT INTO vehicles (id, user_id, make, model, year, category, odometer, nickname, image_url, status,
+                            engine_displacement, weight, fuel_type, fuel_capacity, fuel_consumption)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
       RETURNING *;
     `;
     
-    const values = [id, userId, make, model, year, category, odometer || 0, nickname || null, imageUrl || null, status];
+    const values = [
+      id, userId, make, model, year, category, odometer || 0, nickname || null, imageUrl || null, status,
+      engineDisplacement || null, weight || null, fuelType || null, fuelCapacity || null, fuelConsumption || null
+    ];
     
     const result = await pool.query(query, values);
     const newVehicle = result.rows[0];
