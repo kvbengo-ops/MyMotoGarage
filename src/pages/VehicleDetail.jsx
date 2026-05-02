@@ -1,11 +1,11 @@
 /*
   DESIGN SYSTEM TOKENS  (8px grid + Major Third type scale)
-  ───────────────────────────────────────────────────────────
+  ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬
   Spacing:
     sp1 =  8px    sp2 = 16px    sp3 = 24px
     sp4 = 32px    sp5 = 40px    sp6 = 48px
 
-  Type (Major Third 1.25× base 14):
+  Type (Major Third 1.25ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â base 14):
     10px  label/caption
     12px  body-sm
     14px  body
@@ -61,7 +61,7 @@ const specFields = [
   { icon: 'opacity',          label: 'Capacity', key: 'fuelCapacity' },
 ]
 
-/* ── Reusable SectionCard ── */
+/* ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Reusable SectionCard ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ */
 function SectionCard({ children, style }) {
   return (
     <div style={{
@@ -75,7 +75,7 @@ function SectionCard({ children, style }) {
   )
 }
 
-/* ── Section header row ── */
+/* ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Section header row ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ */
 function SectionLabel({ title, action }) {
   return (
     <div style={{
@@ -94,7 +94,7 @@ function SectionLabel({ title, action }) {
   )
 }
 
-/* ── Progress bar (with custom accent) ── */
+/* ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Progress bar (with custom accent) ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ */
 function ProgressBar({ percent, color }) {
   const fill = color === 'green' ? 'var(--ds-green)' : color === 'red' ? 'var(--ds-red)' : DS.amber
   return (
@@ -104,7 +104,7 @@ function ProgressBar({ percent, color }) {
   )
 }
 
-/* ── SVG Arc Gauge — theme-aware ── */
+/* ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ SVG Arc Gauge ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â theme-aware ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ */
 function ArcGauge({ percent, status }) {
   const cx = 50, cy = 56, r = 36
   const toRad = deg => (deg * Math.PI) / 180
@@ -118,7 +118,7 @@ function ArcGauge({ percent, status }) {
   const fillX = cx + r * Math.cos(toRad(fillAngle))
   const fillY = cy + r * Math.sin(toRad(fillAngle))
   const fillLargeArc = fillSweep >= 180 ? 1 : 0
-  // 4-tier color scale based on actual percent — more expressive than 3-tier status
+  // 4-tier color scale based on actual percent ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â more expressive than 3-tier status
   const arcColor =
     percent >= 90 ? 'var(--ds-green)'   // excellent
     : percent >= 70 ? 'var(--ds-primary)' // good (acid lime)
@@ -141,12 +141,12 @@ function ArcGauge({ percent, status }) {
   )
 }
 
-/* ── Diagnostic Category Card — theme-aware, with locked state ── */
+/* ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Diagnostic Category Card ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â theme-aware, with locked state ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ */
 function DiagCategoryCard({ diag, isSelected, onSelect }) {
   const hasAlerts = diag.alerts && diag.alerts.length > 0
   const alertColor = diag.status === 'critical' ? 'var(--ds-red)' : 'var(--ds-amber)'
 
-  // ── LOCKED state: no components configured for this category ──
+  // ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ LOCKED state: no components configured for this category ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬
   if (diag.isLocked) {
     return (
       <div style={{
@@ -212,203 +212,116 @@ function DiagCategoryCard({ diag, isSelected, onSelect }) {
   )
 }
 
-/* ── Instrument Cluster: Speedometer + Drum Odometer ── */
-function InstrumentCluster({ bike, odoMode, setOdoMode, odoInput, setOdoInput, odoPreview, setOdoPreview, odoSaved, onSave, cameraRef }) {
-  const [needleAngle, setNeedleAngle] = useState(135)
-  const CX = 140, CY = 140
-  const MAX  = 160
-  const SA   = 135  // start angle (0 = top, CW)
-  const SWEEP = 270
 
-  // Startup needle sweep
-  useEffect(() => {
-    const peak = SA + (100 / MAX) * SWEEP
-    const dur  = 1300
-    let raf, t0
-    const animate = (now) => {
-      if (!t0) t0 = now
-      const p = Math.min((now - t0) / dur, 1)
-      let a
-      if (p < 0.5)      a = SA + (peak - SA) * (p / 0.5)
-      else if (p < 0.7) a = peak
-      else              a = peak - (peak - SA) * ((p - 0.7) / 0.3)
-      setNeedleAngle(a)
-      if (p < 1) raf = requestAnimationFrame(animate)
-      else setNeedleAngle(SA)
-    }
-    const tmr = setTimeout(() => { raf = requestAnimationFrame(animate) }, 300)
-    return () => { clearTimeout(tmr); cancelAnimationFrame(raf) }
-  }, [])
-
-  const rad  = (deg) => (deg - 90) * Math.PI / 180
-  const pt   = (r, deg) => ({ x: CX + r * Math.cos(rad(deg)), y: CY + r * Math.sin(rad(deg)) })
-  const arc  = (r, a1, a2) => {
-    const s = pt(r, a1), e = pt(r, a2)
-    const sw = ((a2 - a1) + 720) % 360
-    return `M ${s.x.toFixed(2)} ${s.y.toFixed(2)} A ${r} ${r} 0 ${sw > 180 ? 1 : 0} 1 ${e.x.toFixed(2)} ${e.y.toFixed(2)}`
-  }
-  const sToA = (s) => SA + (s / MAX) * SWEEP
-
-  const greenEnd = sToA(80), amberEnd = sToA(120), redEnd = SA + SWEEP
-  const majorTicks = [0, 40, 80, 120, 160]
-  const minorTicks = [20, 60, 100, 140]
-  const microTicks = [10, 30, 50, 70, 90, 110, 130, 150]
-
-  const tip  = pt(94, needleAngle)
-  const base1 = pt(7, needleAngle + 90)
-  const base2 = pt(7, needleAngle - 90)
-  const ctip  = pt(18, needleAngle + 180)
-
-  // Odometer
-  const digits = String(Math.floor(bike.odometer)).padStart(6, '0').split('')
-
+/* Ã¢â€â‚¬Ã¢â€â‚¬ OdoDrumPicker Ã¢â€â‚¬Ã¢â€â‚¬ */
+function OdoDrumPicker({ currentValue, onConfirm, onCamera }) {
+  const init = (v) => String(Math.max(0,v)).padStart(6,'0').split('').map(Number)
+  const [digits, setDigits] = useState(() => init(currentValue))
+  const [dragging, setDragging] = useState(null)
+  const [confirmed, setConfirmed] = useState(false)
+  const newValue = parseInt(digits.join(''),10)
+  const isValid = newValue > currentValue
+  const setDigit = (i,v) => { const d=[...digits]; d[i]=((v%10)+10)%10; setDigits(d) }
+  const onPD=(e,i)=>{ e.currentTarget.setPointerCapture(e.pointerId); setDragging({i,sy:e.clientY,sd:digits[i]}) }
+  const onPM=(e)=>{ if(!dragging)return; setDigit(dragging.i, dragging.sd+Math.round((dragging.sy-e.clientY)/28)) }
+  const onPU=()=>setDragging(null)
+  const confirm=()=>{ if(!isValid)return; setConfirmed(true); setTimeout(()=>onConfirm(newValue),500) }
   return (
-    <div style={{ background: '#06060a', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.09)' }}>
-
-      {/* ── Speedometer ── */}
-      <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '16px' }}>
-        <svg width="280" height="210" viewBox="0 0 280 210">
-          <defs>
-            <radialGradient id="gaugeGlow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#1a1a2e" />
-              <stop offset="100%" stopColor="#06060a" />
-            </radialGradient>
-            <filter id="nglow" x="-40%" y="-40%" width="180%" height="180%">
-              <feGaussianBlur stdDeviation="3" result="b" />
-              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-
-          {/* Outer ring */}
-          <circle cx={CX} cy={CY} r="132" fill="url(#gaugeGlow)" stroke="rgba(255,255,255,0.12)" strokeWidth="2"/>
-          <circle cx={CX} cy={CY} r="128" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1"/>
-
-          {/* Track */}
-          <path d={arc(112, SA, SA+SWEEP)} fill="none" stroke="#18181f" strokeWidth="18" strokeLinecap="round"/>
-
-          {/* Color zones */}
-          <path d={arc(112, SA, greenEnd)} fill="none" stroke="#22c55e" strokeWidth="7" opacity="0.65"/>
-          <path d={arc(112, greenEnd, amberEnd)} fill="none" stroke="#f59e0b" strokeWidth="7" opacity="0.65"/>
-          <path d={arc(112, amberEnd, redEnd)} fill="none" stroke="#ef4444" strokeWidth="7" strokeLinecap="round" opacity="0.65"/>
-
-          {/* Micro ticks */}
-          {microTicks.map(s => { const a=sToA(s), o=pt(103,a), i=pt(97,a); return <line key={s} x1={o.x} y1={o.y} x2={i.x} y2={i.y} stroke="rgba(255,255,255,0.25)" strokeWidth="1"/> })}
-          {/* Minor ticks */}
-          {minorTicks.map(s => { const a=sToA(s), o=pt(103,a), i=pt(93,a); return <line key={s} x1={o.x} y1={o.y} x2={i.x} y2={i.y} stroke="rgba(255,255,255,0.5)" strokeWidth="1.5"/> })}
-          {/* Major ticks + labels */}
-          {majorTicks.map(s => {
-            const a=sToA(s), o=pt(103,a), i=pt(88,a), l=pt(76,a)
-            return (
-              <g key={s}>
-                <line x1={o.x} y1={o.y} x2={i.x} y2={i.y} stroke="rgba(255,255,255,0.85)" strokeWidth="2.5" strokeLinecap="round"/>
-                <text x={l.x} y={l.y+4} textAnchor="middle" fill="rgba(255,255,255,0.8)" fontSize="10" fontWeight="700" fontFamily="'Courier New',monospace">{s}</text>
-              </g>
-            )
-          })}
-
-          {/* Unit label */}
-          <text x={CX} y={CY+26} textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize="10" fontWeight="700" letterSpacing="3" fontFamily="monospace">KM/H</text>
-          <text x={CX} y={CY+8} textAnchor="middle" fill="rgba(255,255,255,0.12)" fontSize="9" fontWeight="600" fontFamily="monospace">——  0  ——</text>
-
-          {/* Needle */}
-          <polygon
-            points={`${tip.x},${tip.y} ${base1.x},${base1.y} ${ctip.x},${ctip.y} ${base2.x},${base2.y}`}
-            fill="white" filter="url(#nglow)"
-            style={{ transition: 'all 0.04s linear' }}
-          />
-          {/* Hub */}
-          <circle cx={CX} cy={CY} r="12" fill="#111118" stroke="rgba(255,255,255,0.18)" strokeWidth="2"/>
-          <circle cx={CX} cy={CY} r="5" fill="rgba(255,255,255,0.5)"/>
-        </svg>
-      </div>
-
-      {/* ── Odometer drums ── */}
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', padding: '8px 20px 16px' }}>
-        <span style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.14em', textTransform: 'uppercase' }}>ODO</span>
-        {/* Chrome frame */}
-        <div style={{
-          background: 'linear-gradient(180deg,#555 0%,#999 30%,#bbb 50%,#999 70%,#444 100%)',
-          borderRadius: '6px', padding: '2px',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.4)',
-        }}>
-          <div style={{ display: 'flex', borderRadius: '4px', overflow: 'hidden', background: '#08080c' }}>
-            {digits.map((d, i) => {
-              const isLast = i === digits.length - 1
-              return (
-                <div key={i} style={{
-                  width: '34px', height: '54px', position: 'relative',
-                  background: isLast ? '#140404' : '#08080c',
-                  borderRight: !isLast ? '1px solid rgba(255,255,255,0.07)' : 'none',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  overflow: 'hidden',
-                }}>
-                  {/* Top drum shadow */}
-                  <div style={{ position:'absolute', top:0, left:0, right:0, height:'35%', background:'linear-gradient(to bottom,rgba(0,0,0,0.95),transparent)', zIndex:2 }}/>
-                  {/* Bottom drum shadow */}
-                  <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'35%', background:'linear-gradient(to top,rgba(0,0,0,0.95),transparent)', zIndex:2 }}/>
-                  {/* Mid lines (real odometer has thin lines above/below digit) */}
-                  <div style={{ position:'absolute', top:'31%', left:0, right:0, height:'1px', background:'rgba(255,255,255,0.05)' }}/>
-                  <div style={{ position:'absolute', bottom:'31%', left:0, right:0, height:'1px', background:'rgba(255,255,255,0.05)' }}/>
-                  <span style={{
-                    fontSize: '28px', fontWeight: 900, lineHeight: 1,
-                    fontFamily: '"Courier New",monospace',
-                    color: isLast ? '#f87171' : '#f0f0f0',
-                    textShadow: isLast ? '0 0 14px rgba(239,68,68,0.6)' : '0 0 6px rgba(255,255,255,0.15)',
-                    animation: `oRoll 0.38s cubic-bezier(0.2,0.8,0.4,1) ${i*60}ms both`,
-                    position: 'relative', zIndex: 1,
-                  }}>{d}</span>
-                </div>
-              )
-            })}
+    <div>
+      <div style={{fontSize:'11px',color:'var(--ds-text-muted)',textAlign:'center',marginBottom:'14px'}}>Drag digits up/down — or tap arrows</div>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'4px',marginBottom:'6px'}}>
+        {digits.map((d,idx)=>(
+          <div key={idx} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'2px'}}>
+            <button onClick={()=>setDigit(idx,d+1)} style={{background:'none',border:'none',cursor:'pointer',padding:'2px',color:'var(--ds-text-muted)'}}>
+              <span className="material-symbols-outlined" style={{fontSize:'16px'}}>expand_less</span>
+            </button>
+            <div onPointerDown={e=>onPD(e,idx)} onPointerMove={onPM} onPointerUp={onPU} onPointerCancel={onPU}
+              style={{width:'42px',height:'52px',background:'var(--ds-input)',border:idx===5?'1.5px solid var(--ds-primary)':'1px solid var(--ds-border)',borderRadius:'10px',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',overflow:'hidden',position:'relative',cursor:'ns-resize',userSelect:'none',touchAction:'none',boxShadow:dragging?.i===idx?'0 0 0 2px var(--ds-primary)':'none',transition:'box-shadow 0.15s'}}>
+              <span style={{position:'absolute',top:'4px',fontSize:'13px',fontWeight:700,fontFamily:'"Courier New",monospace',color:'var(--ds-text-muted)',opacity:0.4}}>{((d+1)%10)}</span>
+              <span style={{fontSize:'26px',fontWeight:900,fontFamily:'"Courier New",monospace',color:idx===5?'var(--ds-primary)':'var(--ds-text-primary)',lineHeight:1}}>{d}</span>
+              <span style={{position:'absolute',bottom:'4px',fontSize:'13px',fontWeight:700,fontFamily:'"Courier New",monospace',color:'var(--ds-text-muted)',opacity:0.4}}>{((d-1+10)%10)}</span>
+              <div style={{position:'absolute',top:0,left:0,right:0,height:'16px',background:'linear-gradient(to bottom,var(--ds-input),transparent)',pointerEvents:'none'}}/>
+              <div style={{position:'absolute',bottom:0,left:0,right:0,height:'16px',background:'linear-gradient(to top,var(--ds-input),transparent)',pointerEvents:'none'}}/>
+            </div>
+            <button onClick={()=>setDigit(idx,d-1)} style={{background:'none',border:'none',cursor:'pointer',padding:'2px',color:'var(--ds-text-muted)'}}>
+              <span className="material-symbols-outlined" style={{fontSize:'16px'}}>expand_more</span>
+            </button>
           </div>
+        ))}
+        <span style={{fontSize:'12px',fontWeight:700,color:'var(--ds-text-muted)',marginLeft:'6px',alignSelf:'center'}}>km</span>
+      </div>
+      <div style={{textAlign:'center',marginBottom:'18px',minHeight:'18px'}}>
+        {isValid && <span style={{fontSize:'11px',fontWeight:700,color:'var(--ds-primary)'}}>+{(newValue-currentValue).toLocaleString()} km since last update</span>}
+        {!isValid&&newValue!==currentValue && <span style={{fontSize:'11px',color:'var(--ds-red)'}}>Reading must be higher than current</span>}
+      </div>
+      <div style={{display:'flex',gap:'10px'}}>
+        <button onClick={onCamera} style={{flex:1,padding:'13px',borderRadius:'12px',border:'1px solid var(--ds-border)',background:'var(--ds-surface-hover)',color:'var(--ds-text-secondary)',fontSize:'12px',fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:'6px'}}>
+          <span className="material-symbols-outlined" style={{fontSize:'16px'}}>photo_camera</span>Scan
+        </button>
+        <button onClick={confirm} disabled={!isValid} style={{flex:2,padding:'13px',borderRadius:'12px',border:'none',fontSize:'13px',fontWeight:800,cursor:isValid?'pointer':'not-allowed',background:confirmed?'var(--ds-green)':isValid?'var(--ds-primary)':'var(--ds-surface-active)',color:isValid?'#000':'var(--ds-text-muted)',transition:'background 0.25s',display:'flex',alignItems:'center',justifyContent:'center',gap:'6px'}}>
+          {confirmed?<><span className="material-symbols-outlined" style={{fontSize:'16px'}}>check</span>Saved!</>:<><span className="material-symbols-outlined" style={{fontSize:'16px'}}>check_circle</span>Set {newValue.toLocaleString()} km</>}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/* ── Instrument Cluster ── */
+function InstrumentCluster({ bike, odoSaved, odoInput, odoMode, setOdoMode, setOdoInput, setOdoPreview, onSave, cameraRef, showOdoPicker, setShowOdoPicker, odoPreview }) {
+  return (
+    <div style={{ borderRadius:'16px', overflow:'hidden', border:'1px solid var(--ds-border)', background:'var(--ds-surface)' }}>
+      <div style={{ padding:'24px 20px 20px', display:'flex', flexDirection:'column', alignItems:'center', gap:'8px' }}>
+        <span style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.18em', textTransform:'uppercase', color:'var(--ds-text-muted)' }}>Odometer</span>
+
+        {/* Readout */}
+        <div style={{ display:'flex', alignItems:'baseline', gap:'8px', background:'var(--ds-bg)', border:'1px solid var(--ds-border)', borderRadius:'12px', padding:'14px 28px', boxShadow:'inset 0 2px 8px rgba(0,0,0,0.15)' }}>
+          <span style={{ fontSize:'42px', fontWeight:900, fontFamily:'"Courier New",monospace', color:'var(--ds-text-primary)', letterSpacing:'0.05em', lineHeight:1 }}>
+            {bike.odometer.toLocaleString()}
+          </span>
+          <span style={{ fontSize:'14px', fontWeight:700, color:'var(--ds-text-muted)', letterSpacing:'0.1em' }}>km</span>
         </div>
-        <span style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.14em', textTransform: 'uppercase' }}>km</span>
-      </div>
 
-      <style>{`@keyframes oRoll { from{transform:translateY(55%);opacity:0} to{transform:translateY(0);opacity:1} }`}</style>
-
-      {/* ── Input section ── */}
-      <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', padding: '14px 16px' }}>
-        {odoMode === 'idle' && !odoSaved && (
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={() => setOdoMode('manual')} style={{ flex:1, padding:'10px 0', borderRadius:'10px', border:'1px solid rgba(255,255,255,0.1)', background:'rgba(255,255,255,0.04)', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', gap:'5px' }}>
-              <span className="material-symbols-outlined" style={{ fontSize:'20px', color:'var(--ds-cyan)' }}>edit</span>
-              <span style={{ fontSize:'10px', fontWeight:700, color:'rgba(255,255,255,0.5)', letterSpacing:'0.06em' }}>Manual</span>
-            </button>
-            <button onClick={() => cameraRef.current?.click()} style={{ flex:1, padding:'10px 0', borderRadius:'10px', border:'1px solid rgba(255,255,255,0.1)', background:'rgba(255,255,255,0.04)', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', gap:'5px' }}>
-              <span className="material-symbols-outlined" style={{ fontSize:'20px', color:'var(--ds-amber)' }}>photo_camera</span>
-              <span style={{ fontSize:'10px', fontWeight:700, color:'rgba(255,255,255,0.5)', letterSpacing:'0.06em' }}>Camera</span>
-            </button>
-          </div>
+        {/* Update button */}
+        {!odoSaved && odoMode === 'idle' && (
+          <button onClick={() => setShowOdoPicker(true)}
+            style={{ marginTop:'4px', display:'flex', alignItems:'center', gap:'7px', padding:'9px 22px', borderRadius:'999px', border:'1px solid var(--ds-border)', background:'var(--ds-surface-hover)', color:'var(--ds-text-secondary)', fontSize:'11px', fontWeight:700, letterSpacing:'0.08em', cursor:'pointer', transition:'background 0.2s, color 0.2s' }}
+            onMouseEnter={e=>{ e.currentTarget.style.background='var(--ds-surface-active)'; e.currentTarget.style.color='var(--ds-text-primary)' }}
+            onMouseLeave={e=>{ e.currentTarget.style.background='var(--ds-surface-hover)'; e.currentTarget.style.color='var(--ds-text-secondary)' }}>
+            <span className="material-symbols-outlined" style={{ fontSize:'15px' }}>edit</span>
+            UPDATE ODOMETER
+          </button>
         )}
+
+        {/* Camera fallback input */}
         {(odoMode === 'manual' || odoMode === 'camera') && !odoSaved && (
-          <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
+          <div style={{ width:'100%', display:'flex', flexDirection:'column', gap:'8px', marginTop:'4px' }}>
             {odoMode === 'camera' && odoPreview && (
-              <div style={{ position:'relative', borderRadius:'8px', overflow:'hidden', height:'100px' }}>
+              <div style={{ position:'relative', borderRadius:'8px', overflow:'hidden', height:'90px' }}>
                 <img src={odoPreview} alt="odo" style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
-                <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(0,0,0,0.6),transparent)' }}/>
+                <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(0,0,0,0.5),transparent)' }}/>
               </div>
             )}
-            <div style={{ display:'flex', alignItems:'center', gap:'8px', background:'rgba(255,255,255,0.05)', borderRadius:'10px', border:'1px solid rgba(255,255,255,0.1)', padding:'0 12px' }}>
-              <span className="material-symbols-outlined" style={{ fontSize:'18px', color:'rgba(255,255,255,0.3)' }}>speed</span>
+            <div style={{ display:'flex', alignItems:'center', gap:'8px', background:'var(--ds-input)', borderRadius:'10px', border:'1px solid var(--ds-border)', padding:'0 14px' }}>
+              <span className="material-symbols-outlined" style={{ fontSize:'17px', color:'var(--ds-text-muted)' }}>speed</span>
               <input type="number" placeholder={`Current: ${bike.odometer.toLocaleString()}`} value={odoInput} onChange={e=>setOdoInput(e.target.value)}
-                style={{ flex:1, background:'none', border:'none', outline:'none', color:'#fff', fontSize:'18px', fontWeight:800, padding:'12px 0', fontFamily:'"Courier New",monospace' }}/>
-              <span style={{ fontSize:'11px', color:'rgba(255,255,255,0.3)' }}>km</span>
+                style={{ flex:1, background:'none', border:'none', outline:'none', color:'var(--ds-text-primary)', fontSize:'18px', fontWeight:800, padding:'11px 0', fontFamily:'"Courier New",monospace' }}/>
+              <span style={{ fontSize:'11px', color:'var(--ds-text-muted)' }}>km</span>
             </div>
             <div style={{ display:'flex', gap:'8px' }}>
-              {odoMode === 'camera' && <button onClick={() => cameraRef.current?.click()} style={{ padding:'10px 12px', borderRadius:'10px', border:'1px solid rgba(255,255,255,0.1)', background:'none', cursor:'pointer', color:'var(--ds-amber)', fontSize:'11px', fontWeight:700 }}>Retake</button>}
-              <button onClick={() => { setOdoMode('idle'); setOdoInput(''); setOdoPreview(null) }} style={{ flex:1, padding:'10px', borderRadius:'10px', border:'1px solid rgba(255,255,255,0.1)', background:'none', cursor:'pointer', color:'rgba(255,255,255,0.5)', fontSize:'11px', fontWeight:700 }}>Cancel</button>
+              {odoMode === 'camera' && <button onClick={()=>cameraRef.current?.click()} style={{ padding:'9px 12px', borderRadius:'10px', border:'1px solid var(--ds-border)', background:'none', cursor:'pointer', color:'var(--ds-amber)', fontSize:'11px', fontWeight:700 }}>Retake</button>}
+              <button onClick={()=>{setOdoMode('idle');setOdoInput('');setOdoPreview(null)}} style={{ flex:1, padding:'9px', borderRadius:'10px', border:'1px solid var(--ds-border)', background:'none', cursor:'pointer', color:'var(--ds-text-secondary)', fontSize:'11px', fontWeight:700 }}>Cancel</button>
               <button onClick={onSave} disabled={!odoInput||Number(odoInput)<=bike.odometer}
-                style={{ flex:2, padding:'10px', borderRadius:'10px', border:'none', background: odoInput&&Number(odoInput)>bike.odometer?'var(--ds-primary)':'rgba(255,255,255,0.06)', cursor: odoInput&&Number(odoInput)>bike.odometer?'pointer':'not-allowed', color: odoInput&&Number(odoInput)>bike.odometer?'#000':'rgba(255,255,255,0.2)', fontSize:'11px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase' }}>Save</button>
+                style={{ flex:2, padding:'9px', borderRadius:'10px', border:'none', fontSize:'11px', fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:odoInput&&Number(odoInput)>bike.odometer?'pointer':'not-allowed', background:odoInput&&Number(odoInput)>bike.odometer?'var(--ds-primary)':'var(--ds-surface-active)', color:odoInput&&Number(odoInput)>bike.odometer?'#000':'var(--ds-text-muted)' }}>Save</button>
             </div>
           </div>
         )}
+
         {odoSaved && (
-          <div style={{ display:'flex', alignItems:'center', gap:'10px', padding:'8px 0' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:'8px', marginTop:'4px' }}>
             <span className="material-symbols-outlined" style={{ fontSize:'22px', color:'var(--ds-green)' }}>check_circle</span>
             <div>
               <div style={{ fontSize:'13px', fontWeight:700, color:'var(--ds-green)' }}>Odometer Updated</div>
-              <div style={{ fontSize:'10px', color:'rgba(255,255,255,0.4)', marginTop:'1px' }}>{Number(odoInput).toLocaleString()} km saved</div>
+              <div style={{ fontSize:'10px', color:'var(--ds-text-muted)', marginTop:'1px' }}>{Number(odoInput).toLocaleString()} km saved</div>
             </div>
           </div>
         )}
@@ -416,9 +329,8 @@ function InstrumentCluster({ bike, odoMode, setOdoMode, odoInput, setOdoInput, o
     </div>
   )
 }
-
-/* ── Swipeable Diagnostics + Specs Card ── */
 function SwipeableInfoCard({ diagnostics, bike }) {
+
   const [activeSlide, setActiveSlide] = useState(0) // 0 = diagnostics, 1 = specs
   const [dragX, setDragX] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
@@ -512,11 +424,11 @@ function SwipeableInfoCard({ diagnostics, bike }) {
           transform: slideOffset,
           transition: isDragging ? 'none' : 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
         }}>
-          {/* Slide 0 — Diagnostics */}
+          {/* Slide 0 ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Diagnostics */}
           <div style={{ width: '50%', flexShrink: 0 }}>
             <DiagnosticsInner diagnostics={diagnostics} bikeId={bike.id} />
           </div>
-          {/* Slide 1 — Tech Specs */}
+          {/* Slide 1 ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Tech Specs */}
           <div style={{ width: '50%', flexShrink: 0, padding: '0 16px 16px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               {specFields.map(({ icon, label, key }) => (
@@ -528,7 +440,7 @@ function SwipeableInfoCard({ diagnostics, bike }) {
                   <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--ds-text-muted)', flexShrink: 0 }}>{icon}</span>
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: DS.textSecondary, marginBottom: '2px' }}>{label}</div>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: DS.textPrimary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{bike[key] || '—'}</div>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: DS.textPrimary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{bike[key] || 'ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â'}</div>
                   </div>
                 </div>
               ))}
@@ -548,10 +460,10 @@ function SwipeableInfoCard({ diagnostics, bike }) {
   )
 }
 
-/* ── Overall Bike Health Card — master gauge, theme-aware ── */
+/* ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Overall Bike Health Card ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â master gauge, theme-aware ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ */
 function OverallHealthCard({ diagnostics }) {
   // Formula: average health of CONFIGURED (unlocked) categories only
-  // Locked categories (no components) are excluded — they don't drag the score down
+  // Locked categories (no components) are excluded ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â they don't drag the score down
   const configured = diagnostics.filter(d => !d.isLocked)
   const allLocked  = configured.length === 0
   const avg = allLocked
@@ -565,7 +477,7 @@ function OverallHealthCard({ diagnostics }) {
   const healthySystems = configured.filter(d => d.status === 'ok').length
   const lockedCount    = diagnostics.length - configured.length
 
-  // 270° arc
+  // 270ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â° arc
   const cx = 60, cy = 60, r = 44
   const toRad = deg => deg * Math.PI / 180
   const startAngle = 135, sweepTotal = 270
@@ -582,7 +494,7 @@ function OverallHealthCard({ diagnostics }) {
     ? `M ${sX.toFixed(2)} ${sY.toFixed(2)} A ${r} ${r} 0 ${largeArc} 1 ${fX.toFixed(2)} ${fY.toFixed(2)}`
     : null
 
-  // Per-category dots — green/amber/red for configured, gray for locked
+  // Per-category dots ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â green/amber/red for configured, gray for locked
   const catColors = diagnostics.map(d =>
     d.isLocked ? 'var(--ds-border-heavy)'
     : d.status === 'critical' ? 'var(--ds-red)'
@@ -678,7 +590,7 @@ function OverallHealthCard({ diagnostics }) {
   )
 }
 
-/* ── Diagnostics inner content (extracted for swipeable use) ── */
+/* ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Diagnostics inner content (extracted for swipeable use) ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ */
 function DiagnosticsInner({ diagnostics, bikeId }) {
   const navigate = useNavigate()
   const [selectedKey, setSelectedKey] = useState(null)
@@ -707,7 +619,7 @@ function DiagnosticsInner({ diagnostics, bikeId }) {
         </div>
       </div>
 
-      {/* Setup CTA banner — shown when any category has no components */}
+      {/* Setup CTA banner ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â shown when any category has no components */}
       {hasLocked && (
         <div style={{
           marginTop: '10px',
@@ -723,7 +635,7 @@ function DiagnosticsInner({ diagnostics, bikeId }) {
               {lockedCategories.length} {lockedCategories.length === 1 ? 'category' : 'categories'} not set up
             </div>
             <div style={{ fontSize: '10px', color: 'var(--ds-text-muted)', marginTop: '1px' }}>
-              {lockedCategories.map(d => d.label).join(' · ')}
+              {lockedCategories.map(d => d.label).join(' ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· ')}
             </div>
           </div>
           <button
@@ -760,7 +672,7 @@ function DiagnosticsInner({ diagnostics, bikeId }) {
           >
             <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: selectedDiag.accentColor, marginBottom: '2px' }}>
-                {selectedDiag.label} — Alerts
+                {selectedDiag.label} ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Alerts
               </div>
               {selectedDiag.alerts.map((a, i) => (
                 <div key={i} style={{
@@ -773,7 +685,7 @@ function DiagnosticsInner({ diagnostics, bikeId }) {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: '13px', fontWeight: 700, color: DS.textPrimary }}>{a.name}</div>
                     <div style={{ fontSize: '11px', color: DS.textSecondary, marginTop: '2px' }}>
-                      {a.severity === 'critical' ? 'Critical — replace immediately' : `Only ${a.health}% life remaining`}
+                      {a.severity === 'critical' ? 'Critical ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â replace immediately' : `Only ${a.health}% life remaining`}
                     </div>
                   </div>
                   <div style={{ fontSize: '11px', fontWeight: 800, color: a.severity === 'critical' ? 'var(--ds-red)' : 'var(--ds-amber)', flexShrink: 0 }}>{a.health}%</div>
@@ -787,12 +699,12 @@ function DiagnosticsInner({ diagnostics, bikeId }) {
   )
 }
 
-/* ── Diagnostics Panel (kept for backwards compat — now delegates to SwipeableInfoCard) ── */
+/* ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Diagnostics Panel (kept for backwards compat ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â now delegates to SwipeableInfoCard) ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ */
 function DiagnosticsPanel({ diagnostics }) {
   return null // replaced by SwipeableInfoCard
 }
 
-/* ── List row (upgrades + history) ── */
+/* ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ List row (upgrades + history) ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ */
 function ListRow({ icon, iconColor, primary, secondary, trailing, trailingHint }) {
   return (
     <div style={{
@@ -830,12 +742,13 @@ function ListRow({ icon, iconColor, primary, secondary, trailing, trailingHint }
 export default function VehicleDetail() {
   const navigate   = useNavigate()
   const { bike }   = useOutletContext()
-  const [flipped, setFlipped]     = useState(false)
-  const [odoMode, setOdoMode]     = useState('idle')   // 'idle' | 'manual' | 'camera'
-  const [odoInput, setOdoInput]   = useState('')
-  const [odoPreview, setOdoPreview] = useState(null)   // base64 image preview
-  const [odoSaved, setOdoSaved]   = useState(false)
-  const cameraRef                 = useRef(null)
+  const [flipped, setFlipped]         = useState(false)
+  const [odoMode, setOdoMode]         = useState('idle')   // 'idle' | 'manual' | 'camera'
+  const [odoInput, setOdoInput]       = useState('')
+  const [odoPreview, setOdoPreview]   = useState(null)
+  const [odoSaved, setOdoSaved]       = useState(false)
+  const [showOdoPicker, setShowOdoPicker] = useState(false)
+  const cameraRef                     = useRef(null)
 
   const handleCameraCapture = (e) => {
     const file = e.target.files?.[0]
@@ -852,10 +765,22 @@ export default function VehicleDetail() {
     setTimeout(() => { setOdoSaved(false); setOdoMode('idle'); setOdoInput(''); setOdoPreview(null) }, 1800)
   }
 
+  // Listen for drum-picker save
+  useEffect(() => {
+    const handler = (e) => {
+      setOdoInput(String(e.detail))
+      setOdoMode('manual')
+      setOdoSaved(true)
+      setTimeout(() => { setOdoSaved(false); setOdoMode('idle'); setOdoInput(''); setOdoPreview(null) }, 2200)
+    }
+    window.addEventListener('odo-drum-save', handler)
+    return () => window.removeEventListener('odo-drum-save', handler)
+  }, [])
+
   return (
     <div style={{ minHeight: '100dvh', background: DS.bg }}>
 
-      {/* ── App Bar — 56px ── */}
+      {/* ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ App Bar ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â 56px ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ */}
       <header style={{
         position: 'sticky', top: 0, zIndex: 40,
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -876,10 +801,10 @@ export default function VehicleDetail() {
         </button>
       </header>
 
-      {/* ── Scrollable Content — 16px sides, 24px top ── */}
+      {/* ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Scrollable Content ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â 16px sides, 24px top ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ */}
       <main style={{ padding: '24px 16px 104px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
-        {/* ── Flip Card: Front = Moto image, Back = Badges ── */}
+        {/* ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Flip Card: Front = Moto image, Back = Badges ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ */}
         <div
           onClick={() => setFlipped(f => !f)}
           style={{
@@ -888,7 +813,7 @@ export default function VehicleDetail() {
             perspective: '1200px',
           }}
         >
-          {/* Inner — rotates */}
+          {/* Inner ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â rotates */}
           <div style={{
             position: 'absolute', inset: 0,
             transformStyle: 'preserve-3d',
@@ -896,7 +821,7 @@ export default function VehicleDetail() {
             transition: 'transform 0.55s cubic-bezier(0.4,0.2,0.2,1)',
           }}>
 
-            {/* ── FRONT: motorcycle image ── */}
+            {/* ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ FRONT: motorcycle image ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ */}
             <div style={{
               position: 'absolute', inset: 0,
               backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden',
@@ -929,7 +854,7 @@ export default function VehicleDetail() {
               </div>
             </div>
 
-            {/* ── BACK: rider badges ── */}
+            {/* ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ BACK: rider badges ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ */}
             <div style={{
               position: 'absolute', inset: 0,
               backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden',
@@ -984,13 +909,13 @@ export default function VehicleDetail() {
                         <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#fff' }}>{badge.icon}</span>
                       </div>
                       <div style={{ position: 'absolute', bottom: '-5px', left: '50%', transform: 'translateX(-50%)', background: DS.bg, border: `1px solid ${badge.color1}`, borderRadius: '99px', padding: '1px 5px', whiteSpace: 'nowrap' }}>
-                        <span style={{ fontSize: '6px', fontWeight: 900, color: badge.color1 }}>✓ EARNED</span>
+                        <span style={{ fontSize: '6px', fontWeight: 900, color: badge.color1 }}>ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ EARNED</span>
                       </div>
                     </div>
                     <div style={{ textAlign: 'center', marginTop: '4px' }}>
                       <div style={{ fontSize: '10px', fontWeight: 800, color: DS.textPrimary, lineHeight: 1.2 }}>{badge.label}</div>
                       <div style={{ fontSize: '8px', color: DS.textSecondary, marginTop: '1px' }}>{badge.sub}</div>
-                      <div style={{ fontSize: '7px', color: DS.textMuted, marginTop: '2px' }}>{badge.km} · {badge.date}</div>
+                      <div style={{ fontSize: '7px', color: DS.textMuted, marginTop: '2px' }}>{badge.km} ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· {badge.date}</div>
                     </div>
                   </div>
                 ))}
@@ -1026,21 +951,68 @@ export default function VehicleDetail() {
           </div>
         </div>
 
-        {/* ── Instrument Cluster (Speedometer + Odometer) ── */}
+        {/* ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Instrument Cluster (Speedometer + Odometer) ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ */}
         <InstrumentCluster
           bike={bike}
-          odoMode={odoMode}     setOdoMode={setOdoMode}
-          odoInput={odoInput}   setOdoInput={setOdoInput}
+          odoMode={odoMode}       setOdoMode={setOdoMode}
+          odoInput={odoInput}     setOdoInput={setOdoInput}
           odoPreview={odoPreview} setOdoPreview={setOdoPreview}
-          odoSaved={odoSaved}   onSave={saveOdometer}
+          odoSaved={odoSaved}     onSave={saveOdometer}
           cameraRef={cameraRef}
+          showOdoPicker={showOdoPicker} setShowOdoPicker={setShowOdoPicker}
         />
 
         {/* Hidden camera input */}
         <input ref={cameraRef} type="file" accept="image/*" capture="environment"
           style={{ display: 'none' }} onChange={handleCameraCapture} />
 
-        {/* ── Swipeable Diagnostics + Tech Specs Card ── */}
+        {/* ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Odometer Picker Sheet ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ */}
+        <AnimatePresence>
+          {showOdoPicker && (
+            <>
+              <motion.div key="odo-backdrop" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
+                onClick={() => setShowOdoPicker(false)}
+                style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.6)', zIndex:80, backdropFilter:'blur(6px)' }}/>
+              <motion.div key="odo-sheet"
+                initial={{ y:'100%' }} animate={{ y:0 }} exit={{ y:'100%' }}
+                transition={{ type:'spring', damping:28, stiffness:320 }}
+                style={{ position:'fixed', bottom:0, left:0, right:0, zIndex:81, background:'var(--ds-surface)', borderTop:'1px solid var(--ds-border)', borderRadius:'24px 24px 0 0', padding:'16px 20px 44px' }}
+              >
+                {/* Handle */}
+                <div style={{ width:'36px', height:'4px', borderRadius:'2px', background:'rgba(255,255,255,0.12)', margin:'0 auto 20px' }}/>
+
+                {/* Header */}
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'20px' }}>
+                  <div>
+                    <div style={{ fontSize:'16px', fontWeight:800, color:'var(--ds-text-primary)', letterSpacing:'-0.01em' }}>Update Odometer</div>
+                    <div style={{ fontSize:'11px', color:'var(--ds-text-secondary)', marginTop:'3px' }}>Current: {bike.odometer.toLocaleString()} km</div>
+                  </div>
+                  <button onClick={() => setShowOdoPicker(false)} style={{ background:'var(--ds-surface-hover)', border:'1px solid var(--ds-border)', borderRadius:'50%', width:'32px', height:'32px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize:'18px', color:'var(--ds-text-muted)' }}>close</span>
+                  </button>
+                </div>
+
+                {/* Drum Roller Picker */}
+                <OdoDrumPicker
+                  currentValue={bike.odometer}
+                  onConfirm={(val) => {
+                    setOdoInput(String(val))
+                    setShowOdoPicker(false)
+                    setOdoMode('manual')
+                    // trigger save immediately
+                    setTimeout(() => {
+                      const syntheticSave = new CustomEvent('odo-drum-save', { detail: val })
+                      window.dispatchEvent(syntheticSave)
+                    }, 50)
+                  }}
+                  onCamera={() => { setShowOdoPicker(false); cameraRef.current?.click() }}
+                />
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+
+        {/* ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Swipeable Diagnostics + Tech Specs Card ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ */}
         <SwipeableInfoCard diagnostics={bike.diagnostics} bike={bike} />
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
           {[
@@ -1068,13 +1040,13 @@ export default function VehicleDetail() {
         </div>
 
 
-        {/* ── Action Buttons — 8px gap between ── */}
+        {/* ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Action Buttons ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â 8px gap between ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <AmberButton icon="smart_toy" onClick={() => navigate('/mechanic')}>CONSULT AI MECHANIC</AmberButton>
           <SecondaryButton icon="build" onClick={() => navigate(`/bike/${bike.id}/add-log`)}>LOG MAINTENANCE</SecondaryButton>
         </div>
 
-        {/* ── Recent Upgrades ── */}
+        {/* ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Recent Upgrades ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ */}
         <SectionCard>
           <div style={{ padding: '20px' }}>
             <SectionLabel title="Recent Upgrades & Fixes" action="VIEW ALL" />
@@ -1093,7 +1065,7 @@ export default function VehicleDetail() {
           </div>
         </SectionCard>
 
-        {/* ── Ride History ── */}
+        {/* ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Ride History ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ */}
         <SectionCard>
           <div style={{ padding: '20px' }}>
             <SectionLabel title="Ride History" action="VIEW ALL" />
