@@ -3,92 +3,82 @@
 @theme {
   --font-sans: 'DM Sans', sans-serif;
   --font-display: 'Barlow Condensed', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 }
 
-/* ─────────────────────────────────────────────────────────────
-   DEFAULT (DARK) — "Proper Dark"
-   Mid-dark surfaces, full-white text, readable at any age.
-   Primary accent: Acid Lime — motorsport DNA, no AI app uses this.
-─────────────────────────────────────────────────────────────── */
+/* ── DARK THEME ─────────────────────────────────────────────── */
 :root {
-  --ds-bg:              #16161E;
-  --ds-surface:         #1F1F2C;
-  --ds-surface-active:  #28283A;
-  --ds-surface-hover:   rgba(255, 255, 255, 0.05);
-  --ds-input:           #1A1A28;
+  /* 4-Layer depth system */
+  --ds-bg:              #0D0D14;
+  --ds-surface:         #16161E;
+  --ds-surface-active:  #1E1E2C;
+  --ds-surface-hover:   rgba(255,255,255,0.05);
+  --ds-card:            #1A1A28;
+  --ds-input:           #13131C;
 
-  --ds-border:          rgba(255, 255, 255, 0.10);
-  --ds-border-heavy:    rgba(255, 255, 255, 0.20);
+  --ds-border:          rgba(255,255,255,0.08);
+  --ds-border-heavy:    rgba(255,255,255,0.16);
 
-  --ds-text-primary:    #FFFFFF;
+  --ds-text-primary:    #F0F0FF;
   --ds-text-secondary:  #9090A8;
-  --ds-text-muted:      #55556A;
+  --ds-text-muted:      #4A4A6A;
 
-  /* Acid Lime — Kawasaki liveries, MotoGP race gear, zero AI apps */
+  /* Acid Lime — brand accent */
   --ds-primary:         #C8FF00;
-  --ds-primary-glow:    rgba(200, 255, 0, 0.28);
-  --ds-primary-subtle:  rgba(200, 255, 0, 0.07);
-  /* Keep --ds-amber as alias so existing components don't break */
+  --ds-primary-glow:    rgba(200,255,0,0.28);
+  --ds-primary-subtle:  rgba(200,255,0,0.07);
   --ds-amber:           #C8FF00;
-  --ds-amber-glow:      rgba(200, 255, 0, 0.28);
-  --ds-amber-subtle:    rgba(200, 255, 0, 0.07);
+  --ds-amber-glow:      rgba(200,255,0,0.28);
+  --ds-amber-subtle:    rgba(200,255,0,0.07);
 
   --ds-green:           #22C55E;
-  --ds-green-glow:      rgba(34, 197, 94, 0.25);
+  --ds-green-glow:      rgba(34,197,94,0.25);
 
   --ds-red:             #EF4444;
-  --ds-red-glow:        rgba(239, 68, 68, 0.25);
+  --ds-red-glow:        rgba(239,68,68,0.25);
 
   --ds-cyan:            #38BDF8;
-  --ds-cyan-glow:       rgba(56, 189, 248, 0.25);
+  --ds-cyan-glow:       rgba(56,189,248,0.25);
 
-  --ds-glass-bg:        rgba(22, 22, 30, 0.97);
-  --ds-glass-border:    rgba(255, 255, 255, 0.08);
+  /* Cockpit Neon Cyan — telemetry data accent */
+  --ds-neon-cyan:       #00D4FF;
+  --ds-neon-cyan-glow:  rgba(0,212,255,0.30);
+  --ds-neon-cyan-dim:   rgba(0,212,255,0.10);
+
+  --ds-glass-bg:        rgba(13,13,20,0.92);
+  --ds-glass-border:    rgba(0,212,255,0.06);
 }
 
-/* ─────────────────────────────────────────────────────────────
-   LIGHT THEME — toggled via ThemeContext adding .light-theme to <html>
-   Warm cement tones. Lime darkens to an olive-green for readability.
-─────────────────────────────────────────────────────────────── */
+/* ── LIGHT THEME ─────────────────────────────────────────────── */
 .light-theme {
   --ds-bg:              #ECEAE5;
   --ds-surface:         #F7F5F2;
   --ds-surface-active:  #E5E2DA;
-  --ds-surface-hover:   rgba(0, 0, 0, 0.04);
+  --ds-surface-hover:   rgba(0,0,0,0.04);
+  --ds-card:            #F0EDE8;
   --ds-input:           #EDEAE4;
 
-  --ds-border:          rgba(0, 0, 0, 0.10);
-  --ds-border-heavy:    rgba(0, 0, 0, 0.20);
+  --ds-border:          rgba(0,0,0,0.10);
+  --ds-border-heavy:    rgba(0,0,0,0.20);
 
   --ds-text-primary:    #111111;
   --ds-text-secondary:  #5A5650;
   --ds-text-muted:      #9A9490;
 
-  /* Lime on white is invisible. Use dark olive-lime for light mode. */
   --ds-primary:         #5A7A00;
-  --ds-primary-glow:    rgba(90, 122, 0, 0.20);
-  --ds-primary-subtle:  rgba(90, 122, 0, 0.07);
+  --ds-primary-glow:    rgba(90,122,0,0.20);
+  --ds-primary-subtle:  rgba(90,122,0,0.07);
   --ds-amber:           #5A7A00;
-  --ds-amber-glow:      rgba(90, 122, 0, 0.20);
-  --ds-amber-subtle:    rgba(90, 122, 0, 0.07);
+  --ds-amber-glow:      rgba(90,122,0,0.20);
+  --ds-amber-subtle:    rgba(90,122,0,0.07);
 
   --ds-green:           #16A34A;
-  --ds-green-glow:      rgba(22, 163, 74, 0.20);
+  --ds-green-glow:      rgba(22,163,74,0.20);
 
   --ds-red:             #DC2626;
-  --ds-red-glow:        rgba(220, 38, 38, 0.20);
+  --ds-red-glow:        rgba(220,38,38,0.20);
 
   --ds-cyan:            #0284C7;
-  --ds-cyan-glow:       rgba(2, 132, 199, 0.20);
-
-  --ds-glass-bg:        rgba(236, 234, 229, 0.97);
-  --ds-glass-border:    rgba(0, 0, 0, 0.08);
-}
-
-/* ─────────────────────────────────────────────────────────────
-   BASE RESET
-─────────────────────────────────────────────────────────────── */
-*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -194,3 +184,24 @@ html, body, #root {
 .slide-up {
   animation: slide-up 0.35s ease forwards;
 }
+
+/* ── Cockpit: segmented health bar segment ── */
+.seg-bar-fill {
+  transition: background 0.4s ease;
+}
+
+/* ── Cockpit: neon glow border pulse for critical items ── */
+@keyframes cockpit-glow {
+  0%, 100% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.25), inset 0 0 0 1px rgba(239,68,68,0.35); }
+  50%       { box-shadow: 0 0 22px rgba(239, 68, 68, 0.50), inset 0 0 0 1px rgba(239,68,68,0.60); }
+}
+.cockpit-glow-red   { animation: cockpit-glow 2s ease-in-out infinite; }
+
+@keyframes cockpit-glow-amber {
+  0%, 100% { box-shadow: 0 0 10px rgba(245,158,11,0.20), inset 0 0 0 1px rgba(245,158,11,0.30); }
+  50%       { box-shadow: 0 0 20px rgba(245,158,11,0.45), inset 0 0 0 1px rgba(245,158,11,0.55); }
+}
+.cockpit-glow-amber { animation: cockpit-glow-amber 2.5s ease-in-out infinite; }
+
+/* ── Mono font utility ── */
+.font-mono { font-family: 'JetBrains Mono', monospace; }

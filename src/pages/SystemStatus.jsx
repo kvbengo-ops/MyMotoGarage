@@ -21,10 +21,34 @@ const TEXT1   = 'var(--ds-text-primary)'
 const TEXT2   = 'var(--ds-text-secondary)'
 const TEXT3   = 'var(--ds-text-muted)'
 const LIME    = 'var(--ds-primary)'         // brand accent for chrome
+const CYAN    = 'var(--ds-neon-cyan)'       // telemetry data accent
 
 /* back-compat aliases */
 const MUTED   = TEXT2
 const DIM     = TEXT3
+
+/* ── Segmented Health Bar (20 segments, cockpit style) ── */
+function SegmentedBar({ percent, color }) {
+  const SEGS = 20
+  const filled = Math.round((percent / 100) * SEGS)
+  return (
+    <div style={{ display: 'flex', gap: '2px', width: '100%' }}>
+      {Array.from({ length: SEGS }, (_, i) => (
+        <div
+          key={i}
+          className="seg-bar-fill"
+          style={{
+            flex: 1, height: '5px', borderRadius: '2px',
+            background: i < filled
+              ? color
+              : 'rgba(255,255,255,0.07)',
+            boxShadow: i < filled ? `0 0 4px ${color}80` : 'none',
+          }}
+        />
+      ))}
+    </div>
+  )
+}
 
 /* ── Health helpers ── */
 const healthColor = (p) => p >= 70 ? GOOD : p >= 40 ? WARN : CRIT
@@ -160,7 +184,7 @@ export default function SystemStatus() {
   }
 
   return (
-    <div style={{ minHeight: '100dvh', background: BG }}>
+    <div className="fade-in cockpit-grid" style={{ minHeight: '100dvh', background: BG }}>
 
       {/* ── App Bar ── */}
       <header style={{
@@ -177,7 +201,7 @@ export default function SystemStatus() {
         <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase', color: MUTED }}>
           {bike.make} · {bike.model}
         </span>
-        <button onClick={() => navigate(`/bike/${bike.id}/add-log`)} style={{ width: '32px', height: '32px', borderRadius: '50%', border: `1px solid ${BORDER}`, background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: LIME }}>
+        <button onClick={() => navigate(`/bike/${bike.id}/add-log`)} style={{ width: '32px', height: '32px', borderRadius: '50%', border: `1px solid ${CYAN}`, background: 'var(--ds-neon-cyan-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: CYAN }}>
           <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add</span>
         </button>
       </header>
@@ -196,7 +220,20 @@ export default function SystemStatus() {
                 stroke="url(#trackGrad)"
                 strokeWidth={SW}
               />
-              {/* Health arc */}
+              {/* Neon glow layer — blurred, wider */}
+              {totalHealth > 0 && (
+                <circle cx={R + SW} cy={R + SW} r={R}
+                  fill="none"
+                  stroke={sColor}
+                  strokeWidth={SW + 12}
+                  strokeLinecap="round"
+                  strokeDasharray={circ}
+                  strokeDashoffset={off}
+                  opacity={0.12}
+                  style={{ filter: 'blur(8px)', transition: 'stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1)' }}
+                />
+              )}
+              {/* Health arc — crisp top layer */}
               <circle cx={R + SW} cy={R + SW} r={R}
                 fill="none"
                 stroke={sColor}
@@ -217,7 +254,11 @@ export default function SystemStatus() {
 
             {/* Center readout */}
             <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px', zIndex: 3 }}>
-              <span style={{ fontSize: '46px', fontWeight: 900, lineHeight: 1, letterSpacing: '-0.04em', color: sColor }}>
+              <span style={{
+                fontSize: '46px', fontWeight: 900, lineHeight: 1,
+                letterSpacing: '-0.04em', color: sColor,
+                fontFamily: "'JetBrains Mono', monospace",
+              }}>
                 {totalHealth}
               </span>
               <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.16em', color: DIM, textTransform: 'uppercase' }}>% Health</span>
@@ -249,8 +290,9 @@ export default function SystemStatus() {
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
                   padding: '10px 4px 8px',
                   background: CARD,
-                  border: `1px solid ${BORDER}`,
+                  border: `1px solid ${hasData && avg < 40 ? CRIT : hasData && avg < 70 ? WARN : BORDER}`,
                   borderRadius: '14px',
+                  boxShadow: hasData && avg < 40 ? `0 0 10px ${CRIT}20` : 'none',
                 }}>
                   {/* Category icon — category color */}
                   <span className="material-symbols-outlined" style={{ fontSize: '20px', color: hasData ? catColor : DIM }}>
@@ -402,11 +444,14 @@ export default function SystemStatus() {
                       <button
                         key={cat}
                         onClick={() => setOpenCat(cat)}
+                        className={avg < 40 ? 'cockpit-glow-red' : avg < 70 ? 'cockpit-glow-amber' : ''}
                         style={{
-                          background: CARD, border: `1px solid ${BORDER}`,
+                          background: CARD,
+                          border: `1px solid ${avg < 40 ? 'rgba(239,68,68,0.35)' : avg < 70 ? 'rgba(245,158,11,0.30)' : BORDER}`,
                           borderRadius: '16px', cursor: 'pointer', textAlign: 'left',
                           padding: '14px 12px 12px', display: 'flex', flexDirection: 'column',
                           gap: '8px', width: '100%',
+                          boxShadow: avg < 40 ? '0 0 12px rgba(239,68,68,0.15)' : 'none',
                         }}
                       >
                         <div style={{ width: '80px', margin: '0 auto' }}>
@@ -526,14 +571,16 @@ export default function SystemStatus() {
                     : null
                   return (
                     <div key={item.id}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '7px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px' }}>
                         <span style={{ fontSize: '13px', fontWeight: 600, color: TEXT1 }}>{item.label}</span>
-                        <span style={{ fontSize: '12px', fontWeight: 800, color: fc }}>{item.percent}%</span>
+                        <span style={{
+                          fontSize: '14px', fontWeight: 800, color: fc,
+                          fontFamily: "'JetBrains Mono', monospace",
+                          textShadow: `0 0 10px ${fc}80`,
+                        }}>{item.percent}%</span>
                       </div>
-                      <div style={{ height: '3px', background: 'rgba(255,255,255,0.08)', borderRadius: '2px', overflow: 'hidden', marginBottom: '5px' }}>
-                        <div style={{ height: '100%', width: `${item.percent}%`, background: fc, borderRadius: '2px', transition: 'width 0.9s cubic-bezier(0.4,0,0.2,1)' }} />
-                      </div>
-                      <span style={{ fontSize: '10px', color: DIM }}>
+                      <SegmentedBar percent={item.percent} color={fc} />
+                      <span style={{ fontSize: '10px', color: DIM, display: 'block', marginTop: '6px' }}>
                         {kmLeft !== null ? `~${kmLeft.toLocaleString()} km remaining` : `Last: ${item.lastDate}`}
                       </span>
                     </div>

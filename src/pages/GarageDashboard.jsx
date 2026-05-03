@@ -66,7 +66,7 @@ export default function GarageDashboard() {
   }
 
   return (
-    <div className="min-h-screen transition-colors duration-300" style={{ background: 'var(--ds-bg)' }}>
+    <div className="fade-in cockpit-grid min-h-screen transition-colors duration-300" style={{ background: 'var(--ds-bg)' }}>
 
       {/* ── App Bar ── */}
       <header
@@ -97,10 +97,37 @@ export default function GarageDashboard() {
         }}>R</div>
       </header>
 
-      {/* ── Page Content — 16px side pad, 24px top ── */}
-      <main style={{ padding: '24px 16px 32px' }}>
+      {/* ── Fleet Stats Banner ── */}
+      {!loading && !error && fleet.length > 0 && (() => {
+        const totalAlerts = 0 // future: sum smartAlerts across fleet
+        const avgHealth   = null  // future: avg across all bikes
+        return (
+          <div style={{
+            display: 'flex', justifyContent: 'space-around', alignItems: 'center',
+            padding: '10px 20px',
+            background: 'var(--ds-surface)',
+            borderBottom: '1px solid var(--ds-border)',
+          }}>
+            {[
+              { label: 'Fleet',   value: fleet.length, unit: 'bikes',   color: 'var(--ds-text-primary)' },
+              { label: 'Alerts',  value: totalAlerts,  unit: 'active',  color: totalAlerts > 0 ? 'var(--ds-red)' : 'var(--ds-text-muted)' },
+              { label: 'Status',  value: avgHealth ?? '—', unit: '% health', color: 'var(--ds-neon-cyan)' },
+            ].map(({ label, value, unit, color }) => (
+              <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '20px', fontWeight: 800, color, lineHeight: 1 }}>
+                  {value}
+                </span>
+                <span style={{ fontSize: '8px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ds-text-muted)' }}>
+                  {label} · {unit}
+                </span>
+              </div>
+            ))}
+          </div>
+        )
+      })()}
 
-        {/* ── Ride Outlook widget ── */}
+      {/* ── Page Content ── */}
+      <main style={{ padding: '24px 16px 32px' }}>
         <RideOutlookCard />
 
         {/* ── My Fleet — 32px gap after widget (Gestalt: Proximity) ── */}

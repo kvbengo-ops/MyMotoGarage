@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import AppLayout from './components/shared/AppLayout'
 import GarageDashboard from './pages/GarageDashboard'
@@ -7,9 +8,9 @@ import AiMechanic from './pages/AiMechanic'
 import AddLog from './pages/AddLog'
 import SettingsPage from './pages/SettingsPage'
 import BikeLayout from './components/shared/BikeLayout'
-
 import AddVehicle from './pages/AddVehicle'
 import VehicleSetupWizard from './pages/VehicleSetupWizard'
+import SplashScreen from './components/shared/SplashScreen'
 
 const router = createBrowserRouter([
   {
@@ -35,5 +36,20 @@ const router = createBrowserRouter([
 ])
 
 export default function App() {
-  return <RouterProvider router={router} />
+  // Show splash once per browser session
+  const [splashDone, setSplashDone] = useState(
+    () => sessionStorage.getItem('splashShown') === 'true'
+  )
+
+  const handleSplashComplete = () => {
+    sessionStorage.setItem('splashShown', 'true')
+    setSplashDone(true)
+  }
+
+  return (
+    <>
+      {!splashDone && <SplashScreen onComplete={handleSplashComplete} />}
+      <RouterProvider router={router} />
+    </>
+  )
 }

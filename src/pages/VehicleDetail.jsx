@@ -30,6 +30,60 @@ import { motion, AnimatePresence } from 'framer-motion'
 import AmberButton from '../components/shared/AmberButton'
 import SecondaryButton from '../components/shared/SecondaryButton'
 
+/* ── ActionableAlertBar ── */
+function ActionableAlertBar({ alerts, bikeId }) {
+  const navigate = useNavigate()
+  const [dismissed, setDismissed] = useState(false)
+  if (!alerts || alerts.length === 0 || dismissed) return null
+  const topAlert = alerts[0]
+  const isCrit   = topAlert.type === 'critical'
+  const color    = isCrit ? 'var(--ds-red)' : 'var(--ds-amber)'
+  const bg       = isCrit ? 'rgba(239,68,68,0.10)' : 'rgba(245,158,11,0.10)'
+  const border   = isCrit ? 'rgba(239,68,68,0.35)' : 'rgba(245,158,11,0.30)'
+  const glow     = isCrit ? 'rgba(239,68,68,0.20)' : 'rgba(245,158,11,0.15)'
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 8 }}
+      transition={{ delay: 0.8, duration: 0.35, ease: 'easeOut' }}
+      style={{
+        background: bg,
+        border: `1px solid ${border}`,
+        borderRadius: '12px',
+        padding: '12px 14px',
+        display: 'flex', alignItems: 'center', gap: '10px',
+        boxShadow: `0 0 20px ${glow}`,
+      }}
+    >
+      <span className="material-symbols-filled" style={{ fontSize: 20, color, flexShrink: 0 }}>
+        {isCrit ? 'error' : 'warning'}
+      </span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: '12px', fontWeight: 800, color, lineHeight: 1.2 }}>{topAlert.title}</div>
+        <div style={{ fontSize: '10px', color: 'var(--ds-text-secondary)', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{topAlert.body}</div>
+      </div>
+      {alerts.length > 1 && (
+        <div style={{ flexShrink: 0, background: color, color: '#000', borderRadius: 999, width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 900, fontFamily: "'JetBrains Mono', monospace" }}>
+          {alerts.length}
+        </div>
+      )}
+      <button
+        onClick={() => navigate(`/bike/${bikeId}/status`)}
+        style={{ flexShrink: 0, padding: '5px 10px', borderRadius: 999, border: `1px solid ${border}`, background: 'transparent', color, fontSize: '9px', fontWeight: 800, letterSpacing: '0.1em', cursor: 'pointer' }}
+      >
+        VIEW
+      </button>
+      <button
+        onClick={() => setDismissed(true)}
+        style={{ flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ds-text-muted)', display: 'flex', alignItems: 'center', padding: '2px' }}
+      >
+        <span className="material-symbols-outlined" style={{ fontSize: 16 }}>close</span>
+      </button>
+    </motion.div>
+  )
+}
+
 const DS = {
   // Surfaces
   bg:       'var(--ds-bg)',
@@ -175,9 +229,10 @@ function DiagCategoryCard({ diag, isSelected, onSelect }) {
   return (
     <button
       onClick={() => onSelect(diag.key)}
+      className={diag.status === 'critical' ? 'cockpit-glow-red' : diag.status === 'warning' ? 'cockpit-glow-amber' : 'cockpit-card'}
       style={{
         background: isSelected ? 'var(--ds-surface-active)' : 'var(--ds-surface)',
-        border: `1px solid ${isSelected ? 'var(--ds-border-heavy)' : 'var(--ds-border)'}`,
+        border: `1px solid ${diag.status === 'critical' ? 'rgba(239,68,68,0.35)' : diag.status === 'warning' ? 'rgba(245,158,11,0.28)' : isSelected ? 'var(--ds-border-heavy)' : 'var(--ds-border)'}`,
         borderRadius: '10px', padding: '10px 6px 8px',
         cursor: 'pointer', display: 'flex', flexDirection: 'column',
         alignItems: 'center', gap: '4px',
@@ -237,9 +292,9 @@ function OdoDrumPicker({ currentValue, onConfirm, onCamera }) {
             </button>
             <div onPointerDown={e=>onPD(e,idx)} onPointerMove={onPM} onPointerUp={onPU} onPointerCancel={onPU}
               style={{width:'42px',height:'52px',background:'var(--ds-input)',border:idx===5?'1.5px solid var(--ds-primary)':'1px solid var(--ds-border)',borderRadius:'10px',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',overflow:'hidden',position:'relative',cursor:'ns-resize',userSelect:'none',touchAction:'none',boxShadow:dragging?.i===idx?'0 0 0 2px var(--ds-primary)':'none',transition:'box-shadow 0.15s'}}>
-              <span style={{position:'absolute',top:'4px',fontSize:'13px',fontWeight:700,fontFamily:'"Courier New",monospace',color:'var(--ds-text-muted)',opacity:0.4}}>{((d+1)%10)}</span>
-              <span style={{fontSize:'26px',fontWeight:900,fontFamily:'"Courier New",monospace',color:idx===5?'var(--ds-primary)':'var(--ds-text-primary)',lineHeight:1}}>{d}</span>
-              <span style={{position:'absolute',bottom:'4px',fontSize:'13px',fontWeight:700,fontFamily:'"Courier New",monospace',color:'var(--ds-text-muted)',opacity:0.4}}>{((d-1+10)%10)}</span>
+              <span style={{position:'absolute',top:'4px',fontSize:'13px',fontWeight:700,fontFamily:"'JetBrains Mono', monospace",color:'var(--ds-text-muted)',opacity:0.35}}>{((d+1)%10)}</span>
+              <span style={{fontSize:'26px',fontWeight:900,fontFamily:"'JetBrains Mono', monospace",color:idx===5?'var(--ds-neon-cyan)':'var(--ds-text-primary)',lineHeight:1,textShadow:idx===5?'0 0 12px var(--ds-neon-cyan-glow)':'none'}}>{d}</span>
+              <span style={{position:'absolute',bottom:'4px',fontSize:'13px',fontWeight:700,fontFamily:"'JetBrains Mono', monospace",color:'var(--ds-text-muted)',opacity:0.35}}>{((d-1+10)%10)}</span>
               <div style={{position:'absolute',top:0,left:0,right:0,height:'16px',background:'linear-gradient(to bottom,var(--ds-input),transparent)',pointerEvents:'none'}}/>
               <div style={{position:'absolute',bottom:0,left:0,right:0,height:'16px',background:'linear-gradient(to top,var(--ds-input),transparent)',pointerEvents:'none'}}/>
             </div>
@@ -269,16 +324,16 @@ function OdoDrumPicker({ currentValue, onConfirm, onCamera }) {
 /* ── Instrument Cluster ── */
 function InstrumentCluster({ bike, odoSaved, odoInput, odoMode, setOdoMode, setOdoInput, setOdoPreview, onSave, cameraRef, showOdoPicker, setShowOdoPicker, odoPreview }) {
   return (
-    <div style={{ borderRadius:'16px', overflow:'hidden', border:'1px solid var(--ds-border)', background:'var(--ds-surface)' }}>
+    <div style={{ borderRadius:'16px', overflow:'hidden', border:'1px solid rgba(0,212,255,0.15)', background:'var(--ds-surface)', boxShadow:'0 0 24px rgba(0,212,255,0.05)' }}>
       <div style={{ padding:'24px 20px 20px', display:'flex', flexDirection:'column', alignItems:'center', gap:'8px' }}>
-        <span style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.18em', textTransform:'uppercase', color:'var(--ds-text-muted)' }}>Odometer</span>
+        <span style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.18em', textTransform:'uppercase', color:'var(--ds-neon-cyan)', opacity:0.7 }}>Odometer</span>
 
-        {/* Readout */}
-        <div style={{ display:'flex', alignItems:'baseline', gap:'8px', background:'var(--ds-bg)', border:'1px solid var(--ds-border)', borderRadius:'12px', padding:'14px 28px', boxShadow:'inset 0 2px 8px rgba(0,0,0,0.15)' }}>
-          <span style={{ fontSize:'42px', fontWeight:900, fontFamily:'"Courier New",monospace', color:'var(--ds-text-primary)', letterSpacing:'0.05em', lineHeight:1 }}>
+        {/* Readout — JetBrains Mono + neon cyan glow */}
+        <div style={{ display:'flex', alignItems:'baseline', gap:'8px', background:'var(--ds-bg)', border:'1px solid rgba(0,212,255,0.18)', borderRadius:'12px', padding:'14px 28px', boxShadow:'inset 0 2px 12px rgba(0,0,0,0.25), 0 0 16px rgba(0,212,255,0.06)' }}>
+          <span style={{ fontSize:'42px', fontWeight:800, fontFamily:"'JetBrains Mono', monospace", color:'var(--ds-text-primary)', letterSpacing:'0.05em', lineHeight:1, textShadow:'0 0 20px rgba(0,212,255,0.15)' }}>
             {bike.odometer.toLocaleString()}
           </span>
-          <span style={{ fontSize:'14px', fontWeight:700, color:'var(--ds-text-muted)', letterSpacing:'0.1em' }}>km</span>
+          <span style={{ fontSize:'13px', fontWeight:700, color:'var(--ds-neon-cyan)', letterSpacing:'0.12em', opacity:0.6, fontFamily:"'JetBrains Mono', monospace" }}>km</span>
         </div>
 
         {/* Update button */}
@@ -304,7 +359,7 @@ function InstrumentCluster({ bike, odoSaved, odoInput, odoMode, setOdoMode, setO
             <div style={{ display:'flex', alignItems:'center', gap:'8px', background:'var(--ds-input)', borderRadius:'10px', border:'1px solid var(--ds-border)', padding:'0 14px' }}>
               <span className="material-symbols-outlined" style={{ fontSize:'17px', color:'var(--ds-text-muted)' }}>speed</span>
               <input type="number" placeholder={`Current: ${bike.odometer.toLocaleString()}`} value={odoInput} onChange={e=>setOdoInput(e.target.value)}
-                style={{ flex:1, background:'none', border:'none', outline:'none', color:'var(--ds-text-primary)', fontSize:'18px', fontWeight:800, padding:'11px 0', fontFamily:'"Courier New",monospace' }}/>
+                style={{ flex:1, background:'none', border:'none', outline:'none', color:'var(--ds-text-primary)', fontSize:'18px', fontWeight:800, padding:'11px 0', fontFamily:"'JetBrains Mono', monospace" }}/>
               <span style={{ fontSize:'11px', color:'var(--ds-text-muted)' }}>km</span>
             </div>
             <div style={{ display:'flex', gap:'8px' }}>
@@ -778,7 +833,7 @@ export default function VehicleDetail() {
   }, [])
 
   return (
-    <div style={{ minHeight: '100dvh', background: DS.bg }}>
+    <div className="fade-in" style={{ minHeight: '100dvh', background: DS.bg }}>
 
       {/* ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ App Bar ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â 56px ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ */}
       <header style={{
@@ -909,13 +964,13 @@ export default function VehicleDetail() {
                         <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#fff' }}>{badge.icon}</span>
                       </div>
                       <div style={{ position: 'absolute', bottom: '-5px', left: '50%', transform: 'translateX(-50%)', background: DS.bg, border: `1px solid ${badge.color1}`, borderRadius: '99px', padding: '1px 5px', whiteSpace: 'nowrap' }}>
-                        <span style={{ fontSize: '6px', fontWeight: 900, color: badge.color1 }}>ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ EARNED</span>
+                        <span style={{ fontSize: '6px', fontWeight: 900, color: badge.color1 }}>★ EARNED</span>
                       </div>
                     </div>
                     <div style={{ textAlign: 'center', marginTop: '4px' }}>
                       <div style={{ fontSize: '10px', fontWeight: 800, color: DS.textPrimary, lineHeight: 1.2 }}>{badge.label}</div>
                       <div style={{ fontSize: '8px', color: DS.textSecondary, marginTop: '1px' }}>{badge.sub}</div>
-                      <div style={{ fontSize: '7px', color: DS.textMuted, marginTop: '2px' }}>{badge.km} ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· {badge.date}</div>
+                      <div style={{ fontSize: '7px', color: DS.textMuted, marginTop: '2px' }}>{badge.km} · {badge.date}</div>
                     </div>
                   </div>
                 ))}
@@ -1014,6 +1069,12 @@ export default function VehicleDetail() {
 
         {/* ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Swipeable Diagnostics + Tech Specs Card ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ */}
         <SwipeableInfoCard diagnostics={bike.diagnostics} bike={bike} />
+
+        {/* ── Actionable Alert Bar ── */}
+        <AnimatePresence>
+          <ActionableAlertBar alerts={bike.smartAlerts} bikeId={bike.id} />
+        </AnimatePresence>
+
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
           {[
             { label: 'Odometer', value: bike.odometer.toLocaleString(), unit: 'km', icon: 'speed' },
@@ -1022,18 +1083,19 @@ export default function VehicleDetail() {
             <div key={label} style={{
               padding: '20px 16px 16px',
               background: DS.surface,
-              border: `1px solid ${DS.border}`,
+              border: '1px solid rgba(0,212,255,0.12)',
               borderRadius: '12px',
               position: 'relative', overflow: 'hidden',
+              boxShadow: '0 0 16px rgba(0,212,255,0.04)',
             }}>
               {/* Ghost icon */}
-              <span className="material-symbols-outlined" style={{ position: 'absolute', top: '12px', right: '10px', fontSize: '48px', color: 'var(--ds-surface-hover)', userSelect: 'none' }}>{icon}</span>
+              <span className="material-symbols-outlined" style={{ position: 'absolute', top: '10px', right: '8px', fontSize: '44px', color: 'rgba(0,212,255,0.06)', userSelect: 'none' }}>{icon}</span>
               {/* Label */}
-              <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: DS.textSecondary, marginBottom: '16px' }}>{label}</div>
+              <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ds-neon-cyan)', opacity: 0.6, marginBottom: '14px' }}>{label}</div>
               {/* Value */}
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                <span style={{ fontSize: '32px', fontWeight: 900, color: DS.textPrimary, letterSpacing: '-0.02em', lineHeight: 1 }}>{value}</span>
-                <span style={{ fontSize: '12px', color: DS.textSecondary }}>{unit}</span>
+                <span style={{ fontSize: '30px', fontWeight: 800, color: DS.textPrimary, letterSpacing: '-0.02em', lineHeight: 1, fontFamily: "'JetBrains Mono', monospace" }}>{value}</span>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--ds-neon-cyan)', fontFamily: "'JetBrains Mono', monospace", opacity: 0.65 }}>{unit}</span>
               </div>
             </div>
           ))}
