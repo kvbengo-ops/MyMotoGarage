@@ -79,8 +79,32 @@ if (existsSync(DIST)) {
   console.log('Serving React frontend from:', DIST);
 }
 
+// ── Auto-init database on startup (no shell access needed) ───────────────────
+async function initDatabase() {
+  if (!process.env.DATABASE_URL) {
+    console.log('[db] No DATABASE_URL set — skipping auto-init.');
+    return;
+  }
+  try {
+    const { default: pg } = await import('pg');
+    const { readFileSync } = await import('fs');
+    const { fileURLToPath } = await import('url');
+    const __file = fileURLToPath(import.meta.url);
+    const __dir  = path.dirname(__file);
+    const sql    = readFileSync(path.join(__dir, 'db', 'init.sql'), 'utf8');
+    const client = new pg.Client({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+    await client.connect();
+    await client.query(sql);
+    await client.end();
+    console.log('[db] Database initialized successfully.');
+  } catch (err) {
+    console.error('[db] Auto-init failed (non-fatal):', err.message);
+  }
+}
+
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Server is running on port ${PORT}`);
+  await initDatabase();
 });
 
