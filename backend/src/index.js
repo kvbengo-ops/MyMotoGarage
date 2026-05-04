@@ -6,6 +6,7 @@ import multer from 'multer';
 import crypto from 'crypto';
 import vehicleRoutes from './routes/vehicleRoutes.js';
 import trafficRoutes from './routes/trafficRoutes.js';
+import gasPricesRoute from './routes/gasPricesRoute.js';
 
 dotenv.config();
 
@@ -56,6 +57,7 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
 // Routes
 app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/traffic', trafficRoutes);
+app.use('/api/gas-prices', gasPricesRoute);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

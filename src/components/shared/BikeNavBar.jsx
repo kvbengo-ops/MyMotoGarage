@@ -7,6 +7,7 @@ export default function BikeNavBar() {
     { to: `/bike/${bikeId}`,          label: 'Details',    icon: 'two_wheeler',  exact: true  },
     { to: `/bike/${bikeId}/status`,   label: 'Health',     icon: 'analytics',    exact: false },
     { to: `/bike/${bikeId}/mechanic`, label: 'AI',         icon: 'smart_toy',    exact: false },
+    { to: `/bike/${bikeId}/wash`,     label: 'Care',       icon: 'home_repair_service', exact: false },
   ]
 
   return (

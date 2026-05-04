@@ -244,16 +244,18 @@ export function getPresetsForCategory(bikeCategory) {
  * @param {Array} components - The pre-filled component list
  * @returns {Array} - Components with wear states applied
  */
-export function applyCleanSlate(mode, components) {
+export function applyCleanSlate(mode, components, bikeOdometer = 0) {
   const today = new Date().toISOString().split('T')[0]
 
   return components.map(comp => {
     if (mode === 'brandNew') {
-      // Everything is fresh — 0 km, today's date
+      // Parts came from the factory — baseline is km 0.
+      // estimatedKmUsed = current odometer so backend calculates:
+      // baseline_install_odometer = currentOdo - currentOdo = 0
       return {
         ...comp,
         wearState: 'Brand New',
-        estimatedKmUsed: '',
+        estimatedKmUsed: bikeOdometer > 0 ? String(bikeOdometer) : '',
         lastServiceDate: today,
       }
     }
@@ -261,7 +263,6 @@ export function applyCleanSlate(mode, components) {
     if (mode === 'freshService') {
       const isConsumable = CONSUMABLE_TYPES.includes(comp.componentType)
       if (isConsumable) {
-        // Consumable → just serviced, 0 km
         return {
           ...comp,
           wearState: 'Brand New',
@@ -269,7 +270,6 @@ export function applyCleanSlate(mode, components) {
           lastServiceDate: today,
         }
       } else {
-        // Long-life item → unknown wear, flag for later review
         return {
           ...comp,
           wearState: 'Currently Used',

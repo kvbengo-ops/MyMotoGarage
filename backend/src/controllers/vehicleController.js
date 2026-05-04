@@ -114,8 +114,12 @@ export const setupVehicle = async (req, res) => {
       for (const comp of components) {
         let baselineOdometer = initialOdometer;
 
-        if (comp.wearState === 'Currently Used' && comp.estimatedKmUsed) {
-          baselineOdometer = initialOdometer - comp.estimatedKmUsed;
+        // For both Brand New (factory-original parts) and Currently Used:
+        // if estimatedKmUsed is provided, back-calculate the install point.
+        // Brand New + estimatedKmUsed = bikeOdometer → baseline = 0 (factory)
+        // Currently Used + estimatedKmUsed = X → baseline = currentOdo - X
+        if (comp.estimatedKmUsed && parseInt(comp.estimatedKmUsed) > 0) {
+          baselineOdometer = initialOdometer - parseInt(comp.estimatedKmUsed);
           if (baselineOdometer < 0) baselineOdometer = 0;
         }
 
@@ -224,6 +228,38 @@ export const addMaintenanceLog = async (req, res) => {
     res.status(201).json({ success: true, data: result.rows[0] });
   } catch (error) {
     console.error('Error adding maintenance log:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+};
+
+export const updateOdometer = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { odometer } = req.body;
+
+    if (odometer === undefined || odometer === null || isNaN(Number(odometer))) {
+      return res.status(400).json({ success: false, error: 'Valid odometer value is required' });
+    }
+
+    const newOdo = parseInt(odometer);
+
+    // Fetch current value to validate it's not going backwards
+    const current = await pool.query('SELECT odometer FROM vehicles WHERE id = $1', [id]);
+    if (current.rowCount === 0) {
+      return res.status(404).json({ success: false, error: 'Vehicle not found' });
+    }
+    if (newOdo <= current.rows[0].odometer) {
+      return res.status(400).json({ success: false, error: 'New odometer must be greater than current value' });
+    }
+
+    const result = await pool.query(
+      'UPDATE vehicles SET odometer = $1 WHERE id = $2 RETURNING id, odometer',
+      [newOdo, id]
+    );
+
+    res.status(200).json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    console.error('Error updating odometer:', error);
     res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };

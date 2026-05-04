@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import RideOutlookCard from '../components/garage/RideOutlookCard'
+import GasPriceCard from '../components/garage/GasPriceCard'
 import VehicleCard from '../components/garage/VehicleCard'
 import AddVehicleCard from '../components/garage/AddVehicleCard'
 
@@ -10,6 +12,15 @@ export default function GarageDashboard() {
   const [fleet, setFleet] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [cardIndex, setCardIndex] = useState(0)
+  const [dragStart, setDragStart] = useState(null)
+
+  const CARDS = ['outlook', 'gas']
+
+  const handleDragEnd = (e, info) => {
+    if (info.offset.x < -40 && cardIndex < CARDS.length - 1) setCardIndex(i => i + 1)
+    if (info.offset.x >  40 && cardIndex > 0)               setCardIndex(i => i - 1)
+  }
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -128,7 +139,41 @@ export default function GarageDashboard() {
 
       {/* ── Page Content ── */}
       <main style={{ padding: '24px 16px 32px' }}>
-        <RideOutlookCard />
+
+        {/* ── Swipeable Info Cards ── */}
+        <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '12px' }}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={cardIndex}
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              onDragEnd={handleDragEnd}
+              initial={{ opacity: 0, x: cardIndex === 0 ? -30 : 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: cardIndex === 0 ? 30 : -30 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              style={{ cursor: 'grab', userSelect: 'none' }}
+            >
+              {cardIndex === 0 ? <RideOutlookCard /> : <GasPriceCard />}
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Dot indicators */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginTop: '10px' }}>
+            {CARDS.map((_, i) => (
+              <div
+                key={i}
+                onClick={() => setCardIndex(i)}
+                style={{
+                  width: i === cardIndex ? '20px' : '6px', height: '6px',
+                  borderRadius: '3px', cursor: 'pointer',
+                  background: i === cardIndex ? 'var(--ds-primary)' : 'var(--ds-surface-active)',
+                  transition: 'all 0.3s ease'
+                }}
+              />
+            ))}
+          </div>
+        </div>
 
         {/* ── My Fleet — 32px gap after widget (Gestalt: Proximity) ── */}
         <div style={{ marginTop: '32px' }}>

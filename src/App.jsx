@@ -5,6 +5,7 @@ import GarageDashboard from './pages/GarageDashboard'
 import VehicleDetail from './pages/VehicleDetail'
 import SystemStatus from './pages/SystemStatus'
 import AiMechanic from './pages/AiMechanic'
+import BikeWash from './pages/BikeWash'
 import AddLog from './pages/AddLog'
 import SettingsPage from './pages/SettingsPage'
 import BikeLayout from './components/shared/BikeLayout'
@@ -28,6 +29,7 @@ const router = createBrowserRouter([
       { index: true,         element: <VehicleDetail /> },
       { path: 'status',      element: <SystemStatus /> },
       { path: 'mechanic',    element: <AiMechanic /> },
+      { path: 'wash',        element: <BikeWash /> },
     ],
   },
   { path: '/bike/:bikeId/add-log',  element: <AddLog /> },

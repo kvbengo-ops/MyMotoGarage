@@ -367,10 +367,11 @@ export default function AddVehicle() {
       }
 
       setSuccess(true)
+      // Phase 1 done → hand off to Phase 2 (component setup) after a brief confirmation flash
       setTimeout(() => {
         setSuccess(false)
-        navigate(`/`)
-      }, 2000)
+        navigate(`/setup-vehicle/${data.data.id}`)
+      }, 1400)
     } catch (err) {
       console.error('Add vehicle error:', err)
       setError(err.message)
@@ -562,7 +563,7 @@ export default function AddVehicle() {
           backdropFilter: 'blur(12px)', whiteSpace: 'nowrap', zIndex: 50,
         }}>
           <span className="material-symbols-filled" style={{ fontSize: '16px' }}>check_circle</span>
-          Vehicle added successfully!
+          Vehicle added! Setting up components...
         </div>
       )}
 

@@ -796,7 +796,7 @@ function ListRow({ icon, iconColor, primary, secondary, trailing, trailingHint }
 
 export default function VehicleDetail() {
   const navigate   = useNavigate()
-  const { bike }   = useOutletContext()
+  const { bike, setBike, refreshBike } = useOutletContext()
   const [flipped, setFlipped]         = useState(false)
   const [odoMode, setOdoMode]         = useState('idle')   // 'idle' | 'manual' | 'camera'
   const [odoInput, setOdoInput]       = useState('')
@@ -814,23 +814,39 @@ export default function VehicleDetail() {
     setOdoMode('camera')
   }
 
-  const saveOdometer = () => {
-    // In a real app: PATCH /api/bikes/:id with { odometer: odoInput }
-    setOdoSaved(true)
-    setTimeout(() => { setOdoSaved(false); setOdoMode('idle'); setOdoInput(''); setOdoPreview(null) }, 1800)
+  const saveOdometer = async (valueOverride) => {
+    const newOdo = parseInt(valueOverride ?? odoInput)
+    if (!newOdo || newOdo <= bike.odometer) return
+    try {
+      const res = await fetch(`/api/vehicles/${bike.id}/odometer`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ odometer: newOdo }),
+      })
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to update')
+      // Immediately show the new odo in the instrument cluster
+      setBike(prev => ({ ...prev, odometer: newOdo }))
+      setOdoSaved(true)
+      setTimeout(() => { setOdoSaved(false); setOdoMode('idle'); setOdoInput(''); setOdoPreview(null) }, 1800)
+      // Re-fetch full bike data so all component health % recalculates with new odometer
+      refreshBike()
+    } catch (err) {
+      console.error('Odometer save error:', err)
+    }
   }
 
   // Listen for drum-picker save
   useEffect(() => {
     const handler = (e) => {
-      setOdoInput(String(e.detail))
+      const val = e.detail
+      setOdoInput(String(val))
       setOdoMode('manual')
-      setOdoSaved(true)
-      setTimeout(() => { setOdoSaved(false); setOdoMode('idle'); setOdoInput(''); setOdoPreview(null) }, 2200)
+      saveOdometer(val)
     }
     window.addEventListener('odo-drum-save', handler)
     return () => window.removeEventListener('odo-drum-save', handler)
-  }, [])
+  }, [bike.odometer])
 
   return (
     <div className="fade-in" style={{ minHeight: '100dvh', background: DS.bg }}>

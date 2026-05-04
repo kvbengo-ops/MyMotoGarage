@@ -40,9 +40,15 @@ const CATEGORY_PLACEHOLDERS = {
   'Electronics': { name: 'e.g. Battery',            brand: 'e.g. Yuasa, Motobatt',    model: 'e.g. YTZ10S' },
 }
 
-function ComponentCard({ comp, updateComp, removeComp, bikeCondition }) {
+function ComponentCard({ comp, updateComp, removeComp, bikeCondition, bikeOdometer }) {
   const isTimeDegrading = TIME_DEGRADING_PARTS.includes(comp.componentType)
   const ph = CATEGORY_PLACEHOLDERS[comp.category] || { name: 'e.g. Part Name', brand: 'e.g. Brand', model: 'e.g. Model' }
+
+  // Calculate what the install baseline will be (mirrors backend logic)
+  // estimatedKmUsed is set for both 'Currently Used' and 'Brand New' (Brand New Bike mode)
+  const installOdo = comp.estimatedKmUsed && parseInt(comp.estimatedKmUsed) > 0
+    ? Math.max(0, bikeOdometer - parseInt(comp.estimatedKmUsed))
+    : bikeOdometer
 
   return (
     <div style={{
@@ -101,11 +107,30 @@ function ComponentCard({ comp, updateComp, removeComp, bikeCondition }) {
 
         {comp.wearState === 'Currently Used' && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-            <Field label="Current Usage (km)">
+            <Field label="How many km is already on this part?">
               <StyledInput type="number" placeholder="e.g. 500" value={comp.estimatedKmUsed} onChange={e => updateComp({ estimatedKmUsed: e.target.value })} />
             </Field>
           </motion.div>
         )}
+
+        {/* Odometer baseline preview */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '10px',
+          padding: '10px 14px', borderRadius: '8px',
+          background: 'color-mix(in srgb, var(--ds-neon-cyan) 8%, transparent)',
+          border: '1px solid color-mix(in srgb, var(--ds-neon-cyan) 20%, transparent)',
+        }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--ds-neon-cyan)', flexShrink: 0 }}>my_location</span>
+          <div>
+            <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--ds-neon-cyan)', textTransform: 'uppercase' }}>Install Baseline</span>
+            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '13px', fontWeight: 700, color: 'var(--ds-text-primary)' }}>
+              {installOdo.toLocaleString()} km
+              <span style={{ fontWeight: 400, fontSize: '11px', color: 'var(--ds-text-secondary)', marginLeft: '6px' }}>
+                {comp.wearState === 'Brand New' ? '— installed fresh at this odo' : '— estimated install point'}
+              </span>
+            </div>
+          </div>
+        </div>
 
         {isTimeDegrading && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
@@ -289,6 +314,10 @@ export default function VehicleSetupWizard() {
   const [fuelCapacity, setFuelCapacity] = useState('')
   const [fuelConsumption, setFuelConsumption] = useState('')
   
+  // Bike identity — fetched on mount, used as component install baseline
+  const [bikeOdometer, setBikeOdometer] = useState(0)
+  const [bikeName, setBikeName] = useState('')
+
   // Steps 2+: Components
   const [components, setComponents] = useState([])
 
@@ -322,6 +351,9 @@ export default function VehicleSetupWizard() {
           if (v.fuel_capacity) setFuelCapacity(v.fuel_capacity.toString())
           if (v.fuel_consumption) setFuelConsumption(v.fuel_consumption.toString())
           if (v.category) setBikeCategory(v.category)
+          // Store odometer as install baseline for Phase 2 component setup
+          setBikeOdometer(v.odometer || 0)
+          setBikeName(`${v.year} ${v.make} ${v.model}`)
           
           if (v.components && v.components.length > 0) {
             setComponents(v.components.map(c => ({
@@ -542,7 +574,7 @@ export default function VehicleSetupWizard() {
               const presets = getPresetsForCategory(bikeCategory || 'Naked / Streetfighter')
               // If we already set clean slate mode, apply it right away
               if (cleanSlateMode) {
-                setComponents(applyCleanSlate(cleanSlateMode, presets))
+                setComponents(applyCleanSlate(cleanSlateMode, presets, bikeOdometer))
               } else {
                 setComponents(presets)
               }
@@ -597,7 +629,7 @@ export default function VehicleSetupWizard() {
                   <button
                     onClick={() => {
                       setCleanSlateMode('brandNew')
-                      setComponents(applyCleanSlate('brandNew', components))
+                      setComponents(applyCleanSlate('brandNew', components, bikeOdometer))
                     }}
                     style={{
                       padding: '12px 16px', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s', textAlign: 'left',
@@ -617,7 +649,7 @@ export default function VehicleSetupWizard() {
                   <button
                     onClick={() => {
                       setCleanSlateMode('freshService')
-                      setComponents(applyCleanSlate('freshService', components))
+                      setComponents(applyCleanSlate('freshService', components, bikeOdometer))
                     }}
                     style={{
                       padding: '12px 16px', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s', textAlign: 'left',
@@ -637,9 +669,8 @@ export default function VehicleSetupWizard() {
                   <button
                     onClick={() => {
                       setCleanSlateMode(null)
-                      // reset wear states to brand new or used depending on global condition
                       const baseMode = bikeCondition === 'Brand New' ? 'brandNew' : null
-                      setComponents(applyCleanSlate(baseMode, components))
+                      setComponents(applyCleanSlate(baseMode, components, bikeOdometer))
                     }}
                     style={{
                       padding: '12px 16px', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s', textAlign: 'left',
@@ -668,16 +699,28 @@ export default function VehicleSetupWizard() {
       <div className="flex flex-col gap-6">
         <div>
           <h2 className="text-[20px] font-bold mb-2" style={{ color: 'var(--ds-text-primary)' }}>Review Parts</h2>
-          <p className="text-[13px] leading-relaxed mb-6" style={{ color: 'var(--ds-text-secondary)' }}>
+          <p className="text-[13px] leading-relaxed mb-4" style={{ color: 'var(--ds-text-secondary)' }}>
             We've pre-filled the standard parts for a {bikeCategory || 'Naked / Streetfighter'}. Tap any part to customize brands or adjust wear estimates.
           </p>
+          {/* Odometer context for quick setup review */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '10px',
+            padding: '10px 14px', borderRadius: '8px', marginBottom: '8px',
+            background: 'color-mix(in srgb, var(--ds-neon-cyan) 6%, transparent)',
+            border: '1px solid color-mix(in srgb, var(--ds-neon-cyan) 18%, transparent)',
+          }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--ds-neon-cyan)' }}>speed</span>
+            <span style={{ fontSize: '12px', color: 'var(--ds-text-secondary)', fontWeight: 500 }}>
+              Parts will be baselined at <strong style={{ color: 'var(--ds-neon-cyan)', fontFamily: "'JetBrains Mono', monospace" }}>{bikeOdometer.toLocaleString()} km</strong> — your current odometer reading.
+            </span>
+          </div>
         </div>
 
         <div className="flex flex-col gap-4">
           <AnimatePresence>
             {components.map(comp => (
               <motion.div key={comp.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, height: 0 }}>
-                <ComponentCard comp={comp} updateComp={(u) => updateComponent(comp.id, u)} removeComp={() => removeComponent(comp.id)} bikeCondition={bikeCondition} />
+                <ComponentCard comp={comp} updateComp={(u) => updateComponent(comp.id, u)} removeComp={() => removeComponent(comp.id)} bikeCondition={bikeCondition} bikeOdometer={bikeOdometer} />
               </motion.div>
             ))}
           </AnimatePresence>
@@ -728,7 +771,7 @@ export default function VehicleSetupWizard() {
           <AnimatePresence>
             {categoryComponents.map(comp => (
               <motion.div key={comp.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, height: 0 }}>
-                <ComponentCard comp={comp} updateComp={(u) => updateComponent(comp.id, u)} removeComp={() => removeComponent(comp.id)} bikeCondition={bikeCondition} />
+                <ComponentCard comp={comp} updateComp={(u) => updateComponent(comp.id, u)} removeComp={() => removeComponent(comp.id)} bikeCondition={bikeCondition} bikeOdometer={bikeOdometer} />
               </motion.div>
             ))}
           </AnimatePresence>
@@ -799,6 +842,27 @@ export default function VehicleSetupWizard() {
             </div>
           ))}
         </div>
+
+        {/* ── Odometer Baseline Banner (shown on component steps) ── */}
+        {steps[step].category && (
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            margin: '12px 0 0', padding: '10px 16px',
+            background: 'color-mix(in srgb, var(--ds-neon-cyan) 6%, transparent)',
+            border: '1px solid color-mix(in srgb, var(--ds-neon-cyan) 18%, transparent)',
+            borderRadius: '10px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '15px', color: 'var(--ds-neon-cyan)' }}>speed</span>
+              <span style={{ fontSize: '11px', color: 'var(--ds-text-secondary)', fontWeight: 600 }}>
+                Current Odometer
+              </span>
+            </div>
+            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '14px', fontWeight: 800, color: 'var(--ds-neon-cyan)', letterSpacing: '0.04em' }}>
+              {bikeOdometer.toLocaleString()} km
+            </span>
+          </div>
+        )}
       </header>
 
       {/* ── Slide Viewport ── */}
