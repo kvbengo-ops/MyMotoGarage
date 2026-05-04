@@ -70,8 +70,8 @@ app.get('/api/health', (req, res) => {
 import { existsSync } from 'fs';
 if (existsSync(DIST)) {
   app.use(express.static(DIST));
-  // SPA catch-all — any non-API route returns index.html so React Router works
-  app.get('*', (req, res) => {
+  // SPA catch-all — Express 5 requires regex, not bare '*'
+  app.get(/(.*)/, (req, res) => {
     if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
       res.sendFile(path.join(DIST, 'index.html'));
     }
