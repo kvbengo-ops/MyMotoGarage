@@ -12,6 +12,8 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
+const DIST = path.join(__dirname, '..', '..', 'dist');
 
 // Middleware
 app.use(cors());
@@ -63,6 +65,19 @@ app.use('/api/gas-prices', gasPricesRoute);
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Backend is running' });
 });
+
+// ── Serve built React frontend (production only) ──────────────────────────────
+import { existsSync } from 'fs';
+if (existsSync(DIST)) {
+  app.use(express.static(DIST));
+  // SPA catch-all — any non-API route returns index.html so React Router works
+  app.get('*', (req, res) => {
+    if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
+      res.sendFile(path.join(DIST, 'index.html'));
+    }
+  });
+  console.log('Serving React frontend from:', DIST);
+}
 
 // Start server
 app.listen(PORT, () => {
