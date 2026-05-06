@@ -167,14 +167,15 @@ function ArcGauge({ percent, status }) {
   const startY = cy + r * Math.sin(toRad(startAngle))
   const endX = cx + r * Math.cos(toRad(startAngle + sweepTotal))
   const endY = cy + r * Math.sin(toRad(startAngle + sweepTotal))
-  const fillSweep = sweepTotal * percent / 100
+  const fillSweep = sweepTotal * (percent || 0) / 100
   const fillAngle = startAngle + fillSweep
   const fillX = cx + r * Math.cos(toRad(fillAngle))
   const fillY = cy + r * Math.sin(toRad(fillAngle))
   const fillLargeArc = fillSweep >= 180 ? 1 : 0
   // 4-tier color scale based on actual percent ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â more expressive than 3-tier status
   const arcColor =
-    percent >= 90 ? 'var(--ds-green)'   // excellent
+    percent === null ? 'var(--ds-text-muted)'
+    : percent >= 90 ? 'var(--ds-green)'   // excellent
     : percent >= 70 ? 'var(--ds-primary)' // good (acid lime)
     : percent >= 40 ? 'var(--ds-amber)'  // caution
     : 'var(--ds-red)'                    // critical
@@ -182,13 +183,13 @@ function ArcGauge({ percent, status }) {
     <svg viewBox="0 0 100 76" style={{ width: '100%', display: 'block' }}>
       <path d={`M ${startX.toFixed(2)} ${startY.toFixed(2)} A ${r} ${r} 0 1 1 ${endX.toFixed(2)} ${endY.toFixed(2)}`}
         fill="none" stroke="var(--ds-surface-active)" strokeWidth="5" strokeLinecap="round" />
-      {percent > 0 && (
+      {(percent || 0) > 0 && (
         <path d={`M ${startX.toFixed(2)} ${startY.toFixed(2)} A ${r} ${r} 0 ${fillLargeArc} 1 ${fillX.toFixed(2)} ${fillY.toFixed(2)}`}
           fill="none" stroke={arcColor} strokeWidth="5" strokeLinecap="round" />
       )}
       <text x="50" y="54" textAnchor="middle" fontSize="14" fontWeight="800"
         fill={arcColor}
-        fontFamily="inherit">{percent}</text>
+        fontFamily="inherit">{percent === null ? '—' : percent}</text>
       <text x="50" y="63" textAnchor="middle" fontSize="6.5" fontWeight="500"
         fill={arcColor} opacity="0.5" fontFamily="inherit">%</text>
     </svg>
@@ -196,20 +197,23 @@ function ArcGauge({ percent, status }) {
 }
 
 /* ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Diagnostic Category Card ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â theme-aware, with locked state ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ */
-function DiagCategoryCard({ diag, isSelected, onSelect }) {
+function DiagCategoryCard({ diag, isSelected, onSelect, onLockedClick }) {
   const hasAlerts = diag.alerts && diag.alerts.length > 0
   const alertColor = diag.status === 'critical' ? 'var(--ds-red)' : 'var(--ds-amber)'
 
   // ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ LOCKED state: no components configured for this category ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬
   if (diag.isLocked) {
     return (
-      <div style={{
-        borderRadius: '10px', padding: '10px 6px 8px',
-        background: 'var(--ds-surface)',
-        border: `1px dashed var(--ds-border)`,
-        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
-        position: 'relative', overflow: 'hidden',
-      }}>
+      <button
+        onClick={onLockedClick}
+        style={{
+          borderRadius: '10px', padding: '10px 6px 8px',
+          background: 'var(--ds-surface)',
+          border: `1px dashed var(--ds-border)`,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
+          position: 'relative', overflow: 'hidden', cursor: 'pointer',
+          width: '100%',
+        }}>
         {/* Blurred ghost gauge behind */}
         <div style={{ position: 'absolute', inset: 0, filter: 'blur(3px)', opacity: 0.12, pointerEvents: 'none' }}>
           <ArcGauge percent={55} status="ok" />
@@ -222,7 +226,7 @@ function DiagCategoryCard({ diag, isSelected, onSelect }) {
         <span style={{ fontSize: '6.5px', color: 'var(--ds-text-muted)', textAlign: 'center', lineHeight: 1.4, zIndex: 1, opacity: 0.7 }}>
           Add parts<br/>to unlock
         </span>
-      </div>
+      </button>
     )
   }
 
@@ -270,7 +274,8 @@ function DiagCategoryCard({ diag, isSelected, onSelect }) {
 
 /* Ã¢â€â‚¬Ã¢â€â‚¬ OdoDrumPicker Ã¢â€â‚¬Ã¢â€â‚¬ */
 function OdoDrumPicker({ currentValue, onConfirm, onCamera }) {
-  const init = (v) => String(Math.max(0,v)).padStart(6,'0').split('').map(Number)
+  const numDigits = Math.max(6, String(currentValue).length)
+  const init = (v) => String(Math.max(0,v)).padStart(numDigits,'0').split('').map(Number)
   const [digits, setDigits] = useState(() => init(currentValue))
   const [dragging, setDragging] = useState(null)
   const [confirmed, setConfirmed] = useState(false)
@@ -291,9 +296,9 @@ function OdoDrumPicker({ currentValue, onConfirm, onCamera }) {
               <span className="material-symbols-outlined" style={{fontSize:'16px'}}>expand_less</span>
             </button>
             <div onPointerDown={e=>onPD(e,idx)} onPointerMove={onPM} onPointerUp={onPU} onPointerCancel={onPU}
-              style={{width:'42px',height:'52px',background:'var(--ds-input)',border:idx===5?'1.5px solid var(--ds-primary)':'1px solid var(--ds-border)',borderRadius:'10px',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',overflow:'hidden',position:'relative',cursor:'ns-resize',userSelect:'none',touchAction:'none',boxShadow:dragging?.i===idx?'0 0 0 2px var(--ds-primary)':'none',transition:'box-shadow 0.15s'}}>
+              style={{width:'42px',height:'52px',background:'var(--ds-input)',border:idx===numDigits-1?'1.5px solid var(--ds-primary)':'1px solid var(--ds-border)',borderRadius:'10px',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',overflow:'hidden',position:'relative',cursor:'ns-resize',userSelect:'none',touchAction:'none',boxShadow:dragging?.i===idx?'0 0 0 2px var(--ds-primary)':'none',transition:'box-shadow 0.15s'}}>
               <span style={{position:'absolute',top:'4px',fontSize:'13px',fontWeight:700,fontFamily:"'JetBrains Mono', monospace",color:'var(--ds-text-muted)',opacity:0.35}}>{((d+1)%10)}</span>
-              <span style={{fontSize:'26px',fontWeight:900,fontFamily:"'JetBrains Mono', monospace",color:idx===5?'var(--ds-neon-cyan)':'var(--ds-text-primary)',lineHeight:1,textShadow:idx===5?'0 0 12px var(--ds-neon-cyan-glow)':'none'}}>{d}</span>
+              <span style={{fontSize:'26px',fontWeight:900,fontFamily:"'JetBrains Mono', monospace",color:idx===numDigits-1?'var(--ds-neon-cyan)':'var(--ds-text-primary)',lineHeight:1,textShadow:idx===numDigits-1?'0 0 12px var(--ds-neon-cyan-glow)':'none'}}>{d}</span>
               <span style={{position:'absolute',bottom:'4px',fontSize:'13px',fontWeight:700,fontFamily:"'JetBrains Mono', monospace",color:'var(--ds-text-muted)',opacity:0.35}}>{((d-1+10)%10)}</span>
               <div style={{position:'absolute',top:0,left:0,right:0,height:'16px',background:'linear-gradient(to bottom,var(--ds-input),transparent)',pointerEvents:'none'}}/>
               <div style={{position:'absolute',bottom:0,left:0,right:0,height:'16px',background:'linear-gradient(to top,var(--ds-input),transparent)',pointerEvents:'none'}}/>
@@ -519,7 +524,7 @@ function SwipeableInfoCard({ diagnostics, bike }) {
 function OverallHealthCard({ diagnostics }) {
   // Formula: average health of CONFIGURED (unlocked) categories only
   // Locked categories (no components) are excluded ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â they don't drag the score down
-  const configured = diagnostics.filter(d => !d.isLocked)
+  const configured = diagnostics.filter(d => !d.isLocked && d.percent !== null)
   const allLocked  = configured.length === 0
   const avg = allLocked
     ? 0
@@ -669,7 +674,7 @@ function DiagnosticsInner({ diagnostics, bikeId }) {
         {/* Right: 5 category cards in 2-col grid */}
         <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
           {diagnostics.map(d => (
-            <DiagCategoryCard key={d.key} diag={d} isSelected={selectedKey === d.key} onSelect={handleSelect} />
+            <DiagCategoryCard key={d.key} diag={d} isSelected={selectedKey === d.key} onSelect={handleSelect} onLockedClick={() => navigate(`/setup-vehicle/${bikeId}`)} />
           ))}
         </div>
       </div>

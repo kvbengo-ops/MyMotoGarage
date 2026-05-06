@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -29,8 +29,8 @@ export default function BikeWash() {
   const [tempKm, setTempKm] = useState(500)
   const [tempDays, setTempDays] = useState(14)
   
-  const [lastWashOdo, setLastWashOdo] = useState(bike?.odometer || 0)
-  const [lastWashDate, setLastWashDate] = useState(new Date().toISOString().split('T')[0])
+  const [lastWashOdo, setLastWashOdo] = useState(bike?.last_wash_odo || bike?.odometer || 0)
+  const [lastWashDate, setLastWashDate] = useState(bike?.last_wash_date ? new Date(bike.last_wash_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0])
   const [currentWashStep, setCurrentWashStep] = useState(0)
 
   // ======== INSPECT STATE ========
@@ -41,8 +41,8 @@ export default function BikeWash() {
   const [tempInspectKm, setTempInspectKm] = useState(1000)
   const [tempInspectDays, setTempInspectDays] = useState(30)
 
-  const [lastInspectOdo, setLastInspectOdo] = useState(bike?.odometer || 0)
-  const [lastInspectDate, setLastInspectDate] = useState(new Date().toISOString().split('T')[0])
+  const [lastInspectOdo, setLastInspectOdo] = useState(bike?.last_inspect_odo || bike?.odometer || 0)
+  const [lastInspectDate, setLastInspectDate] = useState(bike?.last_inspect_date ? new Date(bike.last_inspect_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0])
   const [currentInspectStep, setCurrentInspectStep] = useState(0)
 
   // ======== MODAL STATE ========
@@ -50,42 +50,82 @@ export default function BikeWash() {
   const [showSuccess, setShowSuccess] = useState(false)
   const [checkedItems, setCheckedItems] = useState([]) // Array of checked checklist indices
 
+  const mounted = useRef(true)
+  useEffect(() => {
+    return () => { mounted.current = false }
+  }, [])
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   // Wash Calculations
+  const washDateObj = new Date(lastWashDate);
+  washDateObj.setHours(0, 0, 0, 0);
   const kmSinceWash = Math.max(0, (bike?.odometer || 0) - lastWashOdo)
-  const daysSinceWash = Math.floor((new Date() - new Date(lastWashDate)) / (1000 * 60 * 60 * 24))
+  const daysSinceWash = Math.max(0, Math.floor((today - washDateObj) / (1000 * 60 * 60 * 24)))
   const kmProgress = Math.min(100, (kmSinceWash / intervalKm) * 100)
   const daysProgress = Math.min(100, (daysSinceWash / intervalDays) * 100)
   const isWashDue = kmProgress >= 100 || daysProgress >= 100
+  const washDueReason = kmProgress >= 100 ? `Distance (${intervalKm}km)` : (daysProgress >= 100 ? `Time (${intervalDays} days)` : null);
 
   // Inspect Calculations
+  const inspectDateObj = new Date(lastInspectDate);
+  inspectDateObj.setHours(0, 0, 0, 0);
   const kmSinceInspect = Math.max(0, (bike?.odometer || 0) - lastInspectOdo)
-  const daysSinceInspect = Math.floor((new Date() - new Date(lastInspectDate)) / (1000 * 60 * 60 * 24))
+  const daysSinceInspect = Math.max(0, Math.floor((today - inspectDateObj) / (1000 * 60 * 60 * 24)))
   const inspectKmProgress = Math.min(100, (kmSinceInspect / inspectIntervalKm) * 100)
   const inspectDaysProgress = Math.min(100, (daysSinceInspect / inspectIntervalDays) * 100)
   const isInspectDue = inspectKmProgress >= 100 || inspectDaysProgress >= 100
+  const inspectDueReason = inspectKmProgress >= 100 ? `Distance (${inspectIntervalKm}km)` : (inspectDaysProgress >= 100 ? `Time (${inspectIntervalDays} days)` : null);
 
-  const handleWashComplete = () => {
-    setShowSuccess(true)
-    setTimeout(() => {
-      setLastWashOdo(bike?.odometer || 0)
-      setLastWashDate(new Date().toISOString().split('T')[0])
-      setCurrentWashStep(0)
-      setCheckedItems([])
-      setIsModalOpen(false)
-      setShowSuccess(false)
-    }, 3000)
+  const handleWashComplete = async () => {
+    const d = new Date().toISOString()
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/vehicles/${bike.id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'wash', odometer: bike?.odometer || 0, date: d })
+      });
+    } catch (e) { console.error('Failed to update wash status', e) }
+
+    if (mounted.current) {
+      setShowSuccess(true)
+      setTimeout(() => {
+        if (mounted.current) {
+          setLastWashOdo(bike?.odometer || 0)
+          setLastWashDate(d.split('T')[0])
+          setCurrentWashStep(0)
+          setCheckedItems([])
+          setIsModalOpen(false)
+          setShowSuccess(false)
+        }
+      }, 3000)
+    }
   }
 
-  const handleInspectComplete = () => {
-    setShowSuccess(true)
-    setTimeout(() => {
-      setLastInspectOdo(bike?.odometer || 0)
-      setLastInspectDate(new Date().toISOString().split('T')[0])
-      setCurrentInspectStep(0)
-      setCheckedItems([])
-      setIsModalOpen(false)
-      setShowSuccess(false)
-    }, 3000)
+  const handleInspectComplete = async () => {
+    const d = new Date().toISOString()
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/vehicles/${bike.id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'inspect', odometer: bike?.odometer || 0, date: d })
+      });
+    } catch (e) { console.error('Failed to update inspect status', e) }
+
+    if (mounted.current) {
+      setShowSuccess(true)
+      setTimeout(() => {
+        if (mounted.current) {
+          setLastInspectOdo(bike?.odometer || 0)
+          setLastInspectDate(d.split('T')[0])
+          setCurrentInspectStep(0)
+          setCheckedItems([])
+          setIsModalOpen(false)
+          setShowSuccess(false)
+        }
+      }, 3000)
+    }
   }
 
   const saveWashSettings = () => {
@@ -293,7 +333,10 @@ export default function BikeWash() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span className="material-symbols-outlined" style={{ fontSize: '20px', color: 'var(--ds-cyan)' }}>{icon}</span>
-          <h2 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--ds-text-primary)' }}>{title}</h2>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <h2 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--ds-text-primary)' }}>{title}</h2>
+            {isDue && <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--ds-amber)' }}>DUE: {title.includes('Wash') ? washDueReason : inspectDueReason}</span>}
+          </div>
         </div>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

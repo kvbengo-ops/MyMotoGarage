@@ -128,9 +128,10 @@ export default function BikeLayout() {
         { key: 'Electronics', label: 'Electronics',   icon: 'bolt',        accentColor: 'var(--ds-cyan)',    maps: ['Electronics'] },
       ]
 
-      const allComps = (v.components || []).filter(c => c.replacement_threshold > 0)
+      const allComps = v.components || []
 
       const compHealth = (c) => {
+        if (!c.replacement_threshold || c.replacement_threshold <= 0) return null;
         const kmUsed = (v.odometer || 0) - (c.baseline_install_odometer || 0)
         return Math.max(0, Math.min(100, Math.round(100 - (kmUsed / c.replacement_threshold) * 100)))
       }
@@ -138,11 +139,11 @@ export default function BikeLayout() {
       const diagnostics = DIAG_CATEGORIES.map(cat => {
         const catComps = allComps.filter(c => cat.maps.includes(c.category))
         if (catComps.length === 0) {
-          return { ...cat, percent: 0, status: 'ok', alerts: [], isLocked: true }
+          return { ...cat, percent: 0, status: 'ok', alerts: [], isLocked: true, componentCount: 0 }
         }
-        const healths = catComps.map(c => ({ name: c.component_type, brand: c.brand, health: compHealth(c) }))
-        const avg    = Math.round(healths.reduce((s, h) => s + h.health, 0) / healths.length)
-        const status = avg < 20 ? 'critical' : avg < 50 ? 'warning' : 'ok'
+        const healths = catComps.map(c => ({ name: c.component_type, brand: c.brand, health: compHealth(c) })).filter(h => h.health !== null)
+        const avg    = healths.length > 0 ? Math.round(healths.reduce((s, h) => s + h.health, 0) / healths.length) : null
+        const status = avg === null ? 'ok' : (avg < 20 ? 'critical' : avg < 50 ? 'warning' : 'ok')
         const alerts = healths.filter(h => h.health < 30).map(h => ({
           name: h.name, health: h.health,
           icon: h.health < 10 ? 'error' : 'warning',
@@ -158,6 +159,9 @@ export default function BikeLayout() {
           categoryMeta: CATEGORY_META[displayCat] || { icon: 'build', label: displayCat, color: 'var(--ds-amber)' },
           percent: compHealth(c),
           threshold: c.replacement_threshold,
+          brand: c.brand || null,
+          model: c.model || null,
+          installOdo: c.baseline_install_odometer,
           lastKm: (c.baseline_install_odometer || 0).toLocaleString(),
           lastDate: c.last_service_date
             ? new Date(c.last_service_date).toLocaleDateString('en', { month: 'short', day: 'numeric' })
@@ -168,7 +172,7 @@ export default function BikeLayout() {
 
       const smartAlerts = allComps
         .map(c => ({ c, health: compHealth(c) }))
-        .filter(({ health }) => health < 30)
+        .filter(({ health }) => health !== null && health < 30)
         .map(({ c, health }, i) => ({
           id: `alert-${i}`,
           type: health < 10 ? 'critical' : 'warning',
@@ -200,6 +204,10 @@ export default function BikeLayout() {
         image: v.image_url || 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&q=80',
         odometer: v.odometer || 0,
         fuelRange: (v.fuel_capacity && v.fuel_consumption) ? Math.round(v.fuel_capacity * v.fuel_consumption) : '—',
+        // GA-04: Only sum logs that represent real financial investment in the bike (not operational spend)
+        totalInvestment: logs
+          .filter(l => ['upgrade', 'service', 'repair', 'maintenance'].includes(l.log_type))
+          .reduce((sum, log) => sum + Number(log.cost || 0), 0),
         diagnostics, systemStatus, smartAlerts, maintenanceLogs,
         rideHistory: [], chatThread: [],
       })

@@ -35,6 +35,10 @@ CREATE TABLE IF NOT EXISTS vehicles (
     fuel_consumption NUMERIC,
     bike_condition VARCHAR(50),
     riding_habit VARCHAR(100),
+    last_wash_odo INTEGER,
+    last_wash_date DATE,
+    last_inspect_odo INTEGER,
+    last_inspect_date DATE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -44,8 +48,8 @@ CREATE TABLE IF NOT EXISTS components (
     vehicle_id UUID REFERENCES vehicles(id) ON DELETE CASCADE,
     category VARCHAR(50) NOT NULL,
     component_type VARCHAR(100) NOT NULL,
-    brand VARCHAR(100) NOT NULL,
-    model VARCHAR(100) NOT NULL,
+    brand VARCHAR(100),
+    model VARCHAR(100),
     baseline_install_odometer INTEGER NOT NULL,
     replacement_threshold INTEGER,
     last_service_date DATE,
@@ -61,12 +65,28 @@ ON CONFLICT (email) DO NOTHING;
 CREATE TABLE IF NOT EXISTS maintenance_logs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     vehicle_id UUID REFERENCES vehicles(id) ON DELETE CASCADE,
-    log_type VARCHAR(50) DEFAULT 'maintenance', -- maintenance | upgrade | repair
+    log_type VARCHAR(50) DEFAULT 'maintenance', -- maintenance | upgrade | repair | service
     title VARCHAR(255) NOT NULL,
     description TEXT,
     odometer_at_log INTEGER,
     cost NUMERIC,
     date DATE NOT NULL DEFAULT CURRENT_DATE,
+    image_url VARCHAR(255),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Component service history: audit trail linking a log to each component it touched (GA-08)
+CREATE TABLE IF NOT EXISTS component_service_history (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    component_id UUID REFERENCES components(id) ON DELETE CASCADE,
+    log_id UUID REFERENCES maintenance_logs(id) ON DELETE CASCADE,
+    vehicle_id UUID REFERENCES vehicles(id) ON DELETE CASCADE,
+    odometer_at_service INTEGER,
+    service_date DATE,
+    brand_at_service VARCHAR(100),
+    model_at_service VARCHAR(100),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- GA-10: Migrate legacy 'Modification' category to 'Accessory' (idempotent)
+UPDATE components SET category = 'Accessory' WHERE category = 'Modification';
