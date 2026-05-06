@@ -4,3 +4,10 @@ dist/
 .env.*
 !.env.example
 .vite/
+
+# User-uploaded images — Render filesystem is ephemeral, these don't belong in git
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Scratch / one-off scripts
+backend/update_db.js
